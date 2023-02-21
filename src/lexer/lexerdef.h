@@ -1,17 +1,50 @@
-#include <stdio.h>
-
-union number {
-    int intVal;
-    float floatVal;
+#ifndef LEXER_DEF_H
+#define LEXER_DEF_H
+enum TOKEN
+{
+    INTEGER,
+    REAL,
+    BOOLEAN,
+    OF,
+    ARRAY,
+    START,
+    END,
+    DECLARE,
+    MODULE,
+    DRIVER,
+    PROGRAM,
+    GET_VALUE,
+    PRINT,
+    USE,
+    WITH,
+    PARAMETERS,
+    TAKES,
+    INPUT,
+    RETURNS,
+    FOR,
+    IN,
+    SWITCH,
+    CASE,
+    BREAK,
+    DEFAULT,
+    WHILE,
+    AND,
+    OR,
+    TRUE,
+    FALSE
+    // TODO: add all tokens
 };
-
-typedef struct token{
-    void *tokenID; // token_id; will eventually be an enum of all tokens
-    char *lexeme; // the actual string that was matched
-    number numericValue; // for numbers; union of int and float. 
-    /* TODO
-    1. handle numbers with E notation
-    2. bad naming?
-    */
-    int lineNumber; // line number of the token
+typedef enum TOKEN TOKEN;
+union value
+{
+    int intValue;
+    float floatValue;
+    char *idValue;
+};
+typedef struct token_info
+{
+    TOKEN tok;       // the token
+    union value val; // the value of the token
+    int lineNumber;  // line number of the token
 } token;
+#endif

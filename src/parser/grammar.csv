@@ -1,0 +1,119 @@
+<program>, <moduleDeclarations>, <otherModules>, <driverModule>, <otherModules>
+<moduleDeclarations>, <moduleDeclaration>, <moduleDeclarations>
+<moduleDeclaration>, EPSILON
+<moduleDeclaration>, DECLARE, MODULE, ID, SEMICOL
+<otherModules>, <module>, <otherModules>
+<otherModules>, EPSILON
+<driverModule>, DRIVERDEF, DRIVER, PROGRAM, DRIVERENDDEF, <moduleDef>
+<module>, DEF, MODULE, ID, ENDEF, TAKES, INPUT, SQBO, <input_plist>, SQBC, SEMICOL, <ret>, <moduleDef>
+<ret>, RETURNS, SQBO, <output_plist>, SQBC, SEMICOL
+<ret>, EPSILON
+<input_plist>, ID, COLON, <dataType>, <iP0>
+<iP0>, COMMA, ID, COLON, <dataType>, <iP0>
+<iP0>, EPSILON
+<output_plist>, ID, COLON, <type>, <oP0>
+<oP0>, COMMA, ID, COLON, <type>, <oP0>
+<oP0>, EPSILON
+<dataType>, INTEGER
+<dataType>, REAL
+<dataType>, BOOLEAN
+<dataType>, ARRAY, SQBO, <range_arr>, SQBC, OF, <type>
+<type>, INTEGER
+<type>, REAL
+<type>, BOOLEAN
+<moduleDef>, START, <statements>, END
+<statements>, <statement>, <statements>
+<statements>, EPSILON
+<statement>, <ioStmt>
+<statement>, <simpleStmt>
+<statement>, <declareStmt>
+<statement>, <conditionalStmt>
+<statement>, <iterativeStmt>
+<ioStmt>, GET_VALUE, BO, ID, BC, SEMICOL
+<ioStmt>, PRINT, BO, <var3>, BC, SEMICOL
+<var3>, <var>
+<var3>, <bools>
+<var>, ID, <whichId>
+<var>, NUM
+<var>, RNUM
+<whichId>, SQBO, <wI0>
+<whichId>, EPSILON
+<wI0>, ID, SQBC
+<wI0>, NUM, SQBC
+<simpleStmt>, <assignmentStmt>
+<simpleStmt>, <moduleReuseStmt>
+<assignmentStmt>, ID, <whichStmt>
+<whichStmt>, <lvalueIDStmt>
+<whichStmt>, <lvalueARRStmt>
+<lvalueIDStmt>, ASSIGNOP, <expression>, SEMICOL
+<lvalueARRStmt>, SQBO, <element_index_with_expression>, SQBC, ASSIGNOP, <expression>, SEMICOL
+<element_index_with_expression>, <sign>, <N_10>
+<element_index_with_expression>, <arrExpr>
+<sign>, PLUS
+<sign>, MINUS
+<sign>, EPSILON
+<N_10>, <new_index>
+<N_10>, BO, <arrExpr>, BC
+<arrExpr>, <arrTerm>, <arr_N4>
+<arr_N4>, <op1>, <arrTerm>, <arr_N4>
+<arr_N4>, EPSILON
+<arrTerm>, <arrFactor>, <arr_N5>
+<arr_N5>, <op2>, <arrFactor>, <arr_N5>
+<arr_N5>, EPSILON
+<arrFactor>, BO, <arrExpr>, BC
+<arrFactor>, <id_num_rnum>
+<id_num_rnum>, ID
+<id_num_rnum>, NUM
+<id_num_rnum>, RNUM
+<arrFactor>, <bools>
+<moduleReuseStmt>, <optional>, USE, MODULE, ID, WITH, PARAMETERS, <idList>, SEMICOL
+<optional>, SQBO, <idList>, SQBC, ASSIGNOP
+<optional>, EPSILON
+<idList>, ID, <iL0>
+<iL0>, COMMA, ID, <iL0>
+<il0>, EPSILON
+<expression>, <booleanExpr>
+<booleanExpr>, <arithmeticExpr>, <BE00>
+<booleanExpr>, <bools>, <BE0>
+<BE00>, <relationalOp>, <arithmeticExpr>, <BE0>
+<BE00>, <BE0>
+<BE0>, <logicalOp>, <booleanExpr>
+<BE0>, EPSILON
+<arithmeticExpr>, <term>, <AE0>
+<arithmeticExpr>, <op1>, <term>, <AE0>
+<AE0>, <op1>, <term>, <AE0>
+<AE0>, EPSILON
+<term>, <factor>, <T0>
+<T0>, <op2>, <factor>, <T0>
+<T0>, EPSILON
+<op1>, PLUS, MINUS
+<op2>, MUL, DIV
+<bools>, TRUE, FALSE
+<factor>, BO, <expression>, BC
+<factor>, NUM
+<factor>, RNUM
+<factor>, ID, <N_11>
+<N_11>, SQBO, <element_index_with_expression>, SQBC
+<N_11>, EPSILON
+<logicalOp>, AND, OR
+<relationalOp>, EQ, NE, LT, GT, LE, GE
+<declareStmt>, DECLARE, <idList>, COLON, <dataType>, SEMICOL
+<conditionalStmt>, SWITCH, BO, ID, BC, START, <caseStmts>, <default>, END
+<caseStmts>, <caseStmt>, <caseStmts>
+<caseStmts>, EPSILON
+<caseStmt>, CASE, <value>, COLON, <statements>, BREAK, SEMICOL
+<value>, NUM
+<value>, TRUE
+<value>, FALSE
+<default>, DEFAULT, COLON, <statements>, BREAK, SEMICOL
+<default>, EPSILON
+<iterativeStmt>, FOR, BO, ID, IN, <forrange>, BC, START, <statements>, END
+<iterativeStmt>, WHILE, BO, <booleanExpr>, BC, START, <statements>, END
+<forrange>, NUM, RANGEOP, NUM
+<range>, <var2>, RANGEOP, <var2>
+<var2>, ID, <whichId>
+<var2>, NUM
+<range_arr>, <index_arr>, RANGEOP, <index_arr>
+<index_arr>, <sign>, <new_index>
+<new_index>, NUM
+<new_index>, ID
