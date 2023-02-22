@@ -2,10 +2,13 @@
 #define PARSER_H
 #include "../lexer/lexerdef.h"
 #include "../lexer/lexer.h"
+
+#include "set.h"
+#include "linked_list.h"
+
 #define NUM_TOKENS 57
 #define NUM_NONTERMINALS 67
 #define NUM_RULES 119
-typedef struct token_set token_set;
 typedef struct parse_tree parse_tree;
 typedef struct parse_tree_node parse_tree_node;
 typedef struct linked_list linked_list;

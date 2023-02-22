@@ -1,22 +1,11 @@
 #include "parser.h"
 
-struct linked_list_node
-{
-    struct linked_list_node *next;
-    TNT tnt;
-};
-struct linked_list
-{
-    struct linked_list_node *head;
-    struct linked_list_node *tail;
-};
-struct token_set
-{
-    // TODO: Define a set ADT for tokens and add allied functions
-};
 void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked_list *rules)
 {
     // TODO: Automate population of first and follow sets from grammar
+    firstSet = (token_set *)malloc(sizeof(token_set) * NUM_NONTERMINALS);
+    followSet = (token_set *)malloc(sizeof(token_set) * NUM_NONTERMINALS);
+    // INCOMPLETE
 }
 void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *rules)
 {
