@@ -5,13 +5,21 @@
 
 #include "set.h"
 
-#define NUM_TOKENS 57
+#define NUM_TOKENS 56
 #define NUM_NONTERMINALS 67
 #define NUM_RULES 119
 typedef struct parse_tree parse_tree;
 typedef struct parse_tree_node parse_tree_node;
 typedef struct linked_list linked_list;
 typedef struct linked_list_node linked_list_node;
+enum TNT_TYPE
+{
+    __TERMINAL__,
+    __NONTERMINAL__,
+    __NONE__,
+    __EPSILON__
+};
+typedef enum TNT_TYPE TNT_TYPE;
 int isMember(token_set *set, TOKEN tok);
 extern int Table[NUM_NONTERMINALS][NUM_TOKENS];
 enum NONTERMINAL
@@ -90,10 +98,18 @@ typedef union TNT
     TOKEN tok;
     NONTERMINAL nonterm;
 } TNT;
+
+struct hash_table_element
+{
+    enum TNT_TYPE type;
+    TNT tnt;
+};
+typedef struct hash_table_element hash_table_element;
+
 void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked_list *rules);
 void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *rules);
 void parseInputSourceCode(char *testcaseFile, char *grammarFile);
 void printParseTree(parse_tree *tree, FILE *fp);
-linked_list *createRuleList(char *grammarFile);
+linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable);
 
 #endif
