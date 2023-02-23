@@ -76,8 +76,12 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile)
         Call populateParseTable() to populate the parse table
         Parse the input source code as per LECTURE 21/02/2023 while creating the parse tree
     */
+    hash_table_element *hashTable = createHashTable("nonterminals.txt", "terminals.txt");
+    linked_list *rules = createRuleList(grammarFile, hashTable);
     token_set firstSet[NUM_NONTERMINALS];
     token_set followSet[NUM_NONTERMINALS];
+    computeFirstAndFollowSets(firstSet, followSet, rules);
+    populateParseTable(firstSet, followSet, rules);
 }
 void printParseTree(parse_tree *tree, FILE *fp)
 {
