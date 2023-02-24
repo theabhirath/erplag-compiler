@@ -124,7 +124,7 @@ tokenInfo getNextToken()
         c = buf1[finish];
         switch (state)
         {
-        // begin
+        // start state
         case 0:
             if (c == ' ' || c == '\t')
             {
@@ -240,13 +240,139 @@ tokenInfo getNextToken()
                 break;
             }
 
-        // generate token for identifier
+        // identifier
         case 2:
             // TODO: reserved words table lookup? if not, then identifier
 
         case 3:
-            // TODO: implement handling of numbers
+            if ('0' <= c && c <= '9')
+            {
+                finish++;
+                break;
+            }
+            else if (c == '.')
+            {
+                finish++;
+                state = 5;
+                break;
+            }
+            else
+            {
+                state = 4;
+                break;
+            }
+
+        // integer
+        case 4:
+            char *lexeme = getLexemeFromBuffer();
+            token.tokenID = INTEGER;
+            token.val.intValue = atoi(lexeme);
+            token.lineNumber = lineNumber;
+            return token;
+
+        // reals, both . notation and e notation
+        case 5:
+            if ('0' <= c && c <= '9')
+            {
+                state = 8;
+                finish++;
+                break;
+            }
+            else if (c == '.')
+            {
+                state = 7;
+                break;
+            }
+            else
+            {
+                state = 6;
+                break;
+            }
+
+        // error state; expected a digit or another . after .
+        case 6:
+            // TODO: handle this error state
             break;
+
+        case 7:
+            // number followed by range operator, needs to retract
+            finish--;
+            // TODO: handle this token generation
+
+        // reals, both . notation and e notation
+        case 8:
+            if ('0' <= c && c <= '9')
+            {
+                finish++;
+                break;
+            }
+            else if (c == 'e' || c == 'E')
+            {
+                finish++;
+                state = 10;
+                break;
+            }
+            else
+            {
+                state = 9;
+                break;
+            }
+
+        // reals, both . notation and e notation
+        case 9:
+            // TODO: work out the scheme to convert from E notation to float
+            char *lexeme = getLexemeFromBuffer();
+            token.tokenID = REAL;
+            token.val.floatValue = atof(lexeme);
+            token.lineNumber = lineNumber;
+            return token;
+
+        // reals, e notation
+        case 10:
+            if ('0' <= c && c <= '9')
+            {
+                finish++;
+                state = 12;
+                break;
+            }
+            else if (c == '+' || c == '-')
+            {
+                finish++;
+                state = 11;
+                break;
+            }
+            else
+            {
+                state = 6;
+                break;
+            }
+
+        // reals, e notation
+        case 11:
+            if ('0' <= c && c <= '9')
+            {
+                finish++;
+                state = 12;
+                break;
+            }
+            else
+            {
+                state = 6;
+                break;
+            }
+
+        // reals, e notation
+        case 12:
+            if ('0' <= c && c <= '9')
+            {
+                finish++;
+                break;
+            }
+            else
+            {
+                state = 9;
+                break;
+            }
 
         // bracket open
         case 13:
@@ -331,7 +457,7 @@ tokenInfo getNextToken()
                 break;
             }
 
-        // error state, lone equal is an invalid token
+        // error state; lone equal is an invalid token
         case 30:
             // TODO: handle this error state
             break;
@@ -343,7 +469,7 @@ tokenInfo getNextToken()
             token = allocateToken(EQ, lexeme, lineNumber);
             return token;
 
-        // error state, invalid character read
+        // error state; invalid character read
         case 33:
             // TODO: handle this error state
             break;
@@ -369,7 +495,6 @@ tokenInfo getNextToken()
             return token;
 
         // comment
-        // TODO: complete comment handling
         case 36:
             if (c == '*')
             {
@@ -428,7 +553,7 @@ tokenInfo getNextToken()
                 break;
             }
 
-        // error state, lone dot is an invalid token
+        // error state; lone dot is an invalid token
         case 41:
             // TODO: handle this error state
 
@@ -513,7 +638,7 @@ tokenInfo getNextToken()
                 break;
             }
 
-        // error state, lone exclamation mark is an invalid token
+        // error state; lone exclamation mark is an invalid token
         case 53:
             // TODO: handle this error state
 
