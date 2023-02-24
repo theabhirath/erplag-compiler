@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 enum TOKEN
 {
     INTEGER,
@@ -34,11 +35,13 @@ enum TOKEN
     TRUE,
     FALSE
 };
+
 struct reserved_word
 {
     char *word;
     enum TOKEN token;
 };
+
 #define NUM_RESERVED_WORDS 30
 #define HASH_TABLE_SIZE 128
 

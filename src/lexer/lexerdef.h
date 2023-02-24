@@ -1,5 +1,6 @@
 #ifndef LEXER_DEF_H
 #define LEXER_DEF_H
+
 enum TOKEN
 {
     INTEGER,
@@ -60,16 +61,25 @@ enum TOKEN
     GE
 };
 typedef enum TOKEN TOKEN;
-union value
+
+union Value
 {
     int intValue;
     float floatValue;
     char *idValue;
 };
-typedef struct token_info
+
+typedef struct tokenInfo
 {
     TOKEN tok;       // the token
-    union value val; // the value of the token
+    union Value val; // the value of the token
     int lineNumber;  // line number of the token
-} token;
+} tokenInfo;
+
+struct reserved_word
+{
+    char *word;
+    enum TOKEN token;
+};
+
 #endif
