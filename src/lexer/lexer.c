@@ -9,72 +9,10 @@
 #define NUM_RESERVED_WORDS 30
 #define HASH_TABLE_SIZE 128
 
-// /* hash function for the reserved words table */
-// int hashRW(char *word)
-// {
-//     int hash = 0;
-//     for (int i = 0; i < strlen(word); i++)
-//     {
-//         hash = (word[i] + hash * 43) % HASH_TABLE_SIZE;
-//     }
-//     return hash;
-// }
-
-// /* reserved words table */
-// int reservedWordsTable()
-// {
-//     // allocate memory for the reserved words table
-//     struct reserved_word *arr = (struct reserved_word *)malloc(sizeof(struct reserved_word) * NUM_RESERVED_WORDS);
-
-//     int i = 0;
-//     char delim[] = " \n";
-//     while (fgets(line, 100, fp) != NULL)
-//     {
-//         char *token = strtok(line, delim);
-//         arr[i].word = (char *)malloc(sizeof(char) * strlen(token));
-//         strcpy(arr[i].word, token);
-//         token = strtok(NULL, delim);
-//         arr[i].token = i;
-//         i++;
-//     }
-
-//     struct reserved_word hash_table[HASH_TABLE_SIZE];
-//     for (int i = 0; i < HASH_TABLE_SIZE; i++)
-//     {
-//         hash_table[i].word = NULL;
-//         hash_table[i].token = -1;
-//     }
-//     int numCollisions = 0;
-//     int minCollisions = 30;
-//     int minTerm = 0;
-//     for (int i = 0; i < NUM_RESERVED_WORDS; i++)
-//     {
-//         int index = hash(arr[i].word);
-//         if (hash_table[index].word == NULL)
-//         {
-//             hash_table[index].word = arr[i].word;
-//             hash_table[index].token = arr[i].token;
-//         }
-//         else
-//         {
-//             numCollisions++;
-//             while (hash_table[index].word != NULL)
-//             {
-//                 index = (index + 1) % HASH_TABLE_SIZE;
-//             }
-//             hash_table[index].word = arr[i].word;
-//             hash_table[index].token = arr[i].token;
-//         }
-//     }
-//     printf("Number of collisions: %d\n", numCollisions);
-
-//     return 0;
-// }
-
 // declare global buffers
 char buf1[BUFFER_SIZE], buf2[BUFFER_SIZE];
 // pointers
-int start, finish;
+int begin, finish;
 
 // line number
 int lineNumber = 0;
@@ -82,7 +20,7 @@ int lineNumber = 0;
 // brings fixed size of input into memory. use two buffers
 FILE *getStream(FILE *fp, char *buf1, char *buf2)
 {
-    // TODO
+    // TODO: implement this function
     return fp;
 }
 
@@ -147,13 +85,38 @@ void removeComments(char *test_file, char *clean_file)
     fclose(fp2);
 }
 
+tokenInfo allocateToken(TOKEN tokenID, char *lexeme, int lineNumber)
+{
+    tokenInfo token;
+    token.tokenID = tokenID;
+    token.val.lexValue = (char *)malloc(sizeof(char) * strlen(lexeme));
+    strcpy(token.val.lexValue, lexeme);
+    token.lineNumber = lineNumber;
+    return token;
+}
+
+char getCharFromBuffers()
+{
+    // TODO: implement this function
+}
+
+char *getLexemeFromBuffers()
+{
+    // TODO : implement this function
+}
+
+/* TODO:
+1. Handle error cases
+2. Handle identifier size
+3. Handle pointers (begin and finish). Remember to reset them when you are done with a token.
+*/
 tokenInfo getNextToken()
 {
     // token to be returned
     tokenInfo token;
 
     // get character from buffer
-    char c = buf1[start];
+    char c = getCharFromBuffers();
     int state = 0;
 
     while (state >= 0)
@@ -161,17 +124,17 @@ tokenInfo getNextToken()
         c = buf1[finish];
         switch (state)
         {
-            // start
+        // begin
         case 0:
             if (c == ' ' || c == '\t')
             {
-                start++;
+                begin++;
                 finish++;
                 break;
             }
             else if (c == '\n')
             {
-                start++;
+                begin++;
                 finish++;
                 lineNumber++;
                 break;
@@ -279,15 +242,368 @@ tokenInfo getNextToken()
 
         // generate token for identifier
         case 2:
-            // TODO reserved words table lookup
-            token.tok = ID;
-            token.lineNumber = lineNumber;
-            token.val.idValue = (char *)malloc(sizeof(char) * (finish - start + 1));
-            strncpy(token.val.idValue, buf1 + start, finish - start);
+            // TODO: reserved words table lookup? if not, then identifier
 
         case 3:
-            // TODO
+            // TODO: implement handling of numbers
             break;
+
+        // bracket open
+        case 13:
+        case 14:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(BO, lexeme, lineNumber);
+            return token;
+
+        // bracket close
+        case 15:
+        case 16:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(BC, lexeme, lineNumber);
+            return token;
+
+        // colon, assignop
+        case 17:
+            if (c == '=')
+            {
+                finish++;
+                state = 19;
+                break;
+            }
+            else
+            {
+                state = 18;
+                break;
+            }
+
+        // colon
+        case 18:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(COLON, lexeme, lineNumber);
+            return token;
+
+        // assignop
+        case 19:
+        case 20:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(ASSIGNOP, lexeme, lineNumber);
+            return token;
+
+        // semicolon
+        case 21:
+        case 22:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(SEMICOL, lexeme, lineNumber);
+            return token;
+
+        // comma
+        case 23:
+        case 24:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(COMMA, lexeme, lineNumber);
+            return token;
+
+        // square bracket open
+        case 25:
+        case 26:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(SQBO, lexeme, lineNumber);
+            return token;
+
+        // square bracket close
+        case 27:
+        case 28:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(SQBC, lexeme, lineNumber);
+            return token;
+
+        // equal to
+        case 29:
+            if (c == '=')
+            {
+                finish++;
+                state = 31;
+                break;
+            }
+            else
+            {
+                state = 30;
+                break;
+            }
+
+        // error state, lone equal is an invalid token
+        case 30:
+            // TODO: handle this error state
+            break;
+
+        // equal to
+        case 31:
+        case 32:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(EQ, lexeme, lineNumber);
+            return token;
+
+        // error state, invalid character read
+        case 33:
+            // TODO: handle this error state
+            break;
+
+        // multiplication, comment
+        case 34:
+            if (c == '*')
+            {
+                finish++;
+                state = 36;
+                break;
+            }
+            else
+            {
+                state = 35;
+                break;
+            }
+
+        // multiplication
+        case 35:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(MUL, lexeme, lineNumber);
+            return token;
+
+        // comment
+        // TODO: complete comment handling
+        case 36:
+            if (c == '*')
+            {
+                // finish++;
+                state = 37;
+                break;
+            }
+            else if (c == '\n')
+            {
+                finish++;
+                lineNumber++;
+                break;
+            }
+            else
+            {
+                finish++;
+                break;
+            }
+
+        // comment
+        case 37:
+            if (c == '*')
+            {
+                state = 38;
+                break;
+            }
+            else if (c == '\n')
+            {
+                finish++;
+                lineNumber++;
+                break;
+            }
+            else
+            {
+                finish++;
+                state = 36;
+                break;
+            }
+
+        // comment
+        case 38:
+        case 39:
+            // TODO: discard comment
+
+        // rangeop
+        case 40:
+            if (c == '.')
+            {
+                finish++;
+                state = 42;
+                break;
+            }
+            else
+            {
+                state = 41;
+                break;
+            }
+
+        // error state, lone dot is an invalid token
+        case 41:
+            // TODO: handle this error state
+
+        // rangeop
+        case 42:
+        case 43:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(RANGEOP, lexeme, lineNumber);
+            break;
+
+        // greater than, greater than or equal to, enddef, driverenddef
+        case 44:
+            if (c == '=')
+            {
+                finish++;
+                state = 50;
+                break;
+            }
+            else if (c == '>')
+            {
+                finish++;
+                state = 48;
+                break;
+            }
+            else
+            {
+                state = 45;
+                break;
+            }
+
+        // greater than
+        case 45:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(GT, lexeme, lineNumber);
+            break;
+        
+        // enddef, driverenddef
+        case 46:
+            if (c == '>')
+            {
+                finish++;
+                state = 48;
+                break;
+            }
+            else
+            {
+                state = 47;
+                break;
+            }
+
+        // enddef
+        case 47:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(ENDDEF, lexeme, lineNumber);
+            return token;
+
+        // driverenddef
+        case 48:
+        case 49:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(DRIVERENDDEF, lexeme, lineNumber);
+            return token;
+
+        // greater than or equal to
+        case 50:
+        case 51:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(GE, lexeme, lineNumber);
+            return token;
+
+        // not equal to
+        case 52:
+            if (c == '=')
+            {
+                finish++;
+                state = 54;
+                break;
+            }
+            else
+            {
+                state = 53;
+                break;
+            }
+
+        // error state, lone exclamation mark is an invalid token
+        case 53:
+            // TODO: handle this error state
+
+        // not equal to
+        case 54:
+        case 55:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(NE, lexeme, lineNumber);
+            return token;
+
+        // less than, less than or equal to, def, driverdef
+        case 56:
+            if (c == '=')
+            {
+                finish++;
+                state = 58;
+                break;
+            }
+            else if (c == '<')
+            {
+                finish++;
+                state = 60;
+                break;
+            }
+            else
+            {
+                state = 57;
+                break;
+            }
+
+        // less than
+        case 57:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(LT, lexeme, lineNumber);
+            return token;
+
+        // less than or equal to
+        case 58:
+        case 59:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(LE, lexeme, lineNumber);
+            return token;
+
+        // def, driverdef
+        case 60:
+            if (c == '<')
+            {
+                finish++;
+                state = 62;
+                break;
+            }
+            else
+            {
+                state = 61;
+                break;
+            }
+
+        // def
+        case 61:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(DEF, lexeme, lineNumber);
+            return token;
+
+        // driverdef
+        case 62:
+        case 63:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(DRIVERDEF, lexeme, lineNumber);
+            return token;
+
+        // plus
+        case 64:
+        case 65:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(PLUS, lexeme, lineNumber);
+            return token;
+
+        // minus
+        case 66:
+        case 67:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(MINUS, lexeme, lineNumber);
+            return token;
+
+        // division
+        case 68:
+        case 69:
+            char *lexeme = getLexemeFromBuffer();
+            token = allocateToken(DIV, lexeme, lineNumber);
+            return token;
         }
     }
 }

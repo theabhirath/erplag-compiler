@@ -55,7 +55,7 @@ enum TOKEN
     BC,
     LT,
     DRIVERENDDEF,
-    ENDEF,
+    ENDDEF,
     GT,
     LE,
     GE
@@ -66,12 +66,12 @@ union Value
 {
     int intValue;
     float floatValue;
-    char *idValue;
+    char *lexValue;
 };
 
 typedef struct tokenInfo
 {
-    TOKEN tok;       // the token
+    TOKEN tokenID; // the token
     union Value val; // the value of the token
     int lineNumber;  // line number of the token
 } tokenInfo;
