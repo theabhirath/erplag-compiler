@@ -151,7 +151,7 @@ tokenInfo getNextToken()
 {
     // token to be returned
     tokenInfo token;
-    
+
     // get character from buffer
     char c = buf1[start];
     int state = 0;
@@ -162,49 +162,132 @@ tokenInfo getNextToken()
         switch (state)
         {
             // start
-            case 0:
-                if (c == ' ' | c == '\t'){
-                    start++;
-                    finish++;
-                    break;
-                }
-                // skip whitespace
-                else if(c == '\n'){
-                    start++;
-                    finish++;
-                    lineNumber++;
-                    break;
-                }
-                else if('a' <= c && c <= 'z' || 'A'<= c && c <= 'Z' || c == '_'){
-                    finish++;
-                    state = 1;
-                    break;
-                }
-                
-
-            // identifiers
-            case 1:
-                if ('a' <= c && c <= 'z' || 'A' <= c && c <= 'Z' || '0' <= c && c <= '9' | c == '_'){
-                    finish++;
-                    break;
-                }
-                else{
-                    state = 2;
-                    break;
-                }
-
-            // generate token for identifier
-            case 2:
-                // TODO reserved words table lookup
-                token.tok = ID;
-                token.lineNumber = lineNumber;
-                token.val.idValue = (char *)malloc(sizeof(char) * (finish - start + 1));
-                strncpy(token.val.idValue, buf1 + start, finish - start);
-
-            case 3:
-                // TODO
+        case 0:
+            if (c == ' ' || c == '\t')
+            {
+                start++;
+                finish++;
                 break;
+            }
+            else if (c == '\n')
+            {
+                start++;
+                finish++;
+                lineNumber++;
+                break;
+            }
+            else if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_')
+            {
+                finish++;
+                state = 1;
+                break;
+            }
+            else if (c >= '0' && c <= '9')
+            {
+                finish++;
+                state = 3;
+                break;
+            }
+            else
+            {
+                switch (c)
+                {
+                case '(':
+                    finish++;
+                    state = 13;
+                    break;
+                case ')':
+                    finish++;
+                    state = 15;
+                    break;
+                case ':':
+                    finish++;
+                    state = 17;
+                    break;
+                case ';':
+                    finish++;
+                    state = 21;
+                    break;
+                case ',':
+                    finish++;
+                    state = 23;
+                    break;
+                case '[':
+                    finish++;
+                    state = 25;
+                    break;
+                case ']':
+                    finish++;
+                    state = 27;
+                    break;
+                case '=':
+                    finish++;
+                    state = 29;
+                    break;
+                case '*':
+                    finish++;
+                    state = 34;
+                    break;
+                case '.':
+                    finish++;
+                    state = 40;
+                    break;
+                case '>':
+                    finish++;
+                    state = 44;
+                    break;
+                case '!':
+                    finish++;
+                    state = 52;
+                    break;
+                case '<':
+                    finish++;
+                    state = 56;
+                    break;
+                case '+':
+                    finish++;
+                    state = 64;
+                    break;
+                case '-':
+                    finish++;
+                    state = 66;
+                    break;
+                case '/':
+                    finish++;
+                    state = 68;
+                    break;
+                default:
+                    state = 33;
+                    break;
+                }
+            }
+            break;
+            // State 0 ends here
+
+        // identifiers
+        case 1:
+            if ('a' <= c && c <= 'z' || 'A' <= c && c <= 'Z' || '0' <= c && c <= '9' | c == '_')
+            {
+                finish++;
+                break;
+            }
+            else
+            {
+                state = 2;
+                break;
+            }
+
+        // generate token for identifier
+        case 2:
+            // TODO reserved words table lookup
+            token.tok = ID;
+            token.lineNumber = lineNumber;
+            token.val.idValue = (char *)malloc(sizeof(char) * (finish - start + 1));
+            strncpy(token.val.idValue, buf1 + start, finish - start);
+
+        case 3:
+            // TODO
+            break;
         }
     }
-    
 }
