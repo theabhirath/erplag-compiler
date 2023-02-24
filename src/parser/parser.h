@@ -24,7 +24,6 @@ enum TNT_TYPE
 };
 typedef enum TNT_TYPE TNT_TYPE;
 
-int isMember(token_set *set, TOKEN tok);
 
 extern int Table[NUM_NONTERMINALS][NUM_TOKENS];
 
@@ -118,5 +117,7 @@ void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *
 void parseInputSourceCode(char *testcaseFile, char *grammarFile);
 void printParseTree(parse_tree *tree, FILE *fp);
 linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable);
+hash_table_element *createHashTable(char *nonterminalsFile, char *terminalsFile);
+int hash(char *str);
 
 #endif

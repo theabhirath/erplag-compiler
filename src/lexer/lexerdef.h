@@ -58,8 +58,12 @@ enum TOKEN
     ENDDEF,
     GT,
     LE,
-    GE
+    GE,
+    EPSILON
 };
+// While EPSILON is not a token, for the first and follow sets, we use it as a token
+// NUM_TOKENS does not include EPSILON
+// Currently, NUM_TOKENS is 56 (0-55) and EPSILON is 56
 typedef enum TOKEN TOKEN;
 
 union Value

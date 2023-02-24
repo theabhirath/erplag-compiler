@@ -24,6 +24,10 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
         linked_list_node *node = rules[i].head;
         NONTERMINAL nt = node->tnt.nonterm;
         node = node->next;
+        if (node == NULL)
+        {
+            addToken(&firstSet[nt], EPSILON);
+        }
         while (node != NULL)
         {
             if (node->type == __TERMINAL__)
@@ -33,8 +37,9 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
             }
             else
             {
-                incomplete[nt] = 1;
+                incomplete[nt] += 1;
                 any_incomplete = 1;
+                unhandled[i] = 1;
                 break;
             }
         }
@@ -51,13 +56,12 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
             {
                 if (incomplete[node->tnt.nonterm] == 0)
                 {
-                    incomplete[nt] = 0;
                     unhandled[i] = 0;
+                    incomplete[nt] -= 1;
                     firstSet[nt].set |= firstSet[node->tnt.nonterm].set;
                 }
                 else
                 {
-                    incomplete[nt] = 1;
                     any_incomplete = 1;
                 }
             }
@@ -199,13 +203,14 @@ hash_table_element *createHashTable(char *nontermsfile, char *termsfile)
         }
         else
         {
-            // printf("Hash collision\n");
+            printf("Hash collision\n");
             collisions++;
         }
     }
     for (int i = 0; i < NUM_TOKENS; i++)
     {
         int h = hash(terminals[i]);
+        printf("%d %s %d\n", i, terminals[i], h);
         if (hashTable[h].type == __NONE__)
         {
             hashTable[h].type = __TERMINAL__;
@@ -214,7 +219,7 @@ hash_table_element *createHashTable(char *nontermsfile, char *termsfile)
         else
         {
             collisions++;
-            printf("Hash collision with token %d: %s\n", i, terminals[i]);
+            printf("Hash collision with token %d--- %s. Colliding token: %s\n", i, terminals[i], hashTable[h].type == __TERMINAL__ ? terminals[hashTable[h].tnt.tok] : nonterminals[hashTable[h].tnt.nonterm]);
         }
     }
     int h = hash(epsilon);
@@ -229,11 +234,11 @@ hash_table_element *createHashTable(char *nontermsfile, char *termsfile)
         // Print term colliding with epsilon
         if(hashTable[h].type == __TERMINAL__)
         {
-            printf("Colliding term: %d\n", terminals[hashTable[h].tnt.tok]);
+            printf("Colliding term: %s\n", terminals[hashTable[h].tnt.tok]);
         }
         else
         {
-            printf("Colliding nonterm: %d\n", nonterminals[hashTable[h].tnt.nonterm]);
+            printf("Colliding nonterm: %s\n", nonterminals[hashTable[h].tnt.nonterm]);
         }
     }
     printf("Collisions: %d\n", collisions);
@@ -285,11 +290,14 @@ void printSet(token_set *set)
         }
         cur = cur >> 1;
     }
+    if(isMember(set, EPSILON))
+    {
+        printf("EPSILON");
+    }
 }
 int main()
 {
     hash_table_element *hashTable = createHashTable("nonterminals.txt", "terminals.txt");
-
     linked_list *rules = createRuleList("grammar.csv", hashTable);
     print_rules(rules);
     token_set *first_sets = malloc(sizeof(token_set) * NUM_NONTERMINALS);
