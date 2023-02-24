@@ -110,9 +110,9 @@ void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *
 void parseInputSourceCode(char *testcaseFile, char *grammarFile)
 {
     /*
-        Call create_rules() to create a linked list of rules
-        Call computeFirstAndFollowSets() to compute first and follow sets
-        Call populateParseTable() to populate the parse table
+        Done - Call create_rules() to create a linked list of rules
+        Done - Call computeFirstAndFollowSets() to compute first and follow sets
+        Done - Call populateParseTable() to populate the parse table
         Parse the input source code as per LECTURE 21/02/2023 while creating the parse tree
     */
     hash_table_element *hashTable = createHashTable("nonterminals.txt", "terminals.txt");
@@ -124,7 +124,29 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile)
     //Need stack and stack operations to push start symbol on stack
     stack S;
     //Need to push start symbol on stack.
-    
+    tokenInfo L = getNextToken();
+    /*while(L!=NULL){
+        TNT X = pop(&S);
+        if(X.type == __TERMINAL__){
+            if(X.tok == L->token){
+                //Need to make a node in the parse tree.
+                L = getNextToken();
+            }
+            else{
+                printf("Error in parsing\n");
+                //Space for error recovery
+                exit(1);
+            }
+        }
+        elseif (X.type == __NONTERMINAL__){
+            //Need to find the rule in the parse table
+            //Need to push the RHS of the rule on the stack
+        }
+        else{
+            printf("Error in parsing\n");
+            //Space for error recovery, stack end achieved but input not finished
+            exit(1);}
+    }*/
 }
 void printParseTree(parse_tree *tree, FILE *fp)
 {
