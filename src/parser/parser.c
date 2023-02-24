@@ -8,6 +8,41 @@
 char *nonterminals[NUM_NONTERMINALS];
 char *terminals[NUM_TOKENS];
 
+
+//Stack of nodes
+typedef struct stack
+{
+    TNT symbol; 
+    struct stack *next;
+} stack;
+
+void push(stack **S, TNT symbol)
+{
+    stack *temp = (stack *)malloc(sizeof(stack));
+    temp->symbol = symbol;
+    temp->next = *S;
+    *S = temp;
+}
+
+TNT pop(stack **S)
+{
+    //Pop the top element from the stack
+    TNT symbol;
+    stack *temp = *S;
+    symbol = temp->symbol;
+    *S = temp->next;
+    free(temp);
+    return symbol;
+    
+}
+
+int isEmpty(stack *S)
+{
+    if(S == NULL)
+        return 1;
+    return 0;
+}
+
 void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked_list *rules)
 {
     // TODO: Automate population of first and follow sets from grammar
@@ -86,6 +121,10 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile)
     token_set followSet[NUM_NONTERMINALS];
     computeFirstAndFollowSets(firstSet, followSet, rules);
     populateParseTable(firstSet, followSet, rules);
+    //Need stack and stack operations to push start symbol on stack
+    stack S;
+    //Need to push start symbol on stack.
+    
 }
 void printParseTree(parse_tree *tree, FILE *fp)
 {
