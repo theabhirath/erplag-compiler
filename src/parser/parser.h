@@ -1,5 +1,6 @@
 #ifndef PARSER_H
 #define PARSER_H
+
 #include "../lexer/lexerdef.h"
 #include "../lexer/lexer.h"
 
@@ -8,10 +9,12 @@
 #define NUM_TOKENS 56
 #define NUM_NONTERMINALS 67
 #define NUM_RULES 119
+
 typedef struct parse_tree parse_tree;
 typedef struct parse_tree_node parse_tree_node;
 typedef struct linked_list linked_list;
 typedef struct linked_list_node linked_list_node;
+
 enum TNT_TYPE
 {
     __TERMINAL__,
@@ -20,8 +23,11 @@ enum TNT_TYPE
     __EPSILON__
 };
 typedef enum TNT_TYPE TNT_TYPE;
+
 int isMember(token_set *set, TOKEN tok);
+
 extern int Table[NUM_NONTERMINALS][NUM_TOKENS];
+
 enum NONTERMINAL
 {
     __program__,
@@ -93,6 +99,7 @@ enum NONTERMINAL
     __new_index__
 };
 typedef enum NONTERMINAL NONTERMINAL;
+
 typedef union TNT
 {
     TOKEN tok;

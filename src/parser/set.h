@@ -1,6 +1,8 @@
 #ifndef SET_H
 #define SET_H
+
 #include "../lexer/lexerdef.h"
+
 struct token_set
 {
     long long int set;
@@ -12,8 +14,10 @@ struct token_set
     // The singleton set containing only INTEGER will be 1.
 };
 typedef struct token_set token_set;
+
 token_set *createTokenSet(); // returns a pointer to a new token_set initialized to the empty set (0)
 void addToken(token_set *ts, TOKEN tok); // adds tok to ts if not already present, else does nothing
 void removeToken(token_set *ts, TOKEN tok); // removes tok from ts if present, else does nothing
 int isMember(token_set *ts, TOKEN tok); // returns 1 if tok is in ts, 0 otherwise
+
 #endif
