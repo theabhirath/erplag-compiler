@@ -1,15 +1,16 @@
-#include "parser.h"
-#include "linked_list.h"
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
+
+#include "parser.h"
+#include "linked_list.h"
+
 #define HASH_TABLE_SIZE 1050
 
 char *nonterminals[NUM_NONTERMINALS];
 char *terminals[NUM_TOKENS];
 int Table[NUM_NONTERMINALS][NUM_TOKENS];
-
 typedef struct parse_tree_node
 {
     TNT tnt;
@@ -177,6 +178,7 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
 
 
 }
+
 void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *rules)
 {
     // TODO: Automate population of parse table from grammar and first and follow sets
@@ -233,6 +235,7 @@ void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *
         }
     }
 }
+
 void parseInputSourceCode(char *testcaseFile, char *grammarFile)
 {
     /*
@@ -343,6 +346,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile)
     }
     fclose(fp);
 }
+
 void printParseTree(parse_tree *tree, FILE *fp)
 {
     // TODO: Print the parse tree
@@ -397,6 +401,7 @@ linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable)
     }
     return rules;
 }
+
 // 1037 - 8
 int hash(char *str)
 {
@@ -408,6 +413,7 @@ int hash(char *str)
     }
     return hash;
 }
+
 hash_table_element *createHashTable(char *nontermsfile, char *termsfile)
 {
     FILE *fp;
@@ -503,6 +509,7 @@ hash_table_element *createHashTable(char *nontermsfile, char *termsfile)
     printf("Collisions: %d\n", collisions);
     return hashTable;
 }
+
 void print_rules(linked_list *rules)
 {
     for (int i = 0; i < NUM_RULES; i++)
@@ -533,6 +540,7 @@ void print_rules(linked_list *rules)
         printf("\n");
     }
 }
+
 void printSet(token_set *set)
 {
     long long cur = set->set;
@@ -554,6 +562,7 @@ void printSet(token_set *set)
         printf("EPSILON");
     }
 }
+
 int main()
 {
     hash_table_element *hashTable = createHashTable("nonterminals.txt", "terminals.txt");

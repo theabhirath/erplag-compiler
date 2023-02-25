@@ -62,6 +62,7 @@ enum TOKEN
     PROGRAMEND,
     EPSILON
 };
+
 // While EPSILON is not a token, for the first and follow sets, we use it as a token
 // NUM_TOKENS does not include EPSILON
 // Currently, NUM_TOKENS is 56 (0-55) and EPSILON is 56
@@ -84,7 +85,10 @@ typedef struct tokenInfo
 struct reserved_word
 {
     char *word;
-    enum TOKEN token;
+    enum TOKEN tokenID;
 };
+
+// reserved words table
+extern struct reserved_word rwtable[];
 
 #endif

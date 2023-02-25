@@ -1,5 +1,6 @@
-#include "linked_list.h"
 #include <stdlib.h>
+
+#include "linked_list.h"
 
 linked_list_node *createNode(TNT tnt, TNT_TYPE type)
 {

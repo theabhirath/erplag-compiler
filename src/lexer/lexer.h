@@ -3,8 +3,14 @@
 
 #include <stdio.h>
 
-FILE *getStream(FILE *fp, char *buf1, char *buf2);
+#include "lexerdef.h"
+
+int reservedWordsTable();
+int hashRW(char *word);
+int getReservedWordToken(char *word);
+
+FILE *getStream(FILE *fp);
 void removeComments(char *test_file, char *clean_file);
-tokenInfo getNextToken();
+tokenInfo getNextToken(FILE *fp);
 
 #endif

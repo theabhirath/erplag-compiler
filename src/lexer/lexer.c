@@ -10,19 +10,13 @@
 #define HASH_TABLE_SIZE 128
 
 // declare global buffers
-char buf1[BUFFER_SIZE], buf2[BUFFER_SIZE];
+char buf[2][BUFFER_SIZE];
+
 // pointers
-int begin, finish;
+int begin = 2 * BUFFER_SIZE, finish = 2 * BUFFER_SIZE;
 
 // line number
-int lineNumber = 0;
-
-// brings fixed size of input into memory. use two buffers
-FILE *getStream(FILE *fp, char *buf1, char *buf2)
-{
-    // TODO: implement this function
-    return fp;
-}
+int lineNumber = 1;
 
 // takes source code, writes clean code to file without comments
 // number of lines in clean code is equal to number of lines in source code
@@ -85,24 +79,67 @@ void removeComments(char *test_file, char *clean_file)
     fclose(fp2);
 }
 
+// reset pointers after token generation
+void resetPointers()
+{
+    begin = finish;
+}
+
+// brings fixed size of input into memory. use two buffers
+FILE *getStream(FILE *fp)
+{
+    strncpy(buf[0], buf[1], BUFFER_SIZE);
+    int nread = fread(buf[1], 1, BUFFER_SIZE, fp);
+    // pointers back to "beginning" of buffer
+    begin -= BUFFER_SIZE;
+    finish -= BUFFER_SIZE;
+    // end of file
+    if (nread < BUFFER_SIZE)
+    {
+        // end of file
+        buf[1][nread] = EOF;
+    }
+    return fp;
+}
+
+// gets single character from buffer
+char getCharFromBuffers(FILE *fp)
+{
+    if (finish == 2 * BUFFER_SIZE)
+    {
+        getStream(fp);
+    }
+    return buf[0][finish];
+}
+
+// gets lexeme from buffer
+char *getLexemeFromBuffers(FILE *fp)
+{
+    char *lexeme = (char *)malloc(sizeof(char) * (finish - begin + 1));
+    int i;
+    for (i = begin; i < finish; i++)
+    {
+        lexeme[i - begin] = buf[0][i];
+    }
+    lexeme[i - begin] = '\0';
+    return lexeme;
+}
+
+// returns tokenInfo struct
 tokenInfo allocateToken(TOKEN tokenID, char *lexeme, int lineNumber)
 {
     tokenInfo token;
     token.tokenID = tokenID;
-    token.val.lexValue = (char *)malloc(sizeof(char) * strlen(lexeme));
-    strcpy(token.val.lexValue, lexeme);
+    if (tokenID == ID)
+    {
+        token.val.lexValue = (char *)malloc(sizeof(char) * strlen(lexeme));
+        strcpy(token.val.lexValue, lexeme);
+        free(lexeme);
+    }
+   
     token.lineNumber = lineNumber;
+    resetPointers();
     return token;
-}
-
-char getCharFromBuffers()
-{
-    // TODO: implement this function
-}
-
-char *getLexemeFromBuffers()
-{
-    // TODO : implement this function
 }
 
 /* TODO:
@@ -110,18 +147,20 @@ char *getLexemeFromBuffers()
 2. Handle identifier size
 3. Handle pointers (begin and finish). Remember to reset them when you are done with a token.
 */
-tokenInfo getNextToken()
+tokenInfo getNextToken(FILE *fp)
 {
     // token to be returned
     tokenInfo token;
 
-    // get character from buffer
-    char c = getCharFromBuffers();
+    // declarations
+    char c;
     int state = 0;
+    char *lexeme;
 
     while (state >= 0)
     {
-        c = buf1[finish];
+        // get character from buffer
+        c = getCharFromBuffers(fp);
         switch (state)
         {
         // start state
@@ -219,6 +258,9 @@ tokenInfo getNextToken()
                     finish++;
                     state = 68;
                     break;
+                case EOF:
+                    state = 70;
+                    break;
                 default:
                     state = 33;
                     break;
@@ -242,7 +284,25 @@ tokenInfo getNextToken()
 
         // identifier
         case 2:
-            // TODO: reserved words table lookup? if not, then identifier
+            // get lexeme from buffer
+            lexeme = getLexemeFromBuffers(fp);
+            // check if reserved word by looking up hash table rwtable
+            int tok = getReservedWordToken(lexeme);
+            token.tokenID = tok == -1 ? ID : tok;
+            if (token.tokenID == ID)
+            {
+                token.val.lexValue = (char *)malloc(sizeof(char) * strlen(lexeme));
+                strcpy(token.val.lexValue, lexeme);
+                free(lexeme);
+            }
+            else
+            {
+                free(lexeme);
+                token.val.lexValue = NULL;
+            }
+            token.lineNumber = lineNumber;
+            resetPointers();
+            return token;
 
         case 3:
             if ('0' <= c && c <= '9')
@@ -262,12 +322,14 @@ tokenInfo getNextToken()
                 break;
             }
 
-        // integer
+        // number (integer)
         case 4:
-            char *lexeme = getLexemeFromBuffer();
-            token.tokenID = INTEGER;
+            lexeme = getLexemeFromBuffers(fp);
+            token.tokenID = NUM;
             token.val.intValue = atoi(lexeme);
+            free(lexeme);
             token.lineNumber = lineNumber;
+            resetPointers();
             return token;
 
         // reals, both . notation and e notation
@@ -295,9 +357,15 @@ tokenInfo getNextToken()
             break;
 
         case 7:
-            // number followed by range operator, needs to retract
+            // number (integer) followed by range operator, needs to retract
             finish--;
-            // TODO: handle this token generation
+            lexeme = getLexemeFromBuffers(fp);
+            token.tokenID = NUM;
+            token.val.intValue = atoi(lexeme);
+            free(lexeme);
+            token.lineNumber = lineNumber;
+            resetPointers();
+            return token;
 
         // reals, both . notation and e notation
         case 8:
@@ -320,11 +388,12 @@ tokenInfo getNextToken()
 
         // reals, both . notation and e notation
         case 9:
-            // TODO: work out the scheme to convert from E notation to float
-            char *lexeme = getLexemeFromBuffer();
-            token.tokenID = REAL;
+            lexeme = getLexemeFromBuffers(fp);
+            token.tokenID = RNUM;
             token.val.floatValue = atof(lexeme);
+            free(lexeme);
             token.lineNumber = lineNumber;
+            resetPointers();
             return token;
 
         // reals, e notation
@@ -377,15 +446,15 @@ tokenInfo getNextToken()
         // bracket open
         case 13:
         case 14:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(BO, lexeme, lineNumber);
+            token = allocateToken(BO, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // bracket close
         case 15:
         case 16:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(BC, lexeme, lineNumber);
+            token = allocateToken(BC, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // colon, assignop
@@ -404,43 +473,44 @@ tokenInfo getNextToken()
 
         // colon
         case 18:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(COLON, lexeme, lineNumber);
+            token = allocateToken(COLON, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // assignop
         case 19:
         case 20:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(ASSIGNOP, lexeme, lineNumber);
+            token = allocateToken(ASSIGNOP, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // semicolon
         case 21:
         case 22:
-            char *lexeme = getLexemeFromBuffer();
+            lexeme = getLexemeFromBuffers(fp);
             token = allocateToken(SEMICOL, lexeme, lineNumber);
+            resetPointers();
             return token;
 
         // comma
         case 23:
         case 24:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(COMMA, lexeme, lineNumber);
+            token = allocateToken(COMMA, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // square bracket open
         case 25:
         case 26:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(SQBO, lexeme, lineNumber);
+            token = allocateToken(SQBO, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // square bracket close
         case 27:
         case 28:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(SQBC, lexeme, lineNumber);
+            token = allocateToken(SQBC, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // equal to
@@ -465,8 +535,8 @@ tokenInfo getNextToken()
         // equal to
         case 31:
         case 32:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(EQ, lexeme, lineNumber);
+            token = allocateToken(EQ, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // error state; invalid character read
@@ -490,15 +560,15 @@ tokenInfo getNextToken()
 
         // multiplication
         case 35:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(MUL, lexeme, lineNumber);
+            token = allocateToken(MUL, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // comment
         case 36:
             if (c == '*')
             {
-                // finish++;
+                finish++;
                 state = 37;
                 break;
             }
@@ -518,6 +588,7 @@ tokenInfo getNextToken()
         case 37:
             if (c == '*')
             {
+                finish++;
                 state = 38;
                 break;
             }
@@ -537,7 +608,9 @@ tokenInfo getNextToken()
         // comment
         case 38:
         case 39:
-            // TODO: discard comment
+            resetPointers();
+            state = 0;
+            break;
 
         // rangeop
         case 40:
@@ -560,9 +633,9 @@ tokenInfo getNextToken()
         // rangeop
         case 42:
         case 43:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(RANGEOP, lexeme, lineNumber);
-            break;
+            token = allocateToken(RANGEOP, NULL, lineNumber);
+            resetPointers();
+            return token;
 
         // greater than, greater than or equal to, enddef, driverenddef
         case 44:
@@ -586,10 +659,10 @@ tokenInfo getNextToken()
 
         // greater than
         case 45:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(GT, lexeme, lineNumber);
+            token = allocateToken(GT, NULL, lineNumber);
+            resetPointers();
             break;
-        
+
         // enddef, driverenddef
         case 46:
             if (c == '>')
@@ -606,22 +679,22 @@ tokenInfo getNextToken()
 
         // enddef
         case 47:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(ENDDEF, lexeme, lineNumber);
+            token = allocateToken(ENDDEF, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // driverenddef
         case 48:
         case 49:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(DRIVERENDDEF, lexeme, lineNumber);
+            token = allocateToken(DRIVERENDDEF, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // greater than or equal to
         case 50:
         case 51:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(GE, lexeme, lineNumber);
+            token = allocateToken(GE, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // not equal to
@@ -645,8 +718,8 @@ tokenInfo getNextToken()
         // not equal to
         case 54:
         case 55:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(NE, lexeme, lineNumber);
+            token = allocateToken(NE, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // less than, less than or equal to, def, driverdef
@@ -671,15 +744,15 @@ tokenInfo getNextToken()
 
         // less than
         case 57:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(LT, lexeme, lineNumber);
+            token = allocateToken(LT, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // less than or equal to
         case 58:
         case 59:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(LE, lexeme, lineNumber);
+            token = allocateToken(LE, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // def, driverdef
@@ -698,37 +771,69 @@ tokenInfo getNextToken()
 
         // def
         case 61:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(DEF, lexeme, lineNumber);
+            token = allocateToken(DEF, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // driverdef
         case 62:
         case 63:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(DRIVERDEF, lexeme, lineNumber);
+            token = allocateToken(DRIVERDEF, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // plus
         case 64:
         case 65:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(PLUS, lexeme, lineNumber);
+            token = allocateToken(PLUS, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // minus
         case 66:
         case 67:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(MINUS, lexeme, lineNumber);
+            token = allocateToken(MINUS, NULL, lineNumber);
+            resetPointers();
             return token;
 
         // division
         case 68:
         case 69:
-            char *lexeme = getLexemeFromBuffer();
-            token = allocateToken(DIV, lexeme, lineNumber);
+            token = allocateToken(DIV, NULL, lineNumber);
+            resetPointers();
+            return token;
+
+        // EOF
+        case 70:
+            token = allocateToken(PROGRAMEND, NULL, lineNumber);
+            resetPointers();
             return token;
         }
     }
+    return token;
+}
+
+int main()
+{
+    reservedWordsTable();
+    FILE *fp = fopen("test.txt", "r");
+    if (fp == NULL)
+    {
+        printf("Error opening file\n");
+        return -1;
+    }
+    while (1)
+    {
+        tokenInfo token = getNextToken(fp);
+        if (token.tokenID == PROGRAMEND)
+            break;
+        printf("%d %d\n", token.tokenID, token.lineNumber);
+        if (token.tokenID == NUM){
+            printf("%d\n", token.val.intValue);
+        } else if (token.tokenID == RNUM){
+            printf("%f\n", token.val.floatValue);
+        }
+    }
+    fclose(fp);
+    return 0;
 }
