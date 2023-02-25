@@ -813,27 +813,27 @@ tokenInfo getNextToken(FILE *fp)
     return token;
 }
 
-int main()
-{
-    reservedWordsTable();
-    FILE *fp = fopen("test.txt", "r");
-    if (fp == NULL)
-    {
-        printf("Error opening file\n");
-        return -1;
-    }
-    while (1)
-    {
-        tokenInfo token = getNextToken(fp);
-        if (token.tokenID == PROGRAMEND)
-            break;
-        printf("%d %d\n", token.tokenID, token.lineNumber);
-        if (token.tokenID == NUM){
-            printf("%d\n", token.val.intValue);
-        } else if (token.tokenID == RNUM){
-            printf("%f\n", token.val.floatValue);
-        }
-    }
-    fclose(fp);
-    return 0;
-}
+// int main()
+// {
+//     reservedWordsTable();
+//     FILE *fp = fopen("test.txt", "r");
+//     if (fp == NULL)
+//     {
+//         printf("Error opening file\n");
+//         return -1;
+//     }
+//     while (1)
+//     {
+//         tokenInfo token = getNextToken(fp);
+//         if (token.tokenID == PROGRAMEND)
+//             break;
+//         printf("%d %d\n", token.tokenID, token.lineNumber);
+//         if (token.tokenID == NUM){
+//             printf("%d\n", token.val.intValue);
+//         } else if (token.tokenID == RNUM){
+//             printf("%f\n", token.val.floatValue);
+//         }
+//     }
+//     fclose(fp);
+//     return 0;
+// }

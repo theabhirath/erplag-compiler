@@ -182,7 +182,7 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
     // Follow set computation
     while (changed)
     {
-        printf("Iteration %d\n", iteration++);
+        // printf("Iteration %d\n", iteration++);
         changed = 0;
         for (int i = 0; i < NUM_RULES; i++)
         {
@@ -206,8 +206,8 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
                         if (temp.set != followSet[node->tnt.nonterm].set)
                         {
                             followSet[node->tnt.nonterm].set = temp.set;
-                            printf("Change loc 1\n");
-                            printf("Rule No: %d, Nonterminal: %s, Added token of lhs: %s\n", i, nonterminals[node->tnt.nonterm], nonterminals[lhs_nt]);
+                            // printf("Change loc 1\n");
+                            // printf("Rule No: %d, Nonterminal: %s, Added token of lhs: %s\n", i, nonterminals[node->tnt.nonterm], nonterminals[lhs_nt]);
                             changed = 1;
                         }
                     }
@@ -217,8 +217,8 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
                         if(!isMember(&followSet[node->tnt.nonterm], node->next->tnt.tok))
                         {
                             addToken(&followSet[node->tnt.nonterm], node->next->tnt.tok);
-                            printf("Change loc 2\n");
-                            printf("Rule No: %d, Nonterminal: %s, Added token: %s\n", i, nonterminals[node->tnt.nonterm], terminals[node->next->tnt.tok]);
+                            // printf("Change loc 2\n");
+                            // printf("Rule No: %d, Nonterminal: %s, Added token: %s\n", i, nonterminals[node->tnt.nonterm], terminals[node->next->tnt.tok]);
                             changed = 1;
                         }
                     }
@@ -235,8 +235,8 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
                             if (temp.set != followSet[node->tnt.nonterm].set)
                             {
                                 followSet[node->tnt.nonterm].set = temp.set;
-                                printf("Change loc 3\n");
-                                printf("Rule Number: %d, Nonterminal: %s, Added first set of %s\n", i, nonterminals[node->tnt.nonterm], nonterminals[epsilon_traverser->tnt.nonterm]);
+                                // printf("Change loc 3\n");
+                                // printf("Rule Number: %d, Nonterminal: %s, Added first set of %s\n", i, nonterminals[node->tnt.nonterm], nonterminals[epsilon_traverser->tnt.nonterm]);
                                 changed = 1;
                             }
                             epsilon_traverser = epsilon_traverser->next;
@@ -249,8 +249,8 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
                             if (temp.set != followSet[node->tnt.nonterm].set)
                             {
                                 followSet[node->tnt.nonterm].set = temp.set;
-                                printf("Change loc 4\n");
-                                printf("Rule Number: %d, Nonterminal: %s, Added follow set of %s\n", i, nonterminals[node->tnt.nonterm], nonterminals[epsilon_traverser->tnt.nonterm]);
+                                // printf("Change loc 4\n");
+                                // printf("Rule Number: %d, Nonterminal: %s, Added follow set of %s\n", i, nonterminals[node->tnt.nonterm], nonterminals[epsilon_traverser->tnt.nonterm]);
                                 changed = 1;
                             }
                         }
@@ -259,8 +259,8 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
                             if(!isMember(&followSet[node->tnt.nonterm], epsilon_traverser->tnt.tok))
                             {
                                 addToken(&followSet[node->tnt.nonterm], epsilon_traverser->tnt.tok);
-                                printf("Change loc 5\n");
-                                printf("Rule Number: %d, Nonterminal: %s, Added token: %s\n", i, nonterminals[node->tnt.nonterm], terminals[epsilon_traverser->tnt.tok]);
+                                // printf("Change loc 5\n");
+                                // printf("Rule Number: %d, Nonterminal: %s, Added token: %s\n", i, nonterminals[node->tnt.nonterm], terminals[epsilon_traverser->tnt.tok]);
                                 changed = 1;
                             }
                         }
@@ -271,8 +271,8 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
                             if (temp.set != followSet[node->tnt.nonterm].set)
                             {
                                 followSet[node->tnt.nonterm].set = temp.set;
-                                printf("Change loc 6\n");
-                                printf("Rule Number: %d, Nonterminal: %s, Added follow set of lhs: %s\n", i, nonterminals[node->tnt.nonterm], nonterminals[lhs_nt]);
+                                // printf("Change loc 6\n");
+                                // printf("Rule Number: %d, Nonterminal: %s, Added follow set of lhs: %s\n", i, nonterminals[node->tnt.nonterm], nonterminals[lhs_nt]);
                                 changed = 1;
                             }
                         }
@@ -364,7 +364,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile)
     createParseTree(parseTree);
     parse_tree_node *currentNode = parseTree.root; //Will help in traversing parse tree.
     FILE *fp = fopen(testcaseFile, "r"); //Source code here.
-    tokenInfo L = getNextToken(); //Calling lexer here.
+    tokenInfo L = getNextToken(fp); //Calling lexer here.
     while(L.tokenID!=NULL){
         hash_table_element X = top(&S); //Get top element of stack
         if(X.type == __TERMINAL__){
@@ -390,7 +390,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile)
                 }
                 //Pop stack to remove top element
                 pop(&S);
-                L = getNextToken();
+                L = getNextToken(fp);
             }
             else{
                 //Space for error recovery, tokens not matching
