@@ -8,6 +8,7 @@
 
 char *nonterminals[NUM_NONTERMINALS];
 char *terminals[NUM_TOKENS];
+int Table[NUM_NONTERMINALS][NUM_TOKENS];
 
 
 //Stack of nodes
@@ -191,6 +192,58 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
 void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *rules)
 {
     // TODO: Automate population of parse table from grammar and first and follow sets
+    for (int i = 0; i < NUM_NONTERMINALS; i++)
+    {
+        for (int j = 0; j < NUM_TOKENS; j++)
+        {
+            Table[i][j] = -1;
+        }
+    }
+    
+    for (int i = 0; i < NUM_RULES; i++)
+    {
+        linked_list_node *node = rules[i].head;
+        NONTERMINAL nt = node->tnt.nonterm;
+        // TNT num_val = node->tnt;
+        node = node->next;
+        if (node == NULL)
+        {
+            for (int j = 0; j < NUM_TOKENS; j++)
+            {
+                if (isMember(followSet[nt].set, j))
+                {
+                    Table[nt][j] = i;
+                }
+            }
+        }
+        else
+        {
+            if (node->type == __TERMINAL__)
+            {
+                Table[nt][node->tnt.tok] = i;
+            }
+            else
+            {
+                for (int j = 0; j < NUM_TOKENS; j++)
+                {
+                    if (isMember(firstSet[node->tnt.nonterm].set, j))
+                    {
+                        Table[nt][j] = i;
+                    }
+                }
+                if (isMember(firstSet[node->tnt.nonterm].set, EPSILON))
+                {
+                    for (int j = 0; j < NUM_TOKENS; j++)
+                    {
+                        if (isMember(followSet[nt].set, j))
+                        {
+                            Table[nt][j] = i;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 void parseInputSourceCode(char *testcaseFile, char *grammarFile)
 {
