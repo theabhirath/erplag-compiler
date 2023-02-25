@@ -9,7 +9,6 @@ linked_list_node *createNode(TNT tnt, TNT_TYPE type)
     node->type = type;
     return node;
 }
-
 void addNode(linked_list *list, linked_list_node *node)
 {
     if (list->head == NULL)

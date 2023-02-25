@@ -59,6 +59,7 @@ enum TOKEN
     GT,
     LE,
     GE,
+    PROGRAMEND,
     EPSILON
 };
 // While EPSILON is not a token, for the first and follow sets, we use it as a token

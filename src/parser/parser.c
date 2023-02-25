@@ -2,6 +2,7 @@
 #include "linked_list.h"
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <stdlib.h>
 #define HASH_TABLE_SIZE 1050
 
@@ -43,6 +44,55 @@ int isEmpty(stack *S)
     return 0;
 }
 
+
+//Stack of nodes
+typedef struct stack
+{
+    TNT symbol; 
+    struct stack *next;
+} stack;
+
+void push(stack **S, TNT symbol)
+{
+    stack *temp = (stack *)malloc(sizeof(stack));
+    temp->symbol = symbol;
+    temp->next = *S;
+    *S = temp;
+}
+
+TNT pop(stack **S)
+{
+    //Pop the top element from the stack
+    TNT symbol;
+    stack *temp = *S;
+    symbol = temp->symbol;
+    *S = temp->next;
+    free(temp);
+    return symbol;
+    
+}
+
+int isEmpty(stack *S)
+{
+    if(S == NULL)
+        return 1;
+    return 0;
+}
+
+char *trim(char *str)
+{
+    int i = 0;
+    while (str[i] != '\0')
+    {
+        if (str[i] == ' ' || str[i] == '\t' || str[i] == '\n' || str[i] == '\r')
+        {
+            str[i] = '\0';
+            break;
+        }
+        i++;
+    }
+    return str;
+}
 void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked_list *rules)
 {
     // TODO: Automate population of first and follow sets from grammar
@@ -93,7 +143,9 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
                 {
                     unhandled[i] = 0;
                     incomplete[nt] -= 1;
-                    firstSet[nt].set |= firstSet[node->tnt.nonterm].set;
+                    token_set temp = firstSet[node->tnt.nonterm];
+                    removeToken(&temp, EPSILON);
+                    firstSet[nt].set |= temp.set;
                 }
                 else
                 {
@@ -102,6 +154,39 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
             }
         }
     }
+    int changed = 1;
+    while(changed)
+    {
+        changed = 0;
+        for (int i = 0; i < NUM_RULES; i++)
+        {
+            linked_list_node *node = rules[i].head;
+            NONTERMINAL nt = node->tnt.nonterm;
+            node = node->next;
+            while (node != NULL)
+            {
+                if(node->type == __TERMINAL__)
+                {
+                    addToken(&firstSet[nt], node->tnt.tok);
+                    break;
+                }
+                if(isMember(&firstSet[node->tnt.nonterm], EPSILON))
+                {
+                    token_set temp = firstSet[node->tnt.nonterm];
+                    removeToken(&temp, EPSILON);
+                    firstSet[nt].set |= temp.set;
+                    node = node->next;
+                }
+                else
+                {
+                    firstSet[nt].set |= firstSet[node->tnt.nonterm].set;
+                    break;
+                }
+            }
+        }
+    }
+
+
 }
 void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *rules)
 {
@@ -179,10 +264,13 @@ linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable)
         tnt = strtok(NULL, delim);
         while(tnt != NULL)
         {
+            tnt = trim(tnt);
             // printf("%s\n", tnt);
             if(hashTable[hash(tnt)].type == __NONE__)
             {
                 printf("None token found in rule %d RHS\n", i+1);
+                printf("%s\n", tnt);
+                exit(1);
             }
             else if(hashTable[hash(tnt)].type == __EPSILON__)
             {

@@ -6,9 +6,9 @@
 
 #include "set.h"
 
-#define NUM_TOKENS 56
+#define NUM_TOKENS 57
 #define NUM_NONTERMINALS 67
-#define NUM_RULES 119
+#define NUM_RULES 128
 
 typedef struct parse_tree parse_tree;
 typedef struct parse_tree_node parse_tree_node;
