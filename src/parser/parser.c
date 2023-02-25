@@ -176,6 +176,112 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
         }
     }
 
+    changed = 1;
+    int iteration = 0;
+
+    // Follow set computation
+    while (changed)
+    {
+        printf("Iteration %d\n", iteration++);
+        changed = 0;
+        for (int i = 0; i < NUM_RULES; i++)
+        {
+            linked_list_node *node = rules[i].head;
+            NONTERMINAL lhs_nt = node->tnt.nonterm;
+            node = node->next;
+            while (node != NULL)
+            {
+                if (node->type == __TERMINAL__)
+                {
+                    node = node->next;
+                    continue;
+                }
+                else if(node->type == __NONTERMINAL__)
+                {
+                    // If this is the last node in the rule, add follow set of lhs to follow set of current nonterminal
+                    if (node->next == NULL)
+                    {
+                        token_set temp = followSet[node->tnt.nonterm];
+                        temp.set |= followSet[lhs_nt].set;
+                        if (temp.set != followSet[node->tnt.nonterm].set)
+                        {
+                            followSet[node->tnt.nonterm].set = temp.set;
+                            printf("Change loc 1\n");
+                            printf("Rule No: %d, Nonterminal: %s, Added token of lhs: %s\n", i, nonterminals[node->tnt.nonterm], nonterminals[lhs_nt]);
+                            changed = 1;
+                        }
+                    }
+                    // If this node is followed by a terminal, add that terminal to the follow set of current nonterminal
+                    else if (node->next->type == __TERMINAL__)
+                    {
+                        if(!isMember(&followSet[node->tnt.nonterm], node->next->tnt.tok))
+                        {
+                            addToken(&followSet[node->tnt.nonterm], node->next->tnt.tok);
+                            printf("Change loc 2\n");
+                            printf("Rule No: %d, Nonterminal: %s, Added token: %s\n", i, nonterminals[node->tnt.nonterm], terminals[node->next->tnt.tok]);
+                            changed = 1;
+                        }
+                    }
+                    // Handle case where this node is followed by a nonterminal
+                    else if (node->next->type == __NONTERMINAL__)
+                    {
+                        // If first set of following non-terminal contains epsilon, add first set - epsilon to the follow set of current nonterminal and repeat for the rest of the rule
+                        linked_list_node *epsilon_traverser = node->next;
+                        while (epsilon_traverser != NULL && epsilon_traverser->type == __NONTERMINAL__ && isMember(&firstSet[epsilon_traverser->tnt.nonterm], EPSILON))
+                        {
+                            token_set temp = firstSet[epsilon_traverser->tnt.nonterm];
+                            removeToken(&temp, EPSILON);
+                            temp.set |= followSet[node->tnt.nonterm].set;
+                            if (temp.set != followSet[node->tnt.nonterm].set)
+                            {
+                                followSet[node->tnt.nonterm].set = temp.set;
+                                printf("Change loc 3\n");
+                                printf("Rule Number: %d, Nonterminal: %s, Added first set of %s\n", i, nonterminals[node->tnt.nonterm], nonterminals[epsilon_traverser->tnt.nonterm]);
+                                changed = 1;
+                            }
+                            epsilon_traverser = epsilon_traverser->next;
+                        }
+
+                        if (epsilon_traverser != NULL && epsilon_traverser->type == __NONTERMINAL__)
+                        {
+                            token_set temp = firstSet[epsilon_traverser->tnt.nonterm];
+                            temp.set |= followSet[node->tnt.nonterm].set;
+                            if (temp.set != followSet[node->tnt.nonterm].set)
+                            {
+                                followSet[node->tnt.nonterm].set = temp.set;
+                                printf("Change loc 4\n");
+                                printf("Rule Number: %d, Nonterminal: %s, Added follow set of %s\n", i, nonterminals[node->tnt.nonterm], nonterminals[epsilon_traverser->tnt.nonterm]);
+                                changed = 1;
+                            }
+                        }
+                        else if (epsilon_traverser != NULL && epsilon_traverser->type == __TERMINAL__)
+                        {
+                            if(!isMember(&followSet[node->tnt.nonterm], epsilon_traverser->tnt.tok))
+                            {
+                                addToken(&followSet[node->tnt.nonterm], epsilon_traverser->tnt.tok);
+                                printf("Change loc 5\n");
+                                printf("Rule Number: %d, Nonterminal: %s, Added token: %s\n", i, nonterminals[node->tnt.nonterm], terminals[epsilon_traverser->tnt.tok]);
+                                changed = 1;
+                            }
+                        }
+                        else
+                        {
+                            token_set temp = followSet[lhs_nt];
+                            temp.set |= followSet[node->tnt.nonterm].set;
+                            if (temp.set != followSet[node->tnt.nonterm].set)
+                            {
+                                followSet[node->tnt.nonterm].set = temp.set;
+                                printf("Change loc 6\n");
+                                printf("Rule Number: %d, Nonterminal: %s, Added follow set of lhs: %s\n", i, nonterminals[node->tnt.nonterm], nonterminals[lhs_nt]);
+                                changed = 1;
+                            }
+                        }
+                    }
+                    node = node->next;
+                }
+            }
+        }
+    }
 
 }
 
@@ -200,7 +306,7 @@ void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *
         {
             for (int j = 0; j < NUM_TOKENS; j++)
             {
-                if (isMember(followSet[nt].set, j))
+                if (isMember(&followSet[nt], j))
                 {
                     Table[nt][j] = i;
                 }
@@ -216,16 +322,16 @@ void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *
             {
                 for (int j = 0; j < NUM_TOKENS; j++)
                 {
-                    if (isMember(firstSet[node->tnt.nonterm].set, j))
+                    if (isMember(&firstSet[node->tnt.nonterm], j))
                     {
                         Table[nt][j] = i;
                     }
                 }
-                if (isMember(firstSet[node->tnt.nonterm].set, EPSILON))
+                if (isMember(&firstSet[node->tnt.nonterm], EPSILON))
                 {
                     for (int j = 0; j < NUM_TOKENS; j++)
                     {
-                        if (isMember(followSet[nt].set, j))
+                        if (isMember(&followSet[nt], j))
                         {
                             Table[nt][j] = i;
                         }
@@ -546,7 +652,7 @@ void printSet(token_set *set)
     long long cur = set->set;
     if(cur == 0)
     {
-        printf("EMPTY SET\n");
+        printf("EMPTY SET");
         return;
     }
     for (int i = 0; i < NUM_TOKENS; i++)
@@ -575,6 +681,13 @@ int main()
     {
         printf("First(%s): ", nonterminals[i]);
         printSet(&first_sets[i]);
+        printf("\n");
+    }
+
+    for (int i = 0; i < NUM_NONTERMINALS; i++)
+    {
+        printf("Follow(%s): ", nonterminals[i]);
+        printSet(&follow_sets[i]);
         printf("\n");
     }
     return 0;
