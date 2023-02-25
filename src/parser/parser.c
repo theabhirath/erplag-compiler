@@ -10,15 +10,38 @@ char *nonterminals[NUM_NONTERMINALS];
 char *terminals[NUM_TOKENS];
 int Table[NUM_NONTERMINALS][NUM_TOKENS];
 
+typedef struct parse_tree_node
+{
+    TNT tnt;
+    struct def *parent;
+    struct def *child;
+    struct def *sibling;
+    int leafNodeFlag;
+}parse_tree_node;
+typedef struct parse_tree{
+    parse_tree_node *root;
+}parse_tree;
+
+parse_tree parseTree;
+parse_tree_node *rootNode;
+void createParseTree(parse_tree parseTree){
+    parseTree.root = rootNode;
+}
+
+parse_tree_node createParseTreeNode(TNT tnt){
+    parse_tree_node node;
+    node.tnt = tnt;
+    return node;
+}
 
 //Stack of nodes
 typedef struct stack
 {
-    TNT symbol; 
+    hash_table_element symbol; 
     struct stack *next;
 } stack;
 
-void push(stack **S, TNT symbol)
+void push(stack **S, hash_table_element symbol)
 {
     stack *temp = (stack *)malloc(sizeof(stack));
     temp->symbol = symbol;
@@ -26,51 +49,16 @@ void push(stack **S, TNT symbol)
     *S = temp;
 }
 
-TNT pop(stack **S)
+hash_table_element top(stack *S)
 {
-    //Pop the top element from the stack
-    TNT symbol;
+    return S->symbol;
+}
+
+void pop(stack **S)
+{
     stack *temp = *S;
-    symbol = temp->symbol;
-    *S = temp->next;
+    *S = (*S)->next;
     free(temp);
-    return symbol;
-    
-}
-
-int isEmpty(stack *S)
-{
-    if(S == NULL)
-        return 1;
-    return 0;
-}
-
-
-//Stack of nodes
-typedef struct stack
-{
-    TNT symbol; 
-    struct stack *next;
-} stack;
-
-void push(stack **S, TNT symbol)
-{
-    stack *temp = (stack *)malloc(sizeof(stack));
-    temp->symbol = symbol;
-    temp->next = *S;
-    *S = temp;
-}
-
-TNT pop(stack **S)
-{
-    //Pop the top element from the stack
-    TNT symbol;
-    stack *temp = *S;
-    symbol = temp->symbol;
-    *S = temp->next;
-    free(temp);
-    return symbol;
-    
 }
 
 int isEmpty(stack *S)
@@ -259,32 +247,101 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile)
     token_set followSet[NUM_NONTERMINALS];
     computeFirstAndFollowSets(firstSet, followSet, rules);
     populateParseTable(firstSet, followSet, rules);
-    //Need stack and stack operations to push start symbol on stack
-    stack S;
-    //Need to push start symbol on stack.
-    tokenInfo L = getNextToken();
-    /*while(L!=NULL){
-        TNT X = pop(&S);
+    stack S; //Stack for parsing
+    hash_table_element startsym;
+    startsym.type = __NONTERMINAL__;
+    startsym.tnt.nonterm = __program__;
+    push(&S, startsym); //Pushing start table on stack
+    createParseTree(parseTree);
+    parse_tree_node *currentNode = parseTree.root; //Will help in traversing parse tree.
+    FILE *fp = fopen(testcaseFile, "r"); //Source code here.
+    tokenInfo L = getNextToken(); //Calling lexer here.
+    while(L.tokenID!=NULL){
+        hash_table_element X = top(&S); //Get top element of stack
         if(X.type == __TERMINAL__){
-            if(X.tok == L->token){
-                //Need to make a node in the parse tree.
+            if(X.tnt.tok == L.tokenID){
+                //Need to make a leaf node in the parse tree.
+                /*TNT l1 = {L.tokenID};
+                parse_tree_node leafNode = createParseTreeNode(l1);
+                currentNode->child = &leafNode;*/
+                //NEED TO HANDLE CURRENT NODE APPROPRIATELY
+                currentNode->leafNodeFlag = 1; //Token can only be the leaf node.
+                if(currentNode->sibling != NULL){
+                    currentNode = currentNode->sibling;
+                }
+                else{
+                    //Need to go up the tree
+                    while(currentNode->parent != NULL){
+                        currentNode = currentNode->parent;
+                        if(currentNode->sibling != NULL){
+                            currentNode = currentNode->sibling;
+                            break;
+                        }
+                    }
+                }
+                //Pop stack to remove top element
+                pop(&S);
                 L = getNextToken();
             }
             else{
-                printf("Error in parsing\n");
-                //Space for error recovery
-                exit(1);
+                //Space for error recovery, tokens not matching
             }
         }
-        elseif (X.type == __NONTERMINAL__){
+        else if (X.type == __NONTERMINAL__){
             //Need to find the rule in the parse table
+            int ruleNumber = Table[X.tnt.nonterm][L.tokenID];
             //Need to push the RHS of the rule on the stack
+            if(ruleNumber != 0){
+                stack Stemp;
+                linked_list_node *firstNode = rules[ruleNumber].head;
+                firstNode = firstNode->next;
+                pop(&S);
+                int flagSib = 0;
+                while(firstNode != NULL){
+                    hash_table_element toBePushed;
+                    toBePushed.type = firstNode->type;
+                    toBePushed.tnt = firstNode->tnt;
+                    push(&Stemp, toBePushed);
+                    parse_tree_node *keepTrackNode = currentNode;
+                    if (flagSib == 0){
+                        //Create left child of currentnode
+                        TNT l1 = firstNode->tnt;
+                        parse_tree_node newPTNode = createParseTreeNode(l1);
+                        currentNode->child = &newPTNode; //Sabse pehli baar child banaya
+                        currentNode = currentNode->child; //Current node is now the child
+                        flagSib++;
+                    }
+                    else{
+                        //Create sibling of currentnode
+                        TNT l1 = firstNode->tnt;
+                        parse_tree_node newPTNode = createParseTreeNode(l1);
+                        currentNode->sibling = &newPTNode; //Starts filling siblings
+                        currentNode = currentNode->sibling;
+                    }
+                    firstNode = firstNode->next;
+                    currentNode = keepTrackNode; //Goes back to where it was
+                    currentNode = currentNode->child; //Goes to the leftmost child to now start processing.
+                }
+                while(!isEmpty(&Stemp)){
+                    hash_table_element toBePushed1 = top(&Stemp);
+                    pop(&Stemp);
+                    push(&S, toBePushed1);
+                }
+            }
+            else{
+                //Space for error recovery, no rule found in parse table
+            }
         }
         else{
             printf("Error in parsing\n");
             //Space for error recovery, stack end achieved but input not finished
-            exit(1);}
-    }*/
+            exit(1);
+        }
+    }
+    if(!isEmpty(&S)){
+        //Space for error recovery, stack not empty but input finished
+    }
+    fclose(fp);
 }
 void printParseTree(parse_tree *tree, FILE *fp)
 {
