@@ -447,7 +447,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
                 // printf("Loc 987\n");
 
                 // DO SOMETHING HERE
-                // currentNode->leafNodeFlag = 1; //Token can only be the leaf node.
+                currentNode->leafNodeFlag = 1; //Token can only be the leaf node.
                 // currentNode->tnt.tok = L.tokenID;
                 // currentNode->lnInfo->leafNodeInfo = L;
                 if (currentNode->sibling != NULL)

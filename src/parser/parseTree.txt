@@ -5,134 +5,99 @@ EPSILON
 ) 
 <otherModules>	( 
 <module>	( 
-<arrTerm>	( 
-) 
-<iP0>	( 
-) 
-<arr_N5>	( 
-) 
-<logicalOp>	( 
-) 
-<ioStmt>	( 
-) 
-<var3>	( 
-) 
-<optional>	( 
-) 
+DEF	
+MODULE	
+ID	
+ENDEF	
+TAKES	
+INPUT	
+SQBO	
 <input_plist>	( 
-<arr_N5>	( 
-) 
-<arithmeticExpr>	( 
-) 
+ID	
+COLON	
 <dataType>	( 
-<driverModule>	( 
-) 
-<optional>	( 
-) 
+ARRAY	
+SQBO	
 <range_arr>	( 
 <index_arr>	( 
 <sign>	( 
 EPSILON	
 ) 
 <new_index>	( 
-<id_num_rnum>	( 
+NUM	
 ) 
 ) 
-) 
-<op1>	( 
-) 
+RANGEOP	
 <index_arr>	( 
 <sign>	( 
 EPSILON	
 ) 
 <new_index>	( 
-<id_num_rnum>	( 
+NUM	
 ) 
 ) 
 ) 
-) 
-<AE0>	( 
-) 
-<otherModules>	( 
-) 
+SQBC	
+OF	
 <type>	( 
-<moduleDeclarations>	( 
-) 
+REAL	
 ) 
 ) 
 <iP0>	( 
 EPSILON	
 ) 
 ) 
-<AE0>	( 
-) 
-<op2>	( 
-) 
+SQBC	
+SEMICOL	
 <ret>	( 
-<var>	( 
-) 
-<optional>	( 
-) 
+RETURNS	
+SQBO	
 <output_plist>	( 
-<arr_N5>	( 
-) 
-<arithmeticExpr>	( 
-) 
+ID	
+COLON	
 <type>	( 
-<moduleDeclarations>	( 
-) 
+REAL	
 ) 
 <oP0>	( 
 EPSILON	
 ) 
 ) 
-<AE0>	( 
-) 
-<op2>	( 
-) 
+SQBC	
+SEMICOL	
 ) 
 <moduleDef>	( 
-<module>	( 
-) 
+START	
 <statements>	( 
 <statement>	( 
 <declareStmt>	( 
-<input_plist>	( 
-) 
+DECLARE	
 <idList>	( 
-<arr_N5>	( 
-) 
+ID	
 <iL0>	( 
 EPSILON	
 ) 
 ) 
-<arithmeticExpr>	( 
-) 
+COLON	
 <dataType>	( 
-<moduleDeclarations>	( 
+REAL	
 ) 
-) 
-<op2>	( 
-) 
+SEMICOL	
 ) 
 ) 
 <statements>	( 
 <statement>	( 
 <simpleStmt>	( 
 <assignmentStmt>	( 
-<arr_N5>	( 
-) 
+ID	
 <whichStmt>	( 
 <lvalueIDStmt>	( 
-<idList>	( 
-) 
+ASSIGNOP	
 <expression>	( 
 <booleanExpr>	( 
 <arithmeticExpr>	( 
 <term>	( 
 <factor>	( 
-<moduleReuseStmt>	( 
-) 
+RNUM	
 ) 
 <T0>	( 
 EPSILON	
@@ -149,8 +114,7 @@ EPSILON
 ) 
 ) 
 ) 
-<op2>	( 
-) 
+SEMICOL	
 ) 
 ) 
 ) 
@@ -159,65 +123,48 @@ EPSILON
 <statements>	( 
 <statement>	( 
 <declareStmt>	( 
-<input_plist>	( 
-) 
+DECLARE	
 <idList>	( 
-<arr_N5>	( 
-) 
+ID	
 <iL0>	( 
 EPSILON	
 ) 
 ) 
-<arithmeticExpr>	( 
-) 
+COLON	
 <dataType>	( 
-<program>	( 
+INTEGER	
 ) 
-) 
-<op2>	( 
-) 
+SEMICOL	
 ) 
 ) 
 <statements>	( 
 <statement>	( 
 <iterativeStmt>	( 
-<whichId>	( 
-) 
-<booleanExpr>	( 
-) 
-<arr_N5>	( 
-) 
-<wI0>	( 
-) 
+FOR	
+BO	
+ID	
+IN	
 <forrange>	( 
-<id_num_rnum>	( 
+NUM	
+RANGEOP	
+NUM	
 ) 
-<op1>	( 
-) 
-<id_num_rnum>	( 
-) 
-) 
-<bools>	( 
-) 
-<module>	( 
-) 
+BC	
+START	
 <statements>	( 
 <statement>	( 
 <simpleStmt>	( 
 <assignmentStmt>	( 
-<arr_N5>	( 
-) 
+ID	
 <whichStmt>	( 
 <lvalueIDStmt>	( 
-<idList>	( 
-) 
+ASSIGNOP	
 <expression>	( 
 <booleanExpr>	( 
 <arithmeticExpr>	( 
 <term>	( 
 <factor>	( 
-<arr_N5>	( 
-) 
+ID	
 <N_11>	( 
 EPSILON	
 ) 
@@ -228,23 +175,19 @@ EPSILON
 ) 
 <AE0>	( 
 <op1>	( 
-<iL0>	( 
-) 
+PLUS	
 ) 
 <term>	( 
 <factor>	( 
-<arr_N5>	( 
-) 
+ID	
 <N_11>	( 
-<optional>	( 
-) 
+SQBO	
 <element_index_with_expression>	( 
 <arrExpr>	( 
 <arrTerm>	( 
 <arrFactor>	( 
 <id_num_rnum>	( 
-<arr_N5>	( 
-) 
+ID	
 ) 
 ) 
 <arr_N5>	( 
@@ -256,8 +199,7 @@ EPSILON
 ) 
 ) 
 ) 
-<AE0>	( 
-) 
+SQBC	
 ) 
 ) 
 <T0>	( 
@@ -276,8 +218,7 @@ EPSILON
 ) 
 ) 
 ) 
-<op2>	( 
-) 
+SEMICOL	
 ) 
 ) 
 ) 
@@ -287,27 +228,23 @@ EPSILON
 EPSILON	
 ) 
 ) 
-<ret>	( 
-) 
+END	
 ) 
 ) 
 <statements>	( 
 <statement>	( 
 <simpleStmt>	( 
 <assignmentStmt>	( 
-<arr_N5>	( 
-) 
+ID	
 <whichStmt>	( 
 <lvalueIDStmt>	( 
-<idList>	( 
-) 
+ASSIGNOP	
 <expression>	( 
 <booleanExpr>	( 
 <arithmeticExpr>	( 
 <term>	( 
 <factor>	( 
-<arr_N5>	( 
-) 
+ID	
 <N_11>	( 
 EPSILON	
 ) 
@@ -327,8 +264,7 @@ EPSILON
 ) 
 ) 
 ) 
-<op2>	( 
-) 
+SEMICOL	
 ) 
 ) 
 ) 
@@ -342,8 +278,7 @@ EPSILON
 ) 
 ) 
 ) 
-<ret>	( 
-) 
+END	
 ) 
 ) 
 <otherModules>	( 
@@ -351,139 +286,103 @@ EPSILON
 ) 
 ) 
 <driverModule>	( 
-<arr_N4>	( 
-) 
-<output_plist>	( 
-) 
-<oP0>	( 
-) 
-<N_11>	( 
-) 
+DRIVERDEF	
+DRIVER	
+PROGRAM	
+DRIVERENDDEF	
 <moduleDef>	( 
-<module>	( 
-) 
+START	
 <statements>	( 
 <statement>	( 
 <declareStmt>	( 
-<input_plist>	( 
-) 
+DECLARE	
 <idList>	( 
-<arr_N5>	( 
-) 
+ID	
 <iL0>	( 
-<arrFactor>	( 
-) 
-<arr_N5>	( 
-) 
+COMMA	
+ID	
 <iL0>	( 
 EPSILON	
 ) 
 ) 
 ) 
-<arithmeticExpr>	( 
-) 
+COLON	
 <dataType>	( 
-<program>	( 
+INTEGER	
 ) 
-) 
-<op2>	( 
-) 
+SEMICOL	
 ) 
 ) 
 <statements>	( 
 <statement>	( 
 <declareStmt>	( 
-<input_plist>	( 
-) 
+DECLARE	
 <idList>	( 
-<arr_N5>	( 
-) 
+ID	
 <iL0>	( 
 EPSILON	
 ) 
 ) 
-<arithmeticExpr>	( 
-) 
+COLON	
 <dataType>	( 
-<driverModule>	( 
-) 
-<optional>	( 
-) 
+ARRAY	
+SQBO	
 <range_arr>	( 
 <index_arr>	( 
 <sign>	( 
 EPSILON	
 ) 
 <new_index>	( 
-<id_num_rnum>	( 
+NUM	
 ) 
 ) 
-) 
-<op1>	( 
-) 
+RANGEOP	
 <index_arr>	( 
 <sign>	( 
 EPSILON	
 ) 
 <new_index>	( 
-<id_num_rnum>	( 
+NUM	
 ) 
 ) 
 ) 
-) 
-<AE0>	( 
-) 
-<otherModules>	( 
-) 
+SQBC	
+OF	
 <type>	( 
-<program>	( 
+INTEGER	
 ) 
 ) 
-) 
-<op2>	( 
-) 
+SEMICOL	
 ) 
 ) 
 <statements>	( 
 <statement>	( 
 <iterativeStmt>	( 
-<whichId>	( 
-) 
-<booleanExpr>	( 
-) 
-<arr_N5>	( 
-) 
-<wI0>	( 
-) 
+FOR	
+BO	
+ID	
+IN	
 <forrange>	( 
-<id_num_rnum>	( 
+NUM	
+RANGEOP	
+NUM	
 ) 
-<op1>	( 
-) 
-<id_num_rnum>	( 
-) 
-) 
-<bools>	( 
-) 
-<module>	( 
-) 
+BC	
+START	
 <statements>	( 
 <statement>	( 
 <simpleStmt>	( 
 <assignmentStmt>	( 
-<arr_N5>	( 
-) 
+ID	
 <whichStmt>	( 
 <lvalueARRStmt>	( 
-<optional>	( 
-) 
+SQBO	
 <element_index_with_expression>	( 
 <arrExpr>	( 
 <arrTerm>	( 
 <arrFactor>	( 
 <id_num_rnum>	( 
-<arr_N5>	( 
-) 
+ID	
 ) 
 ) 
 <arr_N5>	( 
@@ -495,24 +394,20 @@ EPSILON
 ) 
 ) 
 ) 
-<AE0>	( 
-) 
-<idList>	( 
-) 
+SQBC	
+ASSIGNOP	
 <expression>	( 
 <booleanExpr>	( 
 <arithmeticExpr>	( 
 <term>	( 
 <factor>	( 
-<booleanExpr>	( 
-) 
+BO	
 <expression>	( 
 <booleanExpr>	( 
 <arithmeticExpr>	( 
 <term>	( 
 <factor>	( 
-<arr_N5>	( 
-) 
+ID	
 <N_11>	( 
 EPSILON	
 ) 
@@ -523,13 +418,11 @@ EPSILON
 ) 
 <AE0>	( 
 <op1>	( 
-<expression>	( 
-) 
+MINUS	
 ) 
 <term>	( 
 <factor>	( 
-<arr_N5>	( 
-) 
+ID	
 <N_11>	( 
 EPSILON	
 ) 
@@ -550,24 +443,20 @@ EPSILON
 ) 
 ) 
 ) 
-<bools>	( 
-) 
+BC	
 ) 
 <T0>	( 
 <op2>	( 
-<BE00>	( 
-) 
+MUL	
 ) 
 <factor>	( 
-<booleanExpr>	( 
-) 
+BO	
 <expression>	( 
 <booleanExpr>	( 
 <arithmeticExpr>	( 
 <term>	( 
 <factor>	( 
-<arr_N5>	( 
-) 
+ID	
 <N_11>	( 
 EPSILON	
 ) 
@@ -578,13 +467,11 @@ EPSILON
 ) 
 <AE0>	( 
 <op1>	( 
-<expression>	( 
-) 
+MINUS	
 ) 
 <term>	( 
 <factor>	( 
-<arr_N5>	( 
-) 
+ID	
 <N_11>	( 
 EPSILON	
 ) 
@@ -605,8 +492,7 @@ EPSILON
 ) 
 ) 
 ) 
-<bools>	( 
-) 
+BC	
 ) 
 <T0>	( 
 EPSILON	
@@ -624,8 +510,7 @@ EPSILON
 ) 
 ) 
 ) 
-<op2>	( 
-) 
+SEMICOL	
 ) 
 ) 
 ) 
@@ -634,30 +519,22 @@ EPSILON
 <statements>	( 
 <statement>	( 
 <ioStmt>	( 
-<type>	( 
-) 
-<booleanExpr>	( 
-) 
+PRINT	
+BO	
 <var3>	( 
 <var>	( 
-<arr_N5>	( 
-) 
+ID	
 <whichId>	( 
-<optional>	( 
-) 
+SQBO	
 <wI0>	( 
-<arr_N5>	( 
-) 
-<AE0>	( 
-) 
+ID	
+SQBC	
 ) 
 ) 
 ) 
 ) 
-<bools>	( 
-) 
-<op2>	( 
-) 
+BC	
+SEMICOL	
 ) 
 ) 
 <statements>	( 
@@ -665,8 +542,7 @@ EPSILON
 ) 
 ) 
 ) 
-<ret>	( 
-) 
+END	
 ) 
 ) 
 <statements>	( 
@@ -674,62 +550,46 @@ EPSILON
 <simpleStmt>	( 
 <moduleReuseStmt>	( 
 <optional>	( 
-<optional>	( 
-) 
+SQBO	
 <idList>	( 
-<arr_N5>	( 
-) 
+ID	
 <iL0>	( 
 EPSILON	
 ) 
 ) 
-<AE0>	( 
+SQBC	
+ASSIGNOP	
 ) 
+USE	
+MODULE	
+ID	
+WITH	
+PARAMETERS	
 <idList>	( 
-) 
-) 
-<moduleDef>	( 
-) 
-<iP0>	( 
-) 
-<arr_N5>	( 
-) 
-<statements>	( 
-) 
-<statement>	( 
-) 
-<idList>	( 
-<arr_N5>	( 
-) 
+ID	
 <iL0>	( 
 EPSILON	
 ) 
 ) 
-<op2>	( 
-) 
+SEMICOL	
 ) 
 ) 
 ) 
 <statements>	( 
 <statement>	( 
 <ioStmt>	( 
-<type>	( 
-) 
-<booleanExpr>	( 
-) 
+PRINT	
+BO	
 <var3>	( 
 <var>	( 
-<arr_N5>	( 
-) 
+ID	
 <whichId>	( 
 EPSILON	
 ) 
 ) 
 ) 
-<bools>	( 
-) 
-<op2>	( 
-) 
+BC	
+SEMICOL	
 ) 
 ) 
 <statements>	( 
@@ -740,13 +600,11 @@ EPSILON
 ) 
 ) 
 ) 
-<ret>	( 
-) 
+END	
 ) 
 ) 
 <otherModules>	( 
 EPSILON	
 ) 
-<caseStmts>	( 
-) 
+PROGRAMEND	
 ) 
