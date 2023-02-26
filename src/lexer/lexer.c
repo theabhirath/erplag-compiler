@@ -136,17 +136,12 @@ tokenInfo allocateToken(TOKEN tokenID, char *lexeme, int lineNumber)
         strcpy(token.val.lexValue, lexeme);
         free(lexeme);
     }
-   
     token.lineNumber = lineNumber;
     resetPointers();
     return token;
 }
 
-/* TODO:
-1. Handle error cases
-2. Handle identifier size
-3. Handle pointers (begin and finish). Remember to reset them when you are done with a token.
-*/
+// basically the entire lexer; generates tokens one-by-one from source code
 tokenInfo getNextToken(FILE *fp)
 {
     // token to be returned
@@ -282,10 +277,18 @@ tokenInfo getNextToken(FILE *fp)
                 break;
             }
 
-        // identifier
+        // identifiers and reserved words
         case 2:
             // get lexeme from buffer
             lexeme = getLexemeFromBuffers(fp);
+            if (strlen(lexeme) > 20)
+            {
+                fprintf(stderr, "Error: Identifier length exceeds 20 characters at line %d\n", lineNumber);
+                free(lexeme);
+                resetPointers();
+                state = 0;
+                break;
+            }
             // check if reserved word by looking up hash table rwtable
             int tok = getReservedWordToken(lexeme);
             token.tokenID = tok == -1 ? ID : tok;
@@ -353,7 +356,9 @@ tokenInfo getNextToken(FILE *fp)
 
         // error state; expected a digit or another . after .
         case 6:
-            // TODO: handle this error state
+            fprintf(stderr, "Error: Expected a digit or another . after . at line %d\n", lineNumber);
+            resetPointers();
+            state = 0;
             break;
 
         case 7:
@@ -529,7 +534,9 @@ tokenInfo getNextToken(FILE *fp)
 
         // error state; lone equal is an invalid token
         case 30:
-            // TODO: handle this error state
+            fprintf(stderr, "Error: Lone equal is an invalid symbol at line %d. Did you mean to write ':=' or '=='?\n", lineNumber);
+            resetPointers();
+            state = 0;
             break;
 
         // equal to
@@ -541,7 +548,7 @@ tokenInfo getNextToken(FILE *fp)
 
         // error state; invalid character read
         case 33:
-            // TODO: handle this error state
+            fprintf(stderr, "Error: Invalid character '%c' at line %d.\n", c, lineNumber);
             break;
 
         // multiplication, comment
@@ -628,7 +635,10 @@ tokenInfo getNextToken(FILE *fp)
 
         // error state; lone dot is an invalid token
         case 41:
-            // TODO: handle this error state
+            fprintf(stderr, "Error: Lone dot is an invalid symbol at line %d. Did you mean to write '..'?\n", lineNumber);
+            resetPointers();
+            state = 0;
+            break;
 
         // rangeop
         case 42:
@@ -648,7 +658,7 @@ tokenInfo getNextToken(FILE *fp)
             else if (c == '>')
             {
                 finish++;
-                state = 48;
+                state = 46;
                 break;
             }
             else
@@ -713,7 +723,10 @@ tokenInfo getNextToken(FILE *fp)
 
         // error state; lone exclamation mark is an invalid token
         case 53:
-            // TODO: handle this error state
+            fprintf(stderr, "Error: Lone exclamation mark is an invalid symbol at line %d. Did you mean to write '!='?\n", lineNumber);
+            resetPointers();
+            state = 0;
+            break;
 
         // not equal to
         case 54:
