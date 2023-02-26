@@ -11,20 +11,28 @@
 char *nonterminals[NUM_NONTERMINALS];
 char *terminals[NUM_TOKENS];
 int Table[NUM_NONTERMINALS][NUM_TOKENS];
+
+typedef struct leafNodeInfo{
+    tokenInfo leafNodeInfo;
+}leafNodeInfo;
+
 typedef struct parse_tree_node
 {
     TNT tnt;
-    struct def *parent;
-    struct def *child;
-    struct def *sibling;
+    parse_tree_node *parent;
+    parse_tree_node *child;
+    parse_tree_node *sibling;
     int leafNodeFlag;
+    leafNodeInfo *lnInfo; //To store details of token in case it is leafnode.
 }parse_tree_node;
+
 typedef struct parse_tree{
     parse_tree_node *root;
 }parse_tree;
 
 parse_tree parseTree;
 parse_tree_node *rootNode;
+
 void createParseTree(parse_tree parseTree){
     parseTree.root = rootNode;
 }
@@ -375,6 +383,8 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile)
                 currentNode->child = &leafNode;*/
                 //NEED TO HANDLE CURRENT NODE APPROPRIATELY
                 currentNode->leafNodeFlag = 1; //Token can only be the leaf node.
+                currentNode->tnt.tok = L.tokenID;
+                currentNode->lnInfo->leafNodeInfo = L;
                 if(currentNode->sibling != NULL){
                     currentNode = currentNode->sibling;
                 }
