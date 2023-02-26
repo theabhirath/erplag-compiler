@@ -115,9 +115,10 @@ typedef struct hash_table_element hash_table_element;
 void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked_list *rules);
 void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *rules);
 void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalsFile, char *nonterminalsFile);
-void printParseTree(parse_tree *tree, FILE *fp);
+void printParseTree(FILE *fp);
 linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable);
 hash_table_element *createHashTable(char *nonterminalsFile, char *terminalsFile);
+void printSet(token_set *set);
 int hash(char *str);
 
 #endif

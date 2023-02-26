@@ -835,7 +835,8 @@ tokenInfo getNextToken(FILE *fp)
 //         printf("Error opening file\n");
 //         return -1;
 //     }
-//     while (1)
+//     int flag = 1;
+//     while (flag)
 //     {
 //         tokenInfo token = getNextToken(fp);
 //         if (token.tokenID == PROGRAMEND)
@@ -846,6 +847,8 @@ tokenInfo getNextToken(FILE *fp)
 //         } else if (token.tokenID == RNUM){
 //             printf("%f\n", token.val.floatValue);
 //         }
+//         printf("DO you want to continue? (1/0): ");
+//         scanf("%d", &flag);
 //     }
 //     fclose(fp);
 //     return 0;

@@ -12,7 +12,8 @@ char *nonterminals[NUM_NONTERMINALS];
 char *terminals[NUM_TOKENS];
 int Table[NUM_NONTERMINALS][NUM_TOKENS];
 
-typedef struct leafNodeInfo{
+typedef struct leafNodeInfo
+{
     tokenInfo leafNodeInfo;
 } leafNodeInfo;
 
@@ -26,24 +27,27 @@ typedef struct parse_tree_node
     leafNodeInfo *lnInfo; // To store details of token in case it is leafnode.
 } parse_tree_node;
 
-typedef struct parse_tree{
+typedef struct parse_tree
+{
     parse_tree_node *root;
 } parse_tree;
 
 parse_tree parseTree;
 
-void createParseTree(parse_tree parseTree, parse_tree_node *rootNode){
+void createParseTree(parse_tree parseTree, parse_tree_node *rootNode)
+{
     parseTree.root = rootNode;
 }
 
-void createParseTreeNode(TNT tnt, parse_tree_node *node){
+void createParseTreeNode(TNT tnt, parse_tree_node *node)
+{
     node->tnt = tnt;
 }
 
 // Stack of nodes
 typedef struct stack
 {
-    hash_table_element symbol; 
+    hash_table_element symbol;
     struct stack *next;
 } stack;
 
@@ -156,7 +160,7 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
         }
     }
     int changed = 1;
-    while(changed)
+    while (changed)
     {
         changed = 0;
         for (int i = 0; i < NUM_RULES; i++)
@@ -166,12 +170,12 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
             node = node->next;
             while (node != NULL)
             {
-                if(node->type == __TERMINAL__)
+                if (node->type == __TERMINAL__)
                 {
                     addToken(&firstSet[nt], node->tnt.tok);
                     break;
                 }
-                if(isMember(&firstSet[node->tnt.nonterm], EPSILON))
+                if (isMember(&firstSet[node->tnt.nonterm], EPSILON))
                 {
                     token_set temp = firstSet[node->tnt.nonterm];
                     removeToken(&temp, EPSILON);
@@ -207,7 +211,7 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
                     node = node->next;
                     continue;
                 }
-                else if(node->type == __NONTERMINAL__)
+                else if (node->type == __NONTERMINAL__)
                 {
                     // If this is the last node in the rule, add follow set of lhs to follow set of current nonterminal
                     if (node->next == NULL)
@@ -225,7 +229,7 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
                     // If this node is followed by a terminal, add that terminal to the follow set of current nonterminal
                     else if (node->next->type == __TERMINAL__)
                     {
-                        if(!isMember(&followSet[node->tnt.nonterm], node->next->tnt.tok))
+                        if (!isMember(&followSet[node->tnt.nonterm], node->next->tnt.tok))
                         {
                             addToken(&followSet[node->tnt.nonterm], node->next->tnt.tok);
                             // printf("Change loc 2\n");
@@ -267,7 +271,7 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
                         }
                         else if (epsilon_traverser != NULL && epsilon_traverser->type == __TERMINAL__)
                         {
-                            if(!isMember(&followSet[node->tnt.nonterm], epsilon_traverser->tnt.tok))
+                            if (!isMember(&followSet[node->tnt.nonterm], epsilon_traverser->tnt.tok))
                             {
                                 addToken(&followSet[node->tnt.nonterm], epsilon_traverser->tnt.tok);
                                 // printf("Change loc 5\n");
@@ -293,12 +297,11 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
             }
         }
     }
-
 }
 
 void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *rules)
 {
-    // TODO: Automate population of parse table from grammar and first and follow sets
+    // Automate population of parse table from grammar and first and follow sets
     for (int i = 0; i < NUM_NONTERMINALS; i++)
     {
         for (int j = 0; j < NUM_TOKENS; j++)
@@ -306,7 +309,7 @@ void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *
             Table[i][j] = -1;
         }
     }
-    
+
     for (int i = 0; i < NUM_RULES; i++)
     {
         linked_list_node *node = rules[i].head;
@@ -342,7 +345,7 @@ void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *
                 {
                     for (int j = 0; j < NUM_TOKENS; j++)
                     {
-                        if (isMember(&followSet[nt], j))
+                        if (isMember(&followSet[node->tnt.nonterm], j))
                         {
                             Table[nt][j] = i;
                         }
@@ -380,57 +383,86 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
     token_set followSet[NUM_NONTERMINALS];
     computeFirstAndFollowSets(firstSet, followSet, rules);
     populateParseTable(firstSet, followSet, rules);
-    stack *S = createStack(); //Stack for parsing
+    stack *S = createStack(); // Stack for parsing
     hash_table_element startsym;
     startsym.type = __NONTERMINAL__;
     startsym.tnt.nonterm = __program__;
     S = push(S, startsym);
     parse_tree_node *rootNode = (parse_tree_node *)malloc(sizeof(parse_tree_node));
-    if(rootNode == NULL){
+    if (rootNode == NULL)
+    {
         printf("Memory Error\n");
         exit(1);
     }
     rootNode->tnt.nonterm = __program__;
-    rootNode->child=NULL;
-    rootNode->parent=NULL;
-    rootNode->sibling=NULL;
+    rootNode->child = NULL;
+    rootNode->parent = NULL;
+    rootNode->sibling = NULL;
     parseTree.root = rootNode;
     printf("Created Parse Tree\n");
     parse_tree_node *currentNode = parseTree.root;
-    FILE *fp = fopen(testcaseFile, "r"); //Source code here.
+    FILE *fp = fopen(testcaseFile, "r"); // Source code here.
     reservedWordsTable();
-    tokenInfo L = getNextToken(fp); //Calling lexer here.
+    tokenInfo L = getNextToken(fp); // Calling lexer here.
+    printf("Read first token: %s\n", terminals[L.tokenID]);
     int count = 0;
     // Print non -1 entries of row program of Table
-    for(int i = 0; i < NUM_TOKENS; i++){
-        if(Table[0][i] != -1){
+    printf("Non -1 entries of row program of Table: \n");
+    for (int i = 0; i < NUM_TOKENS; i++)
+    {
+        if (Table[0][i] != -1)
+        {
             printf("Token: %s, Rule Number: %d\n", terminals[i], Table[0][i]);
         }
     }
-    while(L.tokenID != PROGRAMEND){
+    printf("First Set of program: \n");
+    printSet(&firstSet[0]);
+    printf("First set of moduleDeclarations: \n");
+    printSet(&firstSet[1]);
+    printf("Follow set of moduleDeclarations: \n");
+    printSet(&followSet[1]);
+    // return;
+    while (L.tokenID != PROGRAMEND)
+    {
         printf("Iteration Number: %d\n", count++);
         printf("Token: %s\n", terminals[L.tokenID]);
         printf("Stack Top: %s\n", top(S).type == __TERMINAL__ ? terminals[top(S).tnt.tok] : nonterminals[top(S).tnt.nonterm]);
-        if(L.tokenID == ID){
+        if (L.tokenID == ID)
+        {
             printf("Lexeme: %s\n", L.val.lexValue);
         }
-        if(count == 100){
-            break;
-        }
-        hash_table_element X = top(S); //Get top element of stack
-        if(X.type == __TERMINAL__){
-            if(X.tnt.tok == L.tokenID){
-                currentNode->leafNodeFlag = 1; //Token can only be the leaf node.
-                currentNode->tnt.tok = L.tokenID;
-                currentNode->lnInfo->leafNodeInfo = L;
-                if(currentNode->sibling != NULL){
+        hash_table_element X = top(S); // Get top element of stack
+        if (X.type == __TERMINAL__)
+        {
+            printf("Terminal\n");
+            // Check if X matches Current Token
+            printf("X: %s, CurrentNode: %s\n", terminals[X.tnt.tok], terminals[currentNode->tnt.tok]);
+            printf("Current's sibling: %s\n", currentNode->sibling == NULL ? "NULL" : currentNode->sibling->leafNodeFlag ? terminals[currentNode->sibling->tnt.tok] : nonterminals[currentNode->sibling->tnt.nonterm]);
+            
+            if (X.tnt.tok == L.tokenID)
+            {
+                printf("Matched\n");
+                // Print current node
+                printf("Current Node: %s\n", terminals[currentNode->tnt.tok]);
+                // printf("Loc 987\n");
+
+                // DO SOMETHING HERE
+                // currentNode->leafNodeFlag = 1; //Token can only be the leaf node.
+                // currentNode->tnt.tok = L.tokenID;
+                // currentNode->lnInfo->leafNodeInfo = L;
+                if (currentNode->sibling != NULL)
+                {
                     currentNode = currentNode->sibling;
                 }
-                else{
+                else
+                {
                     // Need to go up the tree
-                    while(currentNode->parent != NULL){
+                    while (currentNode->parent != NULL)
+                    {
                         currentNode = currentNode->parent;
-                        if(currentNode->sibling != NULL){
+                        printf("While recursing up the tree, current node: %s\n", nonterminals[currentNode->tnt.nonterm]);
+                        if (currentNode->sibling != NULL)
+                        {
                             currentNode = currentNode->sibling;
                             break;
                         }
@@ -440,88 +472,140 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
                 S = pop(S);
                 L = getNextToken(fp);
             }
-            else{
+            else
+            {
                 // Space for error recovery, tokens not matching
             }
         }
-        else if (X.type == __NONTERMINAL__){
-            //Need to find the rule in the parse table
+        else if (X.type == __NONTERMINAL__)
+        {
+            // Need to find the rule in the parse table
             int ruleNumber = Table[X.tnt.nonterm][L.tokenID];
             printf("Rule Number: %d\n", ruleNumber);
             // Need to push the RHS of the rule on the stack
-            if(ruleNumber != -1){
+            if (ruleNumber != -1)
+            {
                 stack *Stemp = createStack();
                 linked_list_node *firstNode = rules[ruleNumber].head;
                 firstNode = firstNode->next; // Skipping the LHS
-                S = pop(S); // Popping the nonterm from the stack
-                int flagSib = 0; // First child or sibling
+                S = pop(S);                  // Popping the nonterm from the stack
+                int flagSib = 0;             // First child or sibling
                 parse_tree_node *keepTrackNode = currentNode;
-                while(firstNode != NULL){
-                    //printf("Inside while loop\n");
+                
+                if (firstNode == NULL) // Epsilon rule
+                {
+                    parse_tree_node *newPTNode = (parse_tree_node *)malloc(sizeof(parse_tree_node));
+                    newPTNode->tnt.tok = EPSILON;
+                    newPTNode->child = NULL;
+                    newPTNode->parent = keepTrackNode;
+                    newPTNode->sibling = NULL;
+                    newPTNode->leafNodeFlag = 1;
+                    newPTNode->lnInfo = NULL;
+                    currentNode->child = newPTNode;
+                    currentNode = currentNode->child;
+                }
+                while (firstNode != NULL)
+                {
+                    // printf("Inside while loop\n");
                     hash_table_element toBePushed;
                     toBePushed.type = firstNode->type;
                     toBePushed.tnt = firstNode->tnt;
                     Stemp = push(Stemp, toBePushed);
-                    if (flagSib == 0){
+                    if (flagSib == 0)
+                    {
                         // Create left child of currentnode
                         TNT l1 = firstNode->tnt;
                         parse_tree_node *newPTNode = (parse_tree_node *)malloc(sizeof(parse_tree_node));
                         createParseTreeNode(l1, newPTNode);
-                        //printf("New PT Node: %s\n", nonterminals[newPTNode->tnt.nonterm]);
-                        newPTNode->parent = currentNode;
-                        //printf("Parent set\n");
-                        currentNode->child = newPTNode; //Starts filling children
-                        //printf("Child set\n");
-                        currentNode = currentNode->child; //Current node is now the child
+                        // printf("New PT Node: %s\n", nonterminals[newPTNode->tnt.nonterm]);
+                        newPTNode->parent = keepTrackNode;
+                        newPTNode->sibling = NULL;
+                        newPTNode->child = NULL;
+                        newPTNode->leafNodeFlag = 0;
+                        // printf("Parent set\n");
+                        currentNode->child = newPTNode; // Starts filling children
+
+                        // printf("Child set\n");
+                        currentNode = currentNode->child; // Current node is now the child
                         flagSib++;
                     }
-                    else{
+                    else
+                    {
                         // Create sibling of currentnode
                         TNT l1 = firstNode->tnt;
                         parse_tree_node *newPTNode = (parse_tree_node *)malloc(sizeof(parse_tree_node));
+                        newPTNode->parent = keepTrackNode;
+                        newPTNode->sibling = NULL;
+                        newPTNode->child = NULL;
+                        newPTNode->leafNodeFlag = 0;
                         createParseTreeNode(l1, newPTNode);
-                        currentNode->sibling = newPTNode; //Starts filling siblings
+                        currentNode->sibling = newPTNode; // Starts filling siblings
                         currentNode = currentNode->sibling;
                     }
                     firstNode = firstNode->next;
-                    currentNode = keepTrackNode; //Goes back to where it was
-                    currentNode = currentNode->child; //Goes to the leftmost child to now start processing.
                 }
-                while(!isEmpty(Stemp)){
-                    hash_table_element toBePushed1 = top(Stemp);
-                    //printf("To be pushed: %s\n", nonterminals[toBePushed1.tnt.nonterm]);
-                    Stemp = pop(Stemp);
-                    //printf("Popped\n");
-                    S = push(S, toBePushed1);
-                    //printf("Pushed\n");
-                    if(Stemp == NULL){
-                        printf("Stemp is null\n");
+                if(flagSib)
+                {
+                currentNode = keepTrackNode;      // Goes back to where it was
+                currentNode = currentNode->child; // Goes to the leftmost child to now start processing.
+                currentNode->parent = keepTrackNode;
+                }
+                else
+                {
+                    // Recurse parents until we reach a sibling
+                    while (currentNode->parent != NULL)
+                    {
+                        currentNode = currentNode->parent;
+                        if (currentNode->sibling != NULL)
+                        {
+                            currentNode = currentNode->sibling;
+                            break;
+                        }
                     }
-                    else{
+
+                }
+                while (!isEmpty(Stemp))
+                {
+                    hash_table_element toBePushed1 = top(Stemp);
+                    // printf("To be pushed: %s\n", nonterminals[toBePushed1.tnt.nonterm]);
+                    Stemp = pop(Stemp);
+                    // printf("Popped\n");
+                    S = push(S, toBePushed1);
+                    // printf("Pushed\n");
+                    if (Stemp == NULL)
+                    {
+                        // printf("Stemp is null\n");
+                    }
+                    else
+                    {
                         hash_table_element tempTop = top(Stemp);
-                        printf("Top of Stemp: %s\n", nonterminals[tempTop.tnt.nonterm]);
+                        // printf("Top of Stemp: %s\n", nonterminals[tempTop.tnt.nonterm]);
                     }
                 }
             }
-            else{
+            else
+            {
                 // TODO: error recovery, no rule found in parse table
             }
         }
-        else{
+        else
+        {
             printf("Error in parsing\n");
             // TODO: error recovery, stack end achieved but input not finished
             exit(1);
         }
     }
-    if(!isEmpty(S)){
+    if (!isEmpty(S))
+    {
         // Space for error recovery, stack not empty but input finished
     }
+    // First set of <whichStmt> print
     fclose(fp);
 }
 
-void printParseTree(parse_tree *tree, FILE *fp)
+void printParseTree(FILE *fp)
 {
-    // TODO: Print the parse tree
+    // TODO
 }
 
 linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable)
@@ -540,25 +624,25 @@ linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable)
     while (fgets(line, 100, fp) != NULL)
     {
         char *tnt = strtok(line, delim);
-        if(hashTable[hash(tnt)].type != __NONTERMINAL__)
+        if (hashTable[hash(tnt)].type != __NONTERMINAL__)
         {
-            printf("Error in line %d\n", i+1);
+            printf("Error in line %d\n", i + 1);
             printf("Expected nonterminal, found %s\n", tnt);
         }
         linked_list_node *lhs_nt = createNode(hashTable[hash(tnt)].tnt, __NONTERMINAL__);
         addNode(&rules[i], lhs_nt);
         tnt = strtok(NULL, delim);
-        while(tnt != NULL)
+        while (tnt != NULL)
         {
             tnt = trim(tnt);
             // printf("%s\n", tnt);
-            if(hashTable[hash(tnt)].type == __NONE__)
+            if (hashTable[hash(tnt)].type == __NONE__)
             {
-                printf("None token found in rule %d RHS\n", i+1);
+                printf("None token found in rule %d RHS\n", i + 1);
                 printf("%s\n", tnt);
                 exit(1);
             }
-            else if(hashTable[hash(tnt)].type == __EPSILON__)
+            else if (hashTable[hash(tnt)].type == __EPSILON__)
             {
                 break;
             }
@@ -669,7 +753,7 @@ hash_table_element *createHashTable(char *nontermsfile, char *termsfile)
         collisions++;
         printf("Hash collision\n");
         // Print term colliding with epsilon
-        if(hashTable[h].type == __TERMINAL__)
+        if (hashTable[h].type == __TERMINAL__)
         {
             printf("Colliding term: %s\n", terminals[hashTable[h].tnt.tok]);
         }
@@ -723,7 +807,7 @@ void printSet(token_set *set)
     }
     for (int i = 0; i < NUM_TOKENS; i++)
     {
-        if(cur & 1)
+        if (cur & 1)
         {
             printf("%s ", terminals[i]);
         }
@@ -756,6 +840,6 @@ int main()
     //     printSet(&follow_sets[i]);
     //     printf("\n");
     // }
-    parseInputSourceCode("test.txt", "grammar.csv", "terminals.txt", "nonterminals.txt");
+    parseInputSourceCode("../lexer/test.txt", "grammar.csv", "terminals.txt", "nonterminals.txt");
     return 0;
 }
