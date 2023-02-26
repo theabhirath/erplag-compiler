@@ -422,7 +422,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
     printf("Follow set of moduleDeclarations: \n");
     printSet(&followSet[1]);
     // return;
-    while (L.tokenID != PROGRAMEND)
+    while (isEmpty(S) == 0)
     {
         printf("Iteration Number: %d\n", count++);
         printf("Token: %s\n", terminals[L.tokenID]);
@@ -597,15 +597,64 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
     }
     if (!isEmpty(S))
     {
+        printf("Parsing unsuccessful\n");
+        // Print stack
+        stack *current = S;
+        while (current != NULL)
+        {
+            if (current->symbol.type == __TERMINAL__)
+            {
+                printf("%s\t", terminals[current->symbol.tnt.tok]);
+            }
+            else
+            {
+                printf("%s\t", nonterminals[current->symbol.tnt.nonterm]);
+            }
+            current = current->next;
+        }
         // Space for error recovery, stack not empty but input finished
     }
-    // First set of <whichStmt> print
+    else
+    {
+        printf("Parsing successful\n");
+        FILE *fp1 = fopen("parseTree.txt", "w");
+        printParseTree(fp1);
+    }
     fclose(fp);
 }
 
 void printParseTree(FILE *fp)
 {
-    // TODO
+    // printf("Inside printParseTree\n");
+    parse_tree_node *currentNode = parseTree.root;
+    printSubTree(currentNode, fp);
+}
+void printSubTree(parse_tree_node *currentNode, FILE *fp)
+{
+    fprintf(fp, "\n");
+    if (currentNode == NULL)
+    {
+        return;
+    }
+    if (currentNode->leafNodeFlag == 1)
+    {
+        if (currentNode->tnt.tok == EPSILON)
+        {
+            fprintf(fp, "EPSILON\t");
+        }
+        else
+        {
+            fprintf(fp, "%s\t", terminals[currentNode->tnt.tok]);
+        }
+    }
+    else
+    {
+        fprintf(fp, "%s\t", nonterminals[currentNode->tnt.nonterm]);
+        fprintf(fp, "( ");
+        printSubTree(currentNode->child, fp);
+        fprintf(fp, ") ");
+    }
+    printSubTree(currentNode->sibling, fp);
 }
 
 linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable)

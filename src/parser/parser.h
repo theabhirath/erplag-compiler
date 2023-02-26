@@ -120,5 +120,6 @@ linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable);
 hash_table_element *createHashTable(char *nonterminalsFile, char *terminalsFile);
 void printSet(token_set *set);
 int hash(char *str);
+void printSubTree(parse_tree_node *currentNode, FILE *fp);
 
 #endif
