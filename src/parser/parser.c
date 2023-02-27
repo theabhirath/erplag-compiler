@@ -748,6 +748,10 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
         printParseTree(fp1);
     }
     fclose(fp);
+    free(hashTable);
+    destroyList(rules);
+    free(rules);
+    free(S);
 }
 
 void printParseTree(FILE *fp)
@@ -788,6 +792,8 @@ linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable)
 {
     FILE *fp;
     char line[100];
+    linked_list_node *lhs_nt;
+    linked_list_node *rhs_nt;
     fp = fopen(grammarFile, "r");
     if (fp == NULL)
     {
@@ -805,7 +811,7 @@ linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable)
             printf("Error in line %d\n", i + 1);
             printf("Expected nonterminal, found %s\n", tnt);
         }
-        linked_list_node *lhs_nt = createNode(hashTable[hash(tnt)].tnt, __NONTERMINAL__);
+        lhs_nt = createNode(hashTable[hash(tnt)].tnt, __NONTERMINAL__); // Potential memleak
         addNode(&rules[i], lhs_nt);
         tnt = strtok(NULL, delim);
         while (tnt != NULL)
@@ -827,13 +833,14 @@ linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable)
             }
             else
             {
-                linked_list_node *rhs_nt = createNode(hashTable[hash(tnt)].tnt, hashTable[hash(tnt)].type);
+                rhs_nt = createNode(hashTable[hash(tnt)].tnt, hashTable[hash(tnt)].type);
                 addNode(&rules[i], rhs_nt);
             }
             tnt = strtok(NULL, delim);
         }
         i++;
     }
+    // free(lhs_nt);
     return rules;
 }
 

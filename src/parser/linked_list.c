@@ -23,3 +23,17 @@ void addNode(linked_list *list, linked_list_node *node)
         list->tail = node;
     }
 }
+
+void destroyList(linked_list *list)
+{
+    linked_list_node *currentNode = list->head;
+    linked_list_node *nextNode = NULL;
+    while (currentNode != NULL)
+    {
+        nextNode = currentNode->next;
+        free(currentNode);
+        currentNode = nextNode;
+    }
+    list->head = NULL;
+    list->tail = NULL;
+}

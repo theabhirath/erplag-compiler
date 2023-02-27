@@ -494,6 +494,7 @@ tokenInfo getNextToken(FILE *fp)
         case 22:
             lexeme = getLexemeFromBuffers(fp);
             token = allocateToken(SEMICOL, lexeme, lineNumber);
+            free(lexeme);
             resetPointers();
             return token;
 
