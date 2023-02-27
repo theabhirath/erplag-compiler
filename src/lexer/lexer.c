@@ -417,7 +417,7 @@ tokenInfo getNextToken(FILE *fp)
             }
             else
             {
-                state = 6;
+                state = 71;
                 break;
             }
 
@@ -431,7 +431,7 @@ tokenInfo getNextToken(FILE *fp)
             }
             else
             {
-                state = 6;
+                state = 71;
                 break;
             }
 
@@ -821,6 +821,15 @@ tokenInfo getNextToken(FILE *fp)
             token = allocateToken(PROGRAMEND, NULL, lineNumber);
             resetPointers();
             return token;
+
+        // added later; to handle unexpected symbols
+        case 71:
+            lexeme = getLexemeFromBuffers(fp);
+            fprintf(stderr, "Error: Unexpected symbol after '%s' at line %d\n", lexeme, lineNumber);
+            free(lexeme);
+            resetPointers();
+            state = 0;
+            break;
         }
     }
     return token;
@@ -847,8 +856,8 @@ tokenInfo getNextToken(FILE *fp)
 //         } else if (token.tokenID == RNUM){
 //             printf("%f\n", token.val.floatValue);
 //         }
-//         printf("DO you want to continue? (1/0): ");
-//         scanf("%d", &flag);
+//         // printf("DO you want to continue? (1/0): ");
+//         // scanf("%d", &flag);
 //     }
 //     fclose(fp);
 //     return 0;

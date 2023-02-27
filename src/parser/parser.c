@@ -4,12 +4,140 @@
 #include <stdlib.h>
 
 #include "parser.h"
+#include "parserdef.h"
 #include "linked_list.h"
 
 #define HASH_TABLE_SIZE 1050
 
-char *nonterminals[NUM_NONTERMINALS];
-char *terminals[NUM_TOKENS];
+char *nonterminals[NUM_NONTERMINALS] = {
+    "<program>",
+    "<moduleDeclarations>",
+    "<moduleDeclaration>",
+    "<otherModules>",
+    "<driverModule>",
+    "<module>",
+    "<ret>",
+    "<input_plist>",
+    "<iP0>",
+    "<output_plist>",
+    "<oP0>",
+    "<dataType>",
+    "<type>",
+    "<moduleDef>",
+    "<statements>",
+    "<statement>",
+    "<ioStmt>",
+    "<var3>",
+    "<var>",
+    "<whichId>",
+    "<wI0>",
+    "<simpleStmt>",
+    "<assignmentStmt>",
+    "<whichStmt>",
+    "<lvalueIDStmt>",
+    "<lvalueARRStmt>",
+    "<element_index_with_expression>",
+    "<sign>",
+    "<N_10>",
+    "<arrExpr>",
+    "<arr_N4>",
+    "<arrTerm>",
+    "<arr_N5>",
+    "<arrFactor>",
+    "<id_num_rnum>",
+    "<moduleReuseStmt>",
+    "<optional>",
+    "<idList>",
+    "<iL0>",
+    "<expression>",
+    "<booleanExpr>",
+    "<BE00>",
+    "<BE0>",
+    "<arithmeticExpr>",
+    "<AE0>",
+    "<term>",
+    "<T0>",
+    "<op1>",
+    "<op2>",
+    "<bools>",
+    "<factor>",
+    "<N_11>",
+    "<logicalOp>",
+    "<relationalOp>",
+    "<declareStmt>",
+    "<conditionalStmt>",
+    "<caseStmts>",
+    "<caseStmt>",
+    "<value>",
+    "<default>",
+    "<iterativeStmt>",
+    "<forrange>",
+    "<range>",
+    "<var2>",
+    "<range_arr>",
+    "<index_arr>",
+    "<new_index>"};
+
+char *terminals[NUM_TOKENS] = {
+    "INTEGER",
+    "REAL",
+    "BOOLEAN",
+    "OF",
+    "ARRAY",
+    "START",
+    "END",
+    "DECLARE",
+    "MODULE",
+    "DRIVER",
+    "PROGRAM",
+    "GET_VALUE",
+    "PRINT",
+    "USE",
+    "WITH",
+    "PARAMETERS",
+    "TAKES",
+    "INPUT",
+    "RETURNS",
+    "FOR",
+    "IN",
+    "SWITCH",
+    "CASE",
+    "BREAK",
+    "DEFAULT",
+    "WHILE",
+    "AND",
+    "OR",
+    "TRUE",
+    "FALSE",
+    "DRIVERDEF",
+    "DEF",
+    "ID",
+    "COMMA",
+    "NUM",
+    "RNUM",
+    "SQBO",
+    "ASSIGNOP",
+    "PLUS",
+    "MINUS",
+    "BO",
+    "MUL",
+    "EQ",
+    "COLON",
+    "SQBC",
+    "DIV",
+    "NE",
+    "RANGEOP",
+    "SEMICOL",
+    "BC",
+    "LT",
+    "DRIVERENDDEF",
+    "ENDEF",
+    "GT",
+    "LE",
+    "GE",
+    "PROGRAMEND"};
+
+// parse table
 int Table[NUM_NONTERMINALS][NUM_TOKENS];
 
 typedef struct leafNodeInfo
@@ -98,9 +226,9 @@ char *trim(char *str)
     }
     return str;
 }
+
 void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked_list *rules)
 {
-    // TODO: Automate population of first and follow sets from grammar
     for (int i = 0; i < NUM_NONTERMINALS; i++)
     {
         firstSet[i].set = 0;
@@ -377,7 +505,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
         Done - Call populateParseTable() to populate the parse table
         Parse the input source code as per LECTURE 21/02/2023 while creating the parse tree
     */
-    hash_table_element *hashTable = createHashTable(nonterminalFile, terminalFile);
+    hash_table_element *hashTable = createHashTable();
     linked_list *rules = createRuleList(grammarFile, hashTable);
     token_set firstSet[NUM_NONTERMINALS];
     token_set followSet[NUM_NONTERMINALS];
@@ -437,8 +565,8 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
             printf("Terminal\n");
             // Check if X matches Current Token
             printf("X: %s, CurrentNode: %s\n", terminals[X.tnt.tok], terminals[currentNode->tnt.tok]);
-            printf("Current's sibling: %s\n", currentNode->sibling == NULL ? "NULL" : currentNode->sibling->leafNodeFlag ? terminals[currentNode->sibling->tnt.tok] : nonterminals[currentNode->sibling->tnt.nonterm]);
-            
+            printf("Current's sibling: %s\n", currentNode->sibling == NULL ? "NULL" : currentNode->sibling->leafNodeFlag ? terminals[currentNode->sibling->tnt.tok]
+                                                                                                                         : nonterminals[currentNode->sibling->tnt.nonterm]);
             if (X.tnt.tok == L.tokenID)
             {
                 printf("Matched\n");
@@ -447,7 +575,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
                 // printf("Loc 987\n");
 
                 // DO SOMETHING HERE
-                currentNode->leafNodeFlag = 1; //Token can only be the leaf node.
+                currentNode->leafNodeFlag = 1; // Token can only be the leaf node.
                 // currentNode->tnt.tok = L.tokenID;
                 // currentNode->lnInfo->leafNodeInfo = L;
                 if (currentNode->sibling != NULL)
@@ -491,7 +619,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
                 S = pop(S);                  // Popping the nonterm from the stack
                 int flagSib = 0;             // First child or sibling
                 parse_tree_node *keepTrackNode = currentNode;
-                
+
                 if (firstNode == NULL) // Epsilon rule
                 {
                     parse_tree_node *newPTNode = (parse_tree_node *)malloc(sizeof(parse_tree_node));
@@ -544,11 +672,11 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
                     }
                     firstNode = firstNode->next;
                 }
-                if(flagSib)
+                if (flagSib)
                 {
-                currentNode = keepTrackNode;      // Goes back to where it was
-                currentNode = currentNode->child; // Goes to the leftmost child to now start processing.
-                currentNode->parent = keepTrackNode;
+                    currentNode = keepTrackNode;      // Goes back to where it was
+                    currentNode = currentNode->child; // Goes to the leftmost child to now start processing.
+                    currentNode->parent = keepTrackNode;
                 }
                 else
                 {
@@ -562,7 +690,6 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
                             break;
                         }
                     }
-
                 }
                 while (!isEmpty(Stemp))
                 {
@@ -689,6 +816,9 @@ linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable)
             {
                 printf("None token found in rule %d RHS\n", i + 1);
                 printf("%s\n", tnt);
+                printf("Length of string: %d\n", strlen(tnt));
+                printf("Nonterminals: %s\n", nonterminals[22]);
+                printf("Length of %d\n", strlen(nonterminals[22]));
                 exit(1);
             }
             else if (hashTable[hash(tnt)].type == __EPSILON__)
@@ -719,42 +849,8 @@ int hash(char *str)
     return hash;
 }
 
-hash_table_element *createHashTable(char *nontermsfile, char *termsfile)
+hash_table_element *createHashTable()
 {
-    FILE *fp;
-    char line[100];
-    fp = fopen(nontermsfile, "r");
-    if (fp == NULL)
-    {
-        printf("Error opening file\n");
-        exit(1);
-    }
-    int i = 0;
-    char delim[] = " \n";
-    while (fgets(line, 100, fp) != NULL)
-    {
-        char *nonterm = strtok(line, delim);
-        nonterminals[i] = malloc(sizeof(char) * strlen(nonterm));
-        strcpy(nonterminals[i], nonterm);
-        i++;
-    }
-    fclose(fp);
-
-    fp = fopen(termsfile, "r");
-    if (fp == NULL)
-    {
-        printf("Error opening file\n");
-        exit(1);
-    }
-    i = 0;
-    while (fgets(line, 100, fp) != NULL)
-    {
-        char *term = strtok(line, delim);
-        terminals[i] = malloc(sizeof(char) * strlen(term));
-        strcpy(terminals[i], term);
-        i++;
-    }
-    fclose(fp);
     char epsilon[] = "EPSILON";
     hash_table_element *hashTable = malloc(sizeof(hash_table_element) * HASH_TABLE_SIZE);
     int collisions = 0;
@@ -766,6 +862,7 @@ hash_table_element *createHashTable(char *nontermsfile, char *termsfile)
     for (int i = 0; i < NUM_NONTERMINALS; i++)
     {
         int h = hash(nonterminals[i]);
+        printf("%d %s %d\n", i, nonterminals[i], h);
         if (hashTable[h].type == __NONE__)
         {
             hashTable[h].type = __NONTERMINAL__;
@@ -889,6 +986,6 @@ int main()
     //     printSet(&follow_sets[i]);
     //     printf("\n");
     // }
-    parseInputSourceCode("../lexer/test.txt", "grammar.csv", "terminals.txt", "nonterminals.txt");
+    parseInputSourceCode("test.txt", "grammar.csv", "terminals.txt", "nonterminals.txt");
     return 0;
 }

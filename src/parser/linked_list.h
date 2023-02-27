@@ -1,7 +1,7 @@
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H
 
-#include "parser.h"
+#include "parserdef.h"
 
 struct linked_list_node
 {
