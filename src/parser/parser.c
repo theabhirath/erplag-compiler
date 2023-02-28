@@ -561,13 +561,13 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
             {
                 printf("Matched\n");
                 // Print current node
-                printf("Current Node: %s\n", terminals[currentNode->tnt.tok]);
+                //printf("Current Node: %s\n", terminals[currentNode->tnt.tok]);
                 currentNode->leafNodeFlag = 1; // Token can only be the leaf node.
-                printf("Leaf Node Flag set\n");
+                //printf("Leaf Node Flag set\n");
                 currentNode->tnt.tok = L.tokenID;
-                printf("Token set\n");
+                //printf("Token set\n");
                 currentNode->leafNodeInfo = L;
-                printf("Flags set\n");
+                //printf("Flags set\n");
                 if (currentNode->sibling != NULL)
                 {
                     currentNode = currentNode->sibling;
@@ -578,7 +578,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
                     while (currentNode->parent != NULL)
                     {
                         currentNode = currentNode->parent;
-                        printf("While recursing up the tree, current node: %s\n", nonterminals[currentNode->tnt.nonterm]);
+                        //printf("While recursing up the tree, current node: %s\n", nonterminals[currentNode->tnt.nonterm]);
                         if (currentNode->sibling != NULL)
                         {
                             currentNode = currentNode->sibling;
@@ -625,7 +625,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
                 }
                 printf("Found token in syncSet %s\n", terminals[L.tokenID]);
                 //Pop stack till we either find L if X is a terminal or L is in first set of X if it is a nonterminal
-                while ((X.type == __TERMINAL__ && X.tnt.tok != L.tokenID) || (X.type == __NONTERMINAL__ && isMember(&firstSet[X.tnt.nonterm], L.tokenID) == 0))
+                while (((X.type == __TERMINAL__ && X.tnt.tok != L.tokenID) || (X.type == __NONTERMINAL__ && isMember(&firstSet[X.tnt.nonterm], L.tokenID) == 0)) && isEmpty(S) == 0)
                 {
                     S = pop(S);
                     X = top(S);
@@ -650,7 +650,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
         {
             // Need to find the rule in the parse table
             int ruleNumber = Table[X.tnt.nonterm][L.tokenID];
-            printf("Rule Number: %d\n", ruleNumber);
+            //printf("Rule Number: %d\n", ruleNumber);
             // Need to push the RHS of the rule on the stack
             if (ruleNumber != -1)
             {
@@ -779,6 +779,18 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
                 {
                     S = pop(S);
                     X = top(S);
+                }
+                //Handle parse tree accordingly
+                while(1){
+                    if(currentNode->sibling != NULL){
+                        currentNode = currentNode->sibling;
+                    }
+                    else{
+                        currentNode = currentNode->parent;
+                    }
+                    if((currentNode->leafNodeFlag == 1 && currentNode->leafNodeInfo.tokenID == L.tokenID) || isMember(&firstSet[currentNode->tnt.nonterm], L.tokenID)){
+                        break;
+                    }
                 }
             }
         }
