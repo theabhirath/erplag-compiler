@@ -4,7 +4,7 @@ start
 	
 end
 <<module empty>>
-takes input[a:boolean];
+takes input[a:boolean]
 start
 
 end

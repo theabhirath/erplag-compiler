@@ -9,10 +9,10 @@
 #define NUM_RESERVED_WORDS 30
 #define HASH_TABLE_SIZE 128
 
-// #define BUFFER_SIZE 32
-int BUFFER_SIZE;
+#define BUFFER_SIZE 32
+// int BUFFER_SIZE;
 
-// declare global buffers (2D array of characters of 2 * BUFF)hD  **buf = ma
+char buf[2][BUFFER_SIZE];
 
 // pointers
 int begin = 2 * BUFFER_SIZE, finish = 2 * BUFFER_SIZE;

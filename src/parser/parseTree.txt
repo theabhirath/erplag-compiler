@@ -1,59 +1,37 @@
-
-<program>	( 
-<moduleDeclarations>	( 
-EPSILON	
-) 
-<otherModules>	( 
-EPSILON	
-) 
-<driverModule>	( 
-DRIVERDEF	
-DRIVER	
-PROGRAM	
-DRIVERENDDEF	
-<moduleDef>	( 
-START	
-<statements>	( 
-EPSILON	
-) 
-END	
-) 
-) 
-<otherModules>	( 
-<module>	( 
-DEF	
-MODULE	
-ID	
-ENDEF	
-TAKES	
-INPUT	
-SQBO	
-<input_plist>	( 
-ID	
-COLON	
-<dataType>	( 
-BOOLEAN	
-) 
-<iP0>	( 
-EPSILON	
-) 
-) 
-SQBC	
-SEMICOL	
-<ret>	( 
-EPSILON	
-) 
-<moduleDef>	( 
-START	
-<statements>	( 
-EPSILON	
-) 
-END	
-) 
-) 
-<otherModules>	( 
-EPSILON	
-) 
-) 
-PROGRAMEND	
-) 
+         lexeme	    lineNo	 tokenName	valueIfNumber	parentNodeSymbol	isLeafNode	          nodeSymbol
+       --------	  --------	  --------	  --------	 <program>	             NO	     <moduleDeclarations>	
+       --------	  --------	  --------	  --------	  --------	             NO	                <program>	
+       --------	  --------	  --------	  --------	 <program>	             NO	           <otherModules>	
+      DRIVERDEF	         2	 DRIVERDEF	  --------	<driverModule>	            YES	                DRIVERDEF	
+       --------	  --------	  --------	  --------	 <program>	             NO	           <driverModule>	
+         DRIVER	         2	    DRIVER	  --------	<driverModule>	            YES	                   DRIVER	
+        PROGRAM	         2	   PROGRAM	  --------	<driverModule>	            YES	                  PROGRAM	
+   DRIVERENDDEF	         2	DRIVERENDDEF	  --------	<driverModule>	            YES	             DRIVERENDDEF	
+          START	         3	     START	  --------	<moduleDef>	            YES	                    START	
+       --------	  --------	  --------	  --------	<driverModule>	             NO	              <moduleDef>	
+       --------	  --------	  --------	  --------	<moduleDef>	             NO	             <statements>	
+            END	         5	       END	  --------	<moduleDef>	            YES	                      END	
+            DEF	         6	       DEF	  --------	  <module>	            YES	                      DEF	
+       --------	  --------	  --------	  --------	<otherModules>	             NO	                 <module>	
+         MODULE	         6	    MODULE	  --------	  <module>	            YES	                   MODULE	
+          empty	         6	        ID	  --------	  <module>	            YES	                       ID	
+          ENDEF	         6	     ENDEF	  --------	  <module>	            YES	                    ENDEF	
+          TAKES	         7	     TAKES	  --------	  <module>	            YES	                    TAKES	
+          INPUT	         7	     INPUT	  --------	  <module>	            YES	                    INPUT	
+           SQBO	         7	      SQBO	  --------	  <module>	            YES	                     SQBO	
+              a	         7	        ID	  --------	<input_plist>	            YES	                       ID	
+       --------	  --------	  --------	  --------	  <module>	             NO	            <input_plist>	
+          COLON	         7	     COLON	  --------	<input_plist>	            YES	                    COLON	
+        BOOLEAN	         7	   BOOLEAN	  --------	<dataType>	            YES	                  BOOLEAN	
+       --------	  --------	  --------	  --------	<input_plist>	             NO	               <dataType>	
+       --------	  --------	  --------	  --------	<input_plist>	             NO	                    <iP0>	
+           SQBC	         7	      SQBC	  --------	  <module>	            YES	                     SQBC	
+        SEMICOL	         7	   SEMICOL	  --------	  <module>	            YES	                  SEMICOL	
+       --------	  --------	  --------	  --------	  <module>	             NO	                    <ret>	
+          START	         8	     START	  --------	<moduleDef>	            YES	                    START	
+       --------	  --------	  --------	  --------	  <module>	             NO	              <moduleDef>	
+       --------	  --------	  --------	  --------	<moduleDef>	             NO	             <statements>	
+            END	        10	       END	  --------	<moduleDef>	            YES	                      END	
+       --------	  --------	  --------	  --------	 <program>	             NO	           <otherModules>	
+       --------	  --------	  --------	  --------	<otherModules>	             NO	           <otherModules>	
+     PROGRAMEND	        23	PROGRAMEND	  --------	 <program>	            YES	               PROGRAMEND	
