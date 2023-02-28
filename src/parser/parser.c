@@ -624,6 +624,11 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
                     L = getNextToken(fp);
                 }
                 printf("Found token in syncSet %s\n", terminals[L.tokenID]);
+                if(X.type == __NONTERMINAL__ && (&followSet[X.tnt.nonterm], L.tokenID)){
+                    S = pop(S);
+                    X = top(S);
+                    continue;
+                }
                 //Pop stack till we either find L if X is a terminal or L is in first set of X if it is a nonterminal
                 while (((X.type == __TERMINAL__ && X.tnt.tok != L.tokenID) || (X.type == __NONTERMINAL__ && isMember(&firstSet[X.tnt.nonterm], L.tokenID) == 0)) && isEmpty(S) == 0)
                 {
@@ -774,8 +779,13 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
                 {
                     L = getNextToken(fp);
                 }
+                if(X.type == __NONTERMINAL__ && (&followSet[X.tnt.nonterm], L.tokenID)){
+                    S = pop(S);
+                    X = top(S);
+                    continue;
+                }
                 //Keep popping non terminals till we find L in its first set or if X is a terminal, they are equal
-                while ((X.type == __NONTERMINAL__ && isMember(&firstSet[X.tnt.nonterm], L.tokenID) == 0) || (X.type == __TERMINAL__ && X.tnt.tok != L.tokenID))
+                while (((X.type == __NONTERMINAL__ && isMember(&firstSet[X.tnt.nonterm], L.tokenID) == 0) || (X.type == __TERMINAL__ && X.tnt.tok != L.tokenID)) && isEmpty(S) == 0)
                 {
                     S = pop(S);
                     X = top(S);
