@@ -152,6 +152,7 @@ typedef struct parse_tree_node
     parse_tree_node *child;
     parse_tree_node *sibling;
     int leafNodeFlag;
+    int ruleNumber;
     leafNodeInfo *lnInfo; // To store details of token in case it is leafnode.
 } parse_tree_node;
 
@@ -575,9 +576,10 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
                 // printf("Loc 987\n");
 
                 // DO SOMETHING HERE
-                currentNode->leafNodeFlag = 1; // Token can only be the leaf node.
-                // currentNode->tnt.tok = L.tokenID;
-                // currentNode->lnInfo->leafNodeInfo = L;
+                currentNode->leafNodeFlag = 1; //Token can only be the leaf node.
+                currentNode->tnt.tok = L.tokenID;
+                currentNode->lnInfo->leafNodeInfo = L;
+                currentNode->ruleNumber = currentNode->parent->ruleNumber;
                 if (currentNode->sibling != NULL)
                 {
                     currentNode = currentNode->sibling;
@@ -615,6 +617,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
             {
                 stack *Stemp = createStack();
                 linked_list_node *firstNode = rules[ruleNumber].head;
+                currentNode->ruleNumber = ruleNumber;
                 firstNode = firstNode->next; // Skipping the LHS
                 S = pop(S);                  // Popping the nonterm from the stack
                 int flagSib = 0;             // First child or sibling
@@ -758,34 +761,20 @@ void printParseTree(FILE *fp)
 {
     // printf("Inside printParseTree\n");
     parse_tree_node *currentNode = parseTree.root;
+    printf("lexeme\tlineNo\ttokenName\tvalueIfNumber\tparentNodeSymbol\tisLeafNode\tnodeSymbol\n");
     printSubTree(currentNode, fp);
 }
 void printSubTree(parse_tree_node *currentNode, FILE *fp)
 {
-    fprintf(fp, "\n");
-    if (currentNode == NULL)
+    parse_tree_node *leftChild = currentNode->child;
+    parse_tree_node *rightChild = NULL;
+    if(leftChild != NULL)
     {
-        return;
+        printSubTree(leftChild, fp);
+        rightChild = leftChild->sibling;
     }
-    if (currentNode->leafNodeFlag == 1)
-    {
-        if (currentNode->tnt.tok == EPSILON)
-        {
-            fprintf(fp, "EPSILON\t");
-        }
-        else
-        {
-            fprintf(fp, "%s\t", terminals[currentNode->tnt.tok]);
-        }
-    }
-    else
-    {
-        fprintf(fp, "%s\t", nonterminals[currentNode->tnt.nonterm]);
-        fprintf(fp, "( ");
-        printSubTree(currentNode->child, fp);
-        fprintf(fp, ") ");
-    }
-    printSubTree(currentNode->sibling, fp);
+    // Printing the lexeme when leaf node
+    // printf("%s\t", currentNode->isLeafNode ? (currentNode->tnt.tok == ID ? currentNode->lnInfo->leafNodeInfo.val.lexValue
 }
 
 linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable)

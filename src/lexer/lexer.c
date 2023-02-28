@@ -5,12 +5,14 @@
 #include "lexer.h"
 #include "lexerdef.h"
 
-#define BUFFER_SIZE 32
+
 #define NUM_RESERVED_WORDS 30
 #define HASH_TABLE_SIZE 128
 
-// declare global buffers
-char buf[2][BUFFER_SIZE];
+// #define BUFFER_SIZE 32
+int BUFFER_SIZE;
+
+// declare global buffers (2D array of characters of 2 * BUFF)hD  **buf = ma
 
 // pointers
 int begin = 2 * BUFFER_SIZE, finish = 2 * BUFFER_SIZE;
@@ -417,7 +419,7 @@ tokenInfo getNextToken(FILE *fp)
             }
             else
             {
-                state = 71;
+                state = 6;
                 break;
             }
 
@@ -431,7 +433,7 @@ tokenInfo getNextToken(FILE *fp)
             }
             else
             {
-                state = 71;
+                state = 6;
                 break;
             }
 
@@ -494,7 +496,6 @@ tokenInfo getNextToken(FILE *fp)
         case 22:
             lexeme = getLexemeFromBuffers(fp);
             token = allocateToken(SEMICOL, lexeme, lineNumber);
-            free(lexeme);
             resetPointers();
             return token;
 
@@ -822,15 +823,6 @@ tokenInfo getNextToken(FILE *fp)
             token = allocateToken(PROGRAMEND, NULL, lineNumber);
             resetPointers();
             return token;
-
-        // added later; to handle unexpected symbols
-        case 71:
-            lexeme = getLexemeFromBuffers(fp);
-            fprintf(stderr, "Error: Unexpected symbol after '%s' at line %d\n", lexeme, lineNumber);
-            free(lexeme);
-            resetPointers();
-            state = 0;
-            break;
         }
     }
     return token;
@@ -857,8 +849,8 @@ tokenInfo getNextToken(FILE *fp)
 //         } else if (token.tokenID == RNUM){
 //             printf("%f\n", token.val.floatValue);
 //         }
-//         // printf("DO you want to continue? (1/0): ");
-//         // scanf("%d", &flag);
+//         printf("DO you want to continue? (1/0): ");
+//         scanf("%d", &flag);
 //     }
 //     fclose(fp);
 //     return 0;
