@@ -10,6 +10,7 @@ void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *
 void parseInputSourceCode(char *testcaseFile, char *grammarFile);
 void printParseTree(FILE *fp);
 linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable);
+void prematureEndOfInputError();
 hash_table_element *createHashTable();
 void printSet(token_set *set);
 int hash(char *str);
