@@ -456,6 +456,13 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
     token_set firstSet[NUM_NONTERMINALS];
     token_set followSet[NUM_NONTERMINALS];
     computeFirstAndFollowSets(firstSet, followSet, rules);
+    // Print first set of modulereusestmt
+    printf("First Set of modulereusestmt\n");
+    printSet(&firstSet[__moduleReuseStmt__]);
+    printf("First set of statements\n");
+    printSet(&firstSet[__statements__]);
+    printf("\n");
+    printSet(&firstSet[__simpleStmt__]);
     populateParseTable(firstSet, followSet, rules);
     stack *S = createStack(); // Stack for parsing
     hash_table_element startsym;
@@ -493,17 +500,19 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
     }
     while (isEmpty(S) == 0)
     {
-        // printf("Iteration Number: %d\n", count++);
-        // printf("Token: %s\n", terminals[L.tokenID]);
+        printf("Iteration Number: %d\n", count++);
+        printf("Token: %s\n", terminals[L.tokenID]);
         // printf("Stack Top: %s\n", top(S).type == __TERMINAL__ ? terminals[top(S).tnt.tok] : nonterminals[top(S).tnt.nonterm]);
         /*if (L.tokenID == ID)
         {
             printf("Lexeme: %s\n", L.val.lexValue);
         }*/
+
         hash_table_element X = top(S); // Get top element of stack
+        printf("X: %s\n", X.type == __TERMINAL__ ? terminals[X.tnt.tok] : nonterminals[X.tnt.nonterm]);
         if (X.type == __TERMINAL__)
         {
-            // printf("Terminal\n");
+            printf("Terminal\n");
             //  Check if X matches Current Token
             printf("X: %s, CurrentNode: %s\n", terminals[X.tnt.tok], terminals[currentNode->tnt.tok]);
             if (X.tnt.tok == L.tokenID)
@@ -538,6 +547,7 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
                 S = pop(S);
                 printf("Popped\n");
                 L = getNextToken(fp);
+                printf("got next token\n");
                 // TODO: Call function to print error - Premature end of input
                 // if (L.tokenID == PROGRAMEND && X.tnt.tok != PROGRAMEND){
                 //     printf("Idhar se aa raha hai\n");
@@ -581,12 +591,21 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
                 }
                 }
                 printf("Found token in syncSet %s\n", terminals[L.tokenID]);
+                //print X
+                printf("X: %s\n", X.type == __TERMINAL__ ? terminals[X.tnt.tok] : nonterminals[X.tnt.nonterm]);
                 if(isMember(&followSet[X.tnt.nonterm], L.tokenID)){
+                    printf("Found token in followSet of X\n");
                     S = pop(S);
                     X = top(S);
                     continue;
                 }
                 //Pop stack till we either find L if X is a terminal or L is in first set of X if it is a nonterminal
+                while (((X.type == __TERMINAL__ && X.tnt.tok != L.tokenID) || (X.type == __NONTERMINAL__ && isMember(&followSet[X.tnt.nonterm], L.tokenID) == 0)) && isEmpty(S) == 0)
+                {
+                    S = pop(S);
+                    X = top(S);
+                    printf("Popped\n");
+                }
                 while (((X.type == __TERMINAL__ && X.tnt.tok != L.tokenID) || (X.type == __NONTERMINAL__ && isMember(&firstSet[X.tnt.nonterm], L.tokenID) == 0)) && isEmpty(S) == 0)
                 {
                     S = pop(S);
@@ -594,6 +613,8 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
                     printf("Popped\n");
                 }
                 printf("Found L in firstSet of X\n");
+                //print X
+                printf("X: %s\n", X.type == __TERMINAL__ ? terminals[X.tnt.tok] : nonterminals[X.tnt.nonterm]);
                 // In the parse tree, we traverse siblings recursively till we find whatever X is
                 /*while (((X.type == __TERMINAL__ && X.tnt.tok != currentNode->tnt.tok) || (X.type == __NONTERMINAL__ && X.tnt.nonterm != currentNode->tnt.nonterm)) && currentNode->parent != NULL)
                 {
@@ -607,6 +628,8 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
                     }
                 }*/
                 while(1){
+                    // Print Current Node
+                    printf("Current Node: %s %s  LeagNode: %d\n", terminals[currentNode->tnt.tok], nonterminals[currentNode->tnt.nonterm], currentNode->leafNodeFlag);
                     if(currentNode->sibling != NULL){
                         currentNode = currentNode->sibling;
                     }
@@ -623,7 +646,7 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
         {
             // Need to find the rule in the parse table
             int ruleNumber = Table[X.tnt.nonterm][L.tokenID];
-            //printf("Rule Number: %d\n", ruleNumber);
+            printf("Rule Number: %d\n", ruleNumber);
             // Need to push the RHS of the rule on the stack
             if (ruleNumber != -1)
             {
@@ -902,10 +925,11 @@ void printSubTree(parse_tree_node *currentNode, FILE *fp)
 grammar createRuleList(char *grammarFile, hash_table_element *hashTable)
 {
     FILE *fp;
-    char line[100];
+    char line[128];
     linked_list_node *lhs_nt;
     linked_list_node *rhs_nt;
     fp = fopen(grammarFile, "r");
+    printf("Opening file %s", grammarFile);
     if (fp == NULL)
     {
         printf("Error opening file\n");
@@ -914,7 +938,7 @@ grammar createRuleList(char *grammarFile, hash_table_element *hashTable)
     grammar rules = malloc(sizeof(linked_list) * NUM_RULES);
     int i = 0;
     char delim[] = ",\n";
-    while (fgets(line, 100, fp) != NULL)
+    while (fgets(line, 128, fp) != NULL)
     {
         char *tnt = strtok(line, delim);
         if (hashTable[hash(tnt)].type != __NONTERMINAL__)
@@ -1107,14 +1131,14 @@ void prematureEndOfInputError(){
 //     //     printf("\n");
 //     // }
 
-    // for (int i = 0; i < NUM_NONTERMINALS; i++)
-    // {
-    //     printf("Follow(%s): ", nonterminals[i]);
-    //     printSet(&follow_sets[i]);
-    //     printf("\n");
-    // }
-//     printf("Enter the buffer size: ");
-//     scanf("%d", &bufferSize);
-//     parseInputSourceCode("../../tests/t2.txt", "grammar.csv");
+//     // for (int i = 0; i < NUM_NONTERMINALS; i++)
+//     // {
+//     //     printf("Follow(%s): ", nonterminals[i]);
+//     //     printSet(&follow_sets[i]);
+//     //     printf("\n");
+//     // }
+//     // printf("Enter the buffer size: ");
+//     // scanf("%d", &bufferSize);
+//     parseInputSourceCode("../../tests/t5.txt", "parseTree.txt");
 //     return 0;
 // }

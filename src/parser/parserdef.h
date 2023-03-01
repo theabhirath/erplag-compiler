@@ -5,7 +5,7 @@
 
 #define NUM_TOKENS 57
 #define NUM_NONTERMINALS 71
-#define NUM_RULES 134
+#define NUM_RULES 135
 
 enum TNT_TYPE
 {

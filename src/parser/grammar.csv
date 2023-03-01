@@ -64,7 +64,8 @@
 <id_num>,ID
 <id_num>,NUM
 <arrFactor>,<bools>
-<moduleReuseStmt>,<optional>,USE,MODULE,ID,WITH,PARAMETERS,<actual_para_list>,SEMICOL
+<moduleReuseStmt>,SQBO,<idList>,SQBC,ASSIGNOP,USE,MODULE,ID,WITH,PARAMETERS,<actual_para_list>,SEMICOL
+<moduleReuseStmt>,USE,MODULE,ID,WITH,PARAMETERS,<actual_para_list>,SEMICOL
 <actual_para_list>,<aP00>,<aP1>
 <aP1>,COMMA,<aP00>,<aP1>
 <aP1>,EPSILON
