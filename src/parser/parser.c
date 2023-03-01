@@ -45,7 +45,7 @@ char *nonterminals[NUM_NONTERMINALS] = {
     "<arrTerm>",
     "<arr_N5>",
     "<arrFactor>",
-    "<id_num_rnum>",
+    "<id_num>",
     "<moduleReuseStmt>",
     "<optional>",
     "<idList>",
@@ -77,7 +77,8 @@ char *nonterminals[NUM_NONTERMINALS] = {
     "<var2>",
     "<range_arr>",
     "<index_arr>",
-    "<new_index>"};
+    "<new_index>",
+    "<actual_para_list>"};
 
 char *terminals[NUM_TOKENS] = {
     "INTEGER",
@@ -468,6 +469,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile)
     rootNode->child = NULL;
     rootNode->parent = NULL;
     rootNode->sibling = NULL;
+    rootNode->leafNodeFlag = 0;
     parseTree.root = rootNode;
     printf("Created Parse Tree\n");
     parse_tree_node *currentNode = parseTree.root;
@@ -534,9 +536,10 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile)
                 printf("Popped\n");
                 L = getNextToken(fp);
                 // TODO: Call function to print error - Premature end of input
-                if (L.tokenID == PROGRAMEND && X.tnt.tok != PROGRAMEND){
-                    prematureEndOfInputError();
-                }
+                // if (L.tokenID == PROGRAMEND && X.tnt.tok != PROGRAMEND){
+                //     printf("Idhar se aa raha hai\n");
+                //     prematureEndOfInputError();
+                // }
             }
             else
             {
@@ -548,6 +551,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile)
                 addToken(syncSet, END); // Why is there an error here?
                 addToken(syncSet, SEMICOL);
                 addToken(syncSet, BC);
+                addToken(syncSet, START);
                 // Fill syncSet with all the tokens in followSet of the nonterminal on top of stack
                 for (int i = 0; i < NUM_TOKENS; i++)
                 {
@@ -727,6 +731,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile)
                 addToken(syncSet, END); // Why is there an error here?
                 addToken(syncSet, SEMICOL);
                 addToken(syncSet, BC);
+                addToken(syncSet, START);
                 // Fill syncSet with all the tokens in followSet of the nonterminal on top of stack
                 for (int i = 0; i < NUM_TOKENS; i++)
                 {
@@ -816,9 +821,9 @@ void printSubTree(parse_tree_node *currentNode, FILE *fp)
         if (currentNode->tnt.tok == ID)
             fprintf(fp, "%15s\t", currentNode->leafNodeInfo.lexeme);
         else if (currentNode->tnt.tok == NUM || currentNode->tnt.tok == RNUM)
-            fprintf(fp, "%15s\t", "--------");
+            fprintf(fp, "%15s\t", currentNode->leafNodeInfo.lexeme);
         else
-            fprintf(fp, "%15s\t", terminals[currentNode->tnt.tok]);
+            fprintf(fp, "%15s\t", currentNode->leafNodeInfo.lexeme);
     }
     else
     {

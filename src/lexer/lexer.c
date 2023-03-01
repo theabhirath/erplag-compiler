@@ -829,33 +829,33 @@ void printTokenList(FILE *fp)
     }
 }
 
-int main()
-{
-    printf("Enter the buffer size: ");
-    scanf("%d", &bufferSize);
-    initialiseTwinBuffers();
-    reservedWordsTable();
-    FILE *fp = fopen("../../tests/t3.txt", "r");
-    if (fp == NULL)
-    {
-        printf("Error opening file\n");
-        return -1;
-    }
-    int flag = 1;
-    while (flag)
-    {
-        tokenInfo token = getNextToken(fp);
-        if (token.tokenID == PROGRAMEND)
-            break;
-        printf("%d %d\n", token.tokenID, token.lineNumber);
-        if (token.tokenID == NUM){
-            printf("%d\n", token.val.intValue);
-        } else if (token.tokenID == RNUM){
-            printf("%f\n", token.val.floatValue);
-        }
-        printf("DO you want to continue? (1/0): ");
-        scanf("%d", &flag);
-    }
-    fclose(fp);
-    return 0;
-}
+// int main()
+// {
+//     printf("Enter the buffer size: ");
+//     scanf("%d", &bufferSize);
+//     initialiseTwinBuffers();
+//     reservedWordsTable();
+//     FILE *fp = fopen("../../tests/t3.txt", "r");
+//     if (fp == NULL)
+//     {
+//         printf("Error opening file\n");
+//         return -1;
+//     }
+//     int flag = 1;
+//     while (flag)
+//     {
+//         tokenInfo token = getNextToken(fp);
+//         if (token.tokenID == PROGRAMEND)
+//             break;
+//         printf("%d %d\n", token.tokenID, token.lineNumber);
+//         if (token.tokenID == NUM){
+//             printf("%d\n", token.val.intValue);
+//         } else if (token.tokenID == RNUM){
+//             printf("%f\n", token.val.floatValue);
+//         }
+//         printf("DO you want to continue? (1/0): ");
+//         scanf("%d", &flag);
+//     }
+//     fclose(fp);
+//     return 0;
+// }

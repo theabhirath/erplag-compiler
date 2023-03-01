@@ -4,8 +4,8 @@
 #include "../lexer/lexerdef.h"
 
 #define NUM_TOKENS 57
-#define NUM_NONTERMINALS 67
-#define NUM_RULES 128
+#define NUM_NONTERMINALS 68
+#define NUM_RULES 130
 
 enum TNT_TYPE
 {
