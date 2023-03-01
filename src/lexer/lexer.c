@@ -668,7 +668,7 @@ tokenInfo getNextToken(FILE *fp)
         // greater than
         case 45:
             token = allocateToken(GT, lineNumber, fp);
-            break;
+            return token;
 
         // enddef, driverenddef
         case 46:
@@ -831,7 +831,7 @@ void printTokenList(char *fileName)
         return;
     }
     tokenInfo token;
-    printf("Line Number\tToken ID\tLexeme");
+    printf("Line Number\tToken ID\tLexeme\n");
     while (1)
     {
         token = getNextToken(fp);
