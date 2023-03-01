@@ -78,7 +78,10 @@ char *nonterminals[NUM_NONTERMINALS] = {
     "<range_arr>",
     "<index_arr>",
     "<new_index>",
-    "<actual_para_list>"};
+    "<actual_para_list>",
+    "<aP0>",
+    "<aP00>",
+    "<aP1>"};
 
 char *terminals[NUM_TOKENS] = {
     "INTEGER",
@@ -1112,6 +1115,6 @@ int main()
     // }
     printf("Enter the buffer size: ");
     scanf("%d", &bufferSize);
-    parseInputSourceCode("test.txt", "grammar.csv");
+    parseInputSourceCode("../../tests/t2.txt", "grammar.csv");
     return 0;
 }

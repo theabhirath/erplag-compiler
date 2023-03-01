@@ -4,8 +4,8 @@
 #include "../lexer/lexerdef.h"
 
 #define NUM_TOKENS 57
-#define NUM_NONTERMINALS 68
-#define NUM_RULES 130
+#define NUM_NONTERMINALS 71
+#define NUM_RULES 134
 
 enum TNT_TYPE
 {
@@ -54,7 +54,7 @@ enum NONTERMINAL
     __arrTerm__,
     __arr_N5__,
     __arrFactor__,
-    __id_num_rnum__,
+    __id_num__,
     __moduleReuseStmt__,
     __optional__,
     __idList__,
@@ -86,7 +86,11 @@ enum NONTERMINAL
     __var2__,
     __range_arr__,
     __index_arr__,
-    __new_index__
+    __new_index__,
+    __actual_para_list__,
+    __aP0__,
+    __aP00__,
+    __aP1__,
 };
 typedef enum NONTERMINAL NONTERMINAL;
 
