@@ -443,7 +443,7 @@ void printParseTable()
     }
 }
 
-void parseInputSourceCode(char *testcaseFile, char *grammarFile)
+void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
 {
     /*
         Done - Call create_rules() to create a linked list of rules
@@ -452,7 +452,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile)
         Parse the input source code as per LECTURE 21/02/2023 while creating the parse tree
     */
     hash_table_element *hashTable = createHashTable();
-    grammar rules = createRuleList(grammarFile, hashTable);
+    grammar rules = createRuleList("src/parser/grammar.csv", hashTable);
     token_set firstSet[NUM_NONTERMINALS];
     token_set followSet[NUM_NONTERMINALS];
     computeFirstAndFollowSets(firstSet, followSet, rules);
@@ -787,7 +787,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile)
     else
     {
         printf("Parsing successful\n");
-        FILE *fp1 = fopen("parseTree.txt", "w");
+        FILE *fp1 = fopen(parseTreeFile, "w");
         printParseTree(fp1);
     }
     fclose(fp);
@@ -1092,20 +1092,20 @@ void prematureEndOfInputError(){
     exit(1);
 }
 
-int main()
-{
-    // hash_table_element *hashTable = createHashTable("nonterminals.txt", "terminals.txt");
-    // linked_list *rules = createRuleList("grammar.csv", hashTable);
-    // print_rules(rules);
-    // token_set *first_sets = malloc(sizeof(token_set) * NUM_NONTERMINALS);
-    // token_set *follow_sets = malloc(sizeof(token_set) * NUM_NONTERMINALS);
-    // computeFirstAndFollowSets(first_sets, follow_sets, rules);
-    // for (int i = 0; i < NUM_NONTERMINALS; i++)
-    // {
-    //     printf("First(%s): ", nonterminals[i]);
-    //     printSet(&first_sets[i]);
-    //     printf("\n");
-    // }
+// int main()
+// {
+//     // hash_table_element *hashTable = createHashTable("nonterminals.txt", "terminals.txt");
+//     // linked_list *rules = createRuleList("grammar.csv", hashTable);
+//     // print_rules(rules);
+//     // token_set *first_sets = malloc(sizeof(token_set) * NUM_NONTERMINALS);
+//     // token_set *follow_sets = malloc(sizeof(token_set) * NUM_NONTERMINALS);
+//     // computeFirstAndFollowSets(first_sets, follow_sets, rules);
+//     // for (int i = 0; i < NUM_NONTERMINALS; i++)
+//     // {
+//     //     printf("First(%s): ", nonterminals[i]);
+//     //     printSet(&first_sets[i]);
+//     //     printf("\n");
+//     // }
 
     // for (int i = 0; i < NUM_NONTERMINALS; i++)
     // {
@@ -1113,8 +1113,8 @@ int main()
     //     printSet(&follow_sets[i]);
     //     printf("\n");
     // }
-    printf("Enter the buffer size: ");
-    scanf("%d", &bufferSize);
-    parseInputSourceCode("../../tests/t2.txt", "grammar.csv");
-    return 0;
-}
+//     printf("Enter the buffer size: ");
+//     scanf("%d", &bufferSize);
+//     parseInputSourceCode("../../tests/t2.txt", "grammar.csv");
+//     return 0;
+// }

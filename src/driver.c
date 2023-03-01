@@ -6,14 +6,14 @@
 #include "parser/parser.h"
 
 // times input 
-int printTimeTaken()
+void printTimeTaken(char *testCaseFile, char *parseTreeFile)
 {
     clock_t start_time, end_time;
     double total_CPU_time, total_CPU_time_in_seconds;
     start_time = clock();
-    
+
     // invoke your lexer and parser here
-    parseInputSourceCode("test.txt", "parser/grammar.csv");
+    parseInputSourceCode(testCaseFile, parseTreeFile);
 
     end_time = clock();
     total_CPU_time = (double) (end_time - start_time);
@@ -32,15 +32,13 @@ int main(int argc, char *argv[])
         return 1;
     }
     // get buffer size
-    int bufferSize = atoi(argv[3]);
+    bufferSize = atoi(argv[3]);
     // open source code file
     FILE *fp1 = fopen(argv[1], "r");
     if (fp1 == NULL) {
         printf("Error opening file\n");
         return 1;
     }
-    // create file if it doesn't exist for parse tree
-    FILE *fp2 = fopen(argv[2], "ab+");
     int choice = -1;
     while (choice != 0)
     {
@@ -50,7 +48,7 @@ int main(int argc, char *argv[])
             case 0:
                 break;
             case 1:
-                removeComments(fp1, "cleaned.txt");
+                removeComments(argv[1], "cleaned.txt");
                 // print cleaned file
                 FILE *fp = fopen("cleaned.txt", "r");
                 char *line = NULL;
@@ -61,13 +59,13 @@ int main(int argc, char *argv[])
                 }
                 break;
             case 2:
-                printTokenList(fp);
+                printTokenList(argv[1]);
                 break;
             case 3:
-                parseInputSourceCode(fp1, "parser/grammar.csv");
+                parseInputSourceCode(argv[1], argv[2]);
                 break;
             case 4:
-                printTimeTaken(fp);
+                printTimeTaken(argv[1], argv[2]);
                 break;
             default:
                 printf("Invalid choice\n. Please choose a number between 0 and 4\n");

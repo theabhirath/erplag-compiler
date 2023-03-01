@@ -123,10 +123,14 @@ char getCharFromBuffers(FILE *fp)
         getStream(fp);
     }
     if (finish < bufferSize)
+    {
         return buf1[finish];
+    }
     else if (finish < 2 * bufferSize)
+    {
         return buf2[finish - bufferSize];
-    
+    }
+    return '\0';
 }
 
 // gets lexeme from buffer
@@ -816,17 +820,26 @@ tokenInfo getNextToken(FILE *fp)
     return token;
 }
 
-void printTokenList(FILE *fp)
+void printTokenList(char *fileName)
 {
+    initialiseTwinBuffers();
+    reservedWordsTable();
+    FILE *fp = fopen(fileName, "r");
+    if (fp == NULL)
+    {
+        printf("Error opening file\n");
+        return;
+    }
     tokenInfo token;
+    printf("Line Number\tToken ID\tLexeme");
     while (1)
     {
         token = getNextToken(fp);
         if (token.tokenID == PROGRAMEND)
             break;
-        printf("Line Number\tToken ID\tLexeme");
         printf("%d\t%d\t%s\n", token.lineNumber, token.lineNumber, token.lexeme);
     }
+    fclose(fp);
 }
 
 // int main()
