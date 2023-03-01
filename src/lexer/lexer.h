@@ -13,5 +13,6 @@ void initialiseTwinBuffers();
 FILE *getStream(FILE *fp);
 void removeComments(char *test_file, char *clean_file);
 tokenInfo getNextToken(FILE *fp);
+void printTokenList(FILE *fp);
 
 #endif

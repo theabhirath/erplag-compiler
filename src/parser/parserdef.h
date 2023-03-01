@@ -121,5 +121,6 @@ typedef struct parse_tree
 
 typedef struct linked_list linked_list;
 typedef struct linked_list_node linked_list_node;
+typedef struct linked_list* grammar;
 
 #endif

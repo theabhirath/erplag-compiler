@@ -169,7 +169,7 @@ char *trim(char *str)
     return str;
 }
 
-void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked_list *rules)
+void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, grammar rules)
 {
     for (int i = 0; i < NUM_NONTERMINALS; i++)
     {
@@ -369,7 +369,7 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked
     }
 }
 
-void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *rules)
+void populateParseTable(token_set *firstSet, token_set *followSet, grammar rules)
 {
     // Automate population of parse table from grammar and first and follow sets
     for (int i = 0; i < NUM_NONTERMINALS; i++)
@@ -439,7 +439,7 @@ void printParseTable()
     }
 }
 
-void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalFile, char *nonterminalFile)
+void parseInputSourceCode(char *testcaseFile, char *grammarFile)
 {
     /*
         Done - Call create_rules() to create a linked list of rules
@@ -448,7 +448,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
         Parse the input source code as per LECTURE 21/02/2023 while creating the parse tree
     */
     hash_table_element *hashTable = createHashTable();
-    linked_list *rules = createRuleList(grammarFile, hashTable);
+    grammar rules = createRuleList(grammarFile, hashTable);
     token_set firstSet[NUM_NONTERMINALS];
     token_set followSet[NUM_NONTERMINALS];
     computeFirstAndFollowSets(firstSet, followSet, rules);
@@ -796,6 +796,7 @@ void printParseTree(FILE *fp)
     fprintf(fp, "%15s\t%10s\t%10s\t%10s\t%10s\t%10s\t%20s\n", "lexeme", "lineNo", "tokenName", "valueIfNumber", "parentNodeSymbol", "isLeafNode", "nodeSymbol");
     printSubTree(currentNode, fp);
 }
+
 void printSubTree(parse_tree_node *currentNode, FILE *fp)
 {
     if (currentNode == NULL)
@@ -890,7 +891,7 @@ void printSubTree(parse_tree_node *currentNode, FILE *fp)
     }
 }
 
-linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable)
+grammar createRuleList(char *grammarFile, hash_table_element *hashTable)
 {
     FILE *fp;
     char line[100];
@@ -902,7 +903,7 @@ linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable)
         printf("Error opening file\n");
         exit(1);
     }
-    linked_list *rules = malloc(sizeof(linked_list) * NUM_RULES);
+    grammar rules = malloc(sizeof(linked_list) * NUM_RULES);
     int i = 0;
     char delim[] = ",\n";
     while (fgets(line, 100, fp) != NULL)
@@ -1021,7 +1022,7 @@ hash_table_element *createHashTable()
     return hashTable;
 }
 
-void print_rules(linked_list *rules)
+void print_rules(grammar rules)
 {
     for (int i = 0; i < NUM_RULES; i++)
     {
@@ -1097,6 +1098,6 @@ int main()
     // }
     printf("Enter the buffer size: ");
     scanf("%d", &bufferSize);
-    parseInputSourceCode("test.txt", "grammar.csv", "terminals.txt", "nonterminals.txt");
+    parseInputSourceCode("test.txt", "grammar.csv");
     return 0;
 }

@@ -7,7 +7,7 @@
 
 void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, linked_list *rules);
 void populateParseTable(token_set *firstSet, token_set *followSet, linked_list *rules);
-void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalsFile, char *nonterminalsFile);
+void parseInputSourceCode(char *testcaseFile, char *grammarFile);
 void printParseTree(FILE *fp);
 linked_list *createRuleList(char *grammarFile, hash_table_element *hashTable);
 hash_table_element *createHashTable();
