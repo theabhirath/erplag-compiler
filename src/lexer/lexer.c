@@ -26,6 +26,8 @@ void initialiseTwinBuffers()
 {
     buf1 = (char *)malloc(sizeof(char) * bufferSize);
     buf2 = (char *)malloc(sizeof(char) * bufferSize);
+    bzero(buf1, bufferSize);
+    bzero(buf2, bufferSize);
     begin = 2 * bufferSize;
     finish = 2 * bufferSize;
 }
@@ -116,15 +118,15 @@ FILE *getStream(FILE *fp)
 // gets single character from buffer
 char getCharFromBuffers(FILE *fp)
 {
+    if (finish >= 2 * bufferSize)
+    {
+        getStream(fp);
+    }
     if (finish < bufferSize)
         return buf1[finish];
     else if (finish < 2 * bufferSize)
         return buf2[finish - bufferSize];
-    else
-    {
-        getStream(fp);
-        return buf1[finish];
-    }
+    
 }
 
 // gets lexeme from buffer
@@ -833,14 +835,14 @@ int main()
     scanf("%d", &bufferSize);
     initialiseTwinBuffers();
     reservedWordsTable();
-    FILE *fp = fopen("test.txt", "r");
+    FILE *fp = fopen("../../tests/t3.txt", "r");
     if (fp == NULL)
     {
         printf("Error opening file\n");
         return -1;
     }
     int flag = 1;
-    while (1)
+    while (flag)
     {
         tokenInfo token = getNextToken(fp);
         if (token.tokenID == PROGRAMEND)
@@ -851,8 +853,8 @@ int main()
         } else if (token.tokenID == RNUM){
             printf("%f\n", token.val.floatValue);
         }
-        // printf("DO you want to continue? (1/0): ");
-        // scanf("%d", &flag);
+        printf("DO you want to continue? (1/0): ");
+        scanf("%d", &flag);
     }
     fclose(fp);
     return 0;
