@@ -5,6 +5,7 @@
 
 #include "parser.h"
 #include "parserdef.h"
+#include "stack.h"
 #include "linked_list.h"
 
 #define HASH_TABLE_SIZE 1050
@@ -140,23 +141,7 @@ char *terminals[NUM_TOKENS] = {
 // parse table
 int Table[NUM_NONTERMINALS][NUM_TOKENS];
 
-
-typedef struct parse_tree_node
-{
-    TNT tnt;
-    parse_tree_node *parent;
-    parse_tree_node *child;
-    parse_tree_node *sibling;
-    int leafNodeFlag;
-    int ruleNumber;
-    tokenInfo leafNodeInfo;
-} parse_tree_node;
-
-typedef struct parse_tree
-{
-    parse_tree_node *root;
-} parse_tree;
-
+// parse tree
 parse_tree parseTree;
 
 void createParseTree(parse_tree parseTree, parse_tree_node *rootNode)
@@ -167,46 +152,6 @@ void createParseTree(parse_tree parseTree, parse_tree_node *rootNode)
 void createParseTreeNode(TNT tnt, parse_tree_node *node)
 {
     node->tnt = tnt;
-}
-
-// Stack of nodes
-typedef struct stack
-{
-    hash_table_element symbol;
-    struct stack *next;
-} stack;
-
-stack *createStack()
-{
-    return NULL;
-}
-stack *push(stack *S, hash_table_element symbol)
-{
-    stack *temp = (stack *)malloc(sizeof(stack));
-    temp->symbol = symbol;
-    temp->next = S;
-    S = temp;
-    return S;
-}
-
-hash_table_element top(stack *S)
-{
-    return S->symbol;
-}
-
-stack *pop(stack *S)
-{
-    stack *temp = S;
-    S = S->next;
-    free(temp);
-    return S;
-}
-
-int isEmpty(stack *S)
-{
-    if (S == NULL)
-        return 1;
-    return 0;
 }
 
 char *trim(char *str)
@@ -527,6 +472,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
     printf("Created Parse Tree\n");
     parse_tree_node *currentNode = parseTree.root;
     FILE *fp = fopen(testcaseFile, "r"); // Source code here.
+    initialiseTwinBuffers();
     reservedWordsTable();
     tokenInfo L = getNextToken(fp); // Calling lexer here.
     printf("Read first token: %s\n", terminals[L.tokenID]);
@@ -624,7 +570,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
                     L = getNextToken(fp);
                 }
                 printf("Found token in syncSet %s\n", terminals[L.tokenID]);
-                if(X.type == __NONTERMINAL__ && (&followSet[X.tnt.nonterm], L.tokenID)){
+                if(X.type == __NONTERMINAL__ && isMember(&followSet[X.tnt.nonterm], L.tokenID)){
                     S = pop(S);
                     X = top(S);
                     continue;
@@ -675,7 +621,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
                     newPTNode->parent = keepTrackNode;
                     newPTNode->sibling = NULL;
                     newPTNode->leafNodeFlag = 1;
-                    newPTNode->leafNodeInfo;
+                    // newPTNode->leafNodeInfo;
                     currentNode->child = newPTNode;
                     currentNode = currentNode->child;
                 }
@@ -779,7 +725,7 @@ void parseInputSourceCode(char *testcaseFile, char *grammarFile, char *terminalF
                 {
                     L = getNextToken(fp);
                 }
-                if(X.type == __NONTERMINAL__ && (&followSet[X.tnt.nonterm], L.tokenID)){
+                if(X.type == __NONTERMINAL__ && isMember(&followSet[X.tnt.nonterm], L.tokenID)){
                     S = pop(S);
                     X = top(S);
                     continue;
@@ -867,7 +813,7 @@ void printSubTree(parse_tree_node *currentNode, FILE *fp)
         if (currentNode->tnt.tok == EPSILON)
             return;
         if (currentNode->tnt.tok == ID)
-            fprintf(fp, "%15s\t", currentNode->leafNodeInfo.val.lexValue);
+            fprintf(fp, "%15s\t", currentNode->leafNodeInfo.lexeme);
         else if (currentNode->tnt.tok == NUM || currentNode->tnt.tok == RNUM)
             fprintf(fp, "%15s\t", "--------");
         else
@@ -1149,6 +1095,8 @@ int main()
     //     printSet(&follow_sets[i]);
     //     printf("\n");
     // }
+    printf("Enter the buffer size: ");
+    scanf("%d", &bufferSize);
     parseInputSourceCode("test.txt", "grammar.csv", "terminals.txt", "nonterminals.txt");
     return 0;
 }

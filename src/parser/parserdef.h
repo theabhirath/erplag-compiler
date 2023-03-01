@@ -103,8 +103,22 @@ struct hash_table_element
 };
 typedef struct hash_table_element hash_table_element;
 
-typedef struct parse_tree parse_tree;
-typedef struct parse_tree_node parse_tree_node;
+typedef struct parse_tree_node
+{
+    TNT tnt;
+    struct parse_tree_node *parent;
+    struct parse_tree_node *child;
+    struct parse_tree_node *sibling;
+    int leafNodeFlag;
+    int ruleNumber;
+    tokenInfo leafNodeInfo;
+} parse_tree_node;
+
+typedef struct parse_tree
+{
+    parse_tree_node *root;
+} parse_tree;
+
 typedef struct linked_list linked_list;
 typedef struct linked_list_node linked_list_node;
 

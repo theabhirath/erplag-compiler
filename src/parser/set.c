@@ -1,5 +1,6 @@
-#include "set.h"
 #include <stdlib.h>
+
+#include "set.h"
 
 token_set *createTokenSet()
 {

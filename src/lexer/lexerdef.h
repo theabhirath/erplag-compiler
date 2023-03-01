@@ -68,20 +68,23 @@ enum TOKEN
 // Currently, NUM_TOKENS is 56 (0-55) and EPSILON is 56
 typedef enum TOKEN TOKEN;
 
-union Value
+// union for storing numerical values - either int or float
+union number
 {
     int intValue;
     float floatValue;
-    char *lexValue;
 };
 
+// represents a token
 typedef struct tokenInfo
 {
     TOKEN tokenID; // the token
-    union Value val; // the value of the token
+    union number val; // the value of the token
     int lineNumber;  // line number of the token
+    char *lexeme; // the lexeme of the token
 } tokenInfo;
 
+// reserved word struct
 struct reserved_word
 {
     char *word;
@@ -90,5 +93,8 @@ struct reserved_word
 
 // reserved words table
 extern struct reserved_word rwtable[];
+
+// buffer size
+extern int bufferSize;
 
 #endif

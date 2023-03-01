@@ -3,6 +3,7 @@
 
 #include "parserdef.h"
 
+// Linked list node
 struct linked_list_node
 {
     struct linked_list_node *next;
@@ -10,6 +11,7 @@ struct linked_list_node
     enum TNT_TYPE type;
 };
 
+// Linked list
 struct linked_list
 {
     struct linked_list_node *head;

@@ -3,15 +3,15 @@
 
 #include "../lexer/lexerdef.h"
 
+// Here a long long int is used to store the set of tokens.
+// The reason for this is that the number of tokens is 57 < 64.
+// So, the ith least significant bit of the set will correspond to the ith token of the enum TOKEN.
+// For example, if the first entry of the enum TOKEN is INTEGER,
+// then the least significant bit of the set will correspond to INTEGER.
+// The singleton set containing only INTEGER will be 1.
 struct token_set
 {
     long long int set;
-    // Here a long long int is used to store the set of tokens.
-    // The reason for this is that the number of tokens is 57 < 64.
-    // So, the ith least significant bit of the set will correspond to the ith token of the enum TOKEN.
-    // For example, if the first entry of the enum TOKEN is INTEGER,
-    // then the least significant bit of the set will correspond to INTEGER.
-    // The singleton set containing only INTEGER will be 1.
 };
 typedef struct token_set token_set;
 

@@ -2,6 +2,7 @@
 
 #include "linked_list.h"
 
+// create a new node to be added to the linked list
 linked_list_node *createNode(TNT tnt, TNT_TYPE type)
 {
     linked_list_node *node = (linked_list_node *)malloc(sizeof(linked_list_node));
@@ -10,6 +11,8 @@ linked_list_node *createNode(TNT tnt, TNT_TYPE type)
     node->type = type;
     return node;
 }
+
+// add a node to the linked list
 void addNode(linked_list *list, linked_list_node *node)
 {
     if (list->head == NULL)
@@ -24,6 +27,7 @@ void addNode(linked_list *list, linked_list_node *node)
     }
 }
 
+// free the memory allocated to the linked list
 void destroyList(linked_list *list)
 {
     linked_list_node *currentNode = list->head;
