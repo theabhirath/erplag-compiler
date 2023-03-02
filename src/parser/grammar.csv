@@ -125,7 +125,7 @@
 <default>,EPSILON
 <iterativeStmt>,FOR,BO,ID,IN,<forrange>,BC,START,<statements>,END
 <iterativeStmt>,WHILE,BO,<booleanExpr>,BC,START,<statements>,END
-<forrange>,NUM,RANGEOP,NUM
+<forrange>,<sign>,NUM,RANGEOP,<sign>,NUM
 <range>,<var2>,RANGEOP,<var2>
 <var2>,ID,<whichId>
 <var2>,NUM

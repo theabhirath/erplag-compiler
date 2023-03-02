@@ -40,6 +40,10 @@ int main(int argc, char *argv[])
         return 1;
     }
     int choice = -1;
+    printf("FIRST and FOLLOW sets automated\n");
+    printf("Both lexical and syntax analysis modules implemented\n");
+    printf("Parse tree generated\n");
+    printf("Modules work for all test cases\n");
     while (choice != 0)
     {
         printf("Enter your choice: ");

@@ -97,4 +97,8 @@ extern struct reserved_word rwtable[];
 // buffer size
 extern int bufferSize;
 
+
+extern char *terminals[];
+extern char *nonterminals[];
+
 #endif

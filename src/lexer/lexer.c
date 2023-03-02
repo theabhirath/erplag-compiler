@@ -535,7 +535,7 @@ tokenInfo getNextToken(FILE *fp)
 
         // error state; lone equal is an invalid token
         case 30:
-            fprintf(stderr, "Error: Lone equal is an invalid symbol at line %d. Did you mean to write ':=' or '=='?\n", lineNumber);
+            fprintf(stderr, "Line: %d. Error: Lone equal is an invalid symbol. Did you mean to write ':=' or '=='?\n", lineNumber);
             state = 0;
             break;
 
@@ -547,7 +547,7 @@ tokenInfo getNextToken(FILE *fp)
 
         // error state; invalid character read
         case 33:
-            fprintf(stderr, "Error: Invalid character '%c' at line %d.\n", c, lineNumber);
+            fprintf(stderr, "Line: %d. Error: Invalid character '%c'.\n", lineNumber, c);
             finish++;
             state = 0;
             break;
@@ -635,7 +635,7 @@ tokenInfo getNextToken(FILE *fp)
 
         // error state; lone dot is an invalid token
         case 41:
-            fprintf(stderr, "Error: Lone dot is an invalid symbol at line %d. Did you mean to write '..'?\n", lineNumber);
+            fprintf(stderr, "Line: %d. Error: Lone dot is an invalid symbol. Did you mean to write '..'?\n", lineNumber);
             resetPointers();
             state = 0;
             break;
@@ -718,7 +718,7 @@ tokenInfo getNextToken(FILE *fp)
 
         // error state; lone exclamation mark is an invalid token
         case 53:
-            fprintf(stderr, "Error: Lone exclamation mark is an invalid symbol at line %d. Did you mean to write '!='?\n", lineNumber);
+            fprintf(stderr, "Line: %d. Error: Lone exclamation mark is an invalid symbol. Did you mean to write '!='?\n", lineNumber);
             resetPointers();
             state = 0;
             break;
@@ -811,7 +811,7 @@ tokenInfo getNextToken(FILE *fp)
         // added later; to handle unexpected symbols
         case 71:
             lexeme = getLexemeFromBuffers(fp);
-            fprintf(stderr, "Error: Unexpected symbol after '%s' at line %d\n", lexeme, lineNumber);
+            fprintf(stderr, "Line: %d. Error: Unexpected symbol after '%s'\n", lineNumber, lexeme);
             free(lexeme);
             resetPointers();
             state = 0;
@@ -832,13 +832,13 @@ void printTokenList(char *fileName)
         return;
     }
     tokenInfo token;
-    printf("Line Number\tToken ID\tLexeme\n");
+    printf("Line Number\tLexeme\tToken Name\n");
     while (1)
     {
         token = getNextToken(fp);
         if (token.tokenID == PROGRAMEND)
             break;
-        printf("%d\t%d\t%s\n", token.lineNumber, token.lineNumber, token.lexeme);
+        printf("%5d\t%13s\t%s\n", token.lineNumber, token.lexeme, terminals[token.tokenID]);
     }
     fclose(fp);
 }

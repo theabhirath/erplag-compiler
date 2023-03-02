@@ -83,7 +83,7 @@ int reservedWordsTable()
             rwtable[index].tokenID = arr[i].tokenID;
         }
     }
-    printf("Number of collisions: %d\n", numCollisions);
+    // printf("Number of collisions: %d\n", numCollisions);
 
     return 0;
 }

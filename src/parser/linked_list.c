@@ -30,16 +30,16 @@ void addNode(linked_list *list, linked_list_node *node)
 // free the memory allocated to the linked list
 void destroyList(linked_list *list)
 {
-    linked_list_node *currentNode = list->head;
-    linked_list_node *nextNode = NULL;
-    while (currentNode != NULL)
-    {
-        nextNode = currentNode->next;
-        free(currentNode);
-        currentNode = nextNode;
+    for (int i = 0; i < NUM_RULES; i++){
+        linked_list_node *node = list[i].head;
+        while (node != NULL)
+        {
+            linked_list_node *temp = node;
+            node = node->next;
+            free(temp);
+        }
     }
-    list->head = NULL;
-    list->tail = NULL;
+    free(list);
 }
 
 linked_list *createLinkedListArray(int n)

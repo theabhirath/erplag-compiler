@@ -1,2 +1,0 @@
-         lexeme	    lineNo	 tokenName	valueIfNumber	parentNodeSymbol	isLeafNode	          nodeSymbol
-       --------	  --------	  --------	  --------	  --------	             NO	                <program>	
