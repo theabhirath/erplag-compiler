@@ -185,6 +185,11 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, gramma
     int any_incomplete = 0;
     for (int i = 0; i < NUM_RULES; i++)
     {
+        if (rules[i].head == NULL)
+        {
+            printf("Error: Rule %d is empty in Grammar\n", i);
+            exit(1);
+        }
         linked_list_node *node = rules[i].head;
         NONTERMINAL nt = node->tnt.nonterm;
         node = node->next;
@@ -225,6 +230,42 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, gramma
                     token_set temp = firstSet[node->tnt.nonterm];
                     removeToken(&temp, EPSILON);
                     firstSet[nt].set |= temp.set;
+                    if (isMember(&firstSet[node->tnt.nonterm], EPSILON))
+                    {
+                        node = node->next;
+                        while (node != NULL)
+                        {
+                            if (node->type == __TERMINAL__)
+                            {
+                                addToken(&firstSet[nt], node->tnt.tok);
+                                break;
+                            }
+                            else
+                            {
+                                if (incomplete[node->tnt.nonterm] == 0)
+                                {
+                                    token_set temp = firstSet[node->tnt.nonterm];
+                                    removeToken(&temp, EPSILON);
+                                    firstSet[nt].set |= temp.set;
+                                    if (!isMember(&firstSet[node->tnt.nonterm], EPSILON))
+                                    {
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    incomplete[nt] += 1;
+                                    any_incomplete = 1;
+                                    break;
+                                }
+                            }
+                            node = node->next;
+                        }
+                        if (node == NULL)
+                        {
+                            addToken(&firstSet[nt], EPSILON);
+                        }
+                    }
                 }
                 else
                 {
@@ -264,7 +305,7 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, gramma
             }
         }
     }
-
+    printf("First sets computed\n");
     changed = 1;
     int iteration = 0;
 
@@ -452,10 +493,13 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
         Parse the input source code as per LECTURE 21/02/2023 while creating the parse tree
     */
     hash_table_element *hashTable = createHashTable();
+    printf("Hash Table Populated\n");
     grammar rules = createRuleList("src/parser/grammar.csv", hashTable);
+    printf("Rule List Populated\n");
     token_set firstSet[NUM_NONTERMINALS];
     token_set followSet[NUM_NONTERMINALS];
     computeFirstAndFollowSets(firstSet, followSet, rules);
+    printf("First and Follow Sets Computed\n");
     // Print first set of modulereusestmt
     printf("First Set of modulereusestmt\n");
     printSet(&firstSet[__moduleReuseStmt__]);
@@ -586,6 +630,7 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
                     // TODO: Call function to print error - Premature end of input
                     if (L.tokenID == PROGRAMEND && X.tnt.tok != PROGRAMEND){
                     prematureEndOfInputError();
+                    return;
                 }
                 }
                 printf("Found token in syncSet %s\n", terminals[L.tokenID]);
@@ -783,6 +828,7 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
                     // TODO: Call function to print error - Premature end of input
                     if (L.tokenID == PROGRAMEND){
                     prematureEndOfInputError();
+                    return;
                     }
                 }
                 printf("L: %s\n", terminals[L.tokenID]);
@@ -966,30 +1012,35 @@ grammar createRuleList(char *grammarFile, hash_table_element *hashTable)
     linked_list_node *lhs_nt;
     linked_list_node *rhs_nt;
     fp = fopen(grammarFile, "r");
-    printf("Opening file %s", grammarFile);
     if (fp == NULL)
     {
         printf("Error opening file\n");
         exit(1);
     }
-    grammar rules = malloc(sizeof(linked_list) * NUM_RULES);
+    grammar rules = createLinkedListArray(NUM_RULES);
     int i = 0;
     char delim[] = ",\n";
     while (fgets(line, 128, fp) != NULL)
     {
+        printf("%s", line);
         char *tnt = strtok(line, delim);
+        printf("LHS: %s\n", tnt);
         if (hashTable[hash(tnt)].type != __NONTERMINAL__)
         {
-            printf("Error in line %d\n", i + 1);
+            printf("Error in grammar at line %d\n", i + 1);
             printf("Expected nonterminal, found %s\n", tnt);
         }
+        printf("It is a nonterminal\n");
         lhs_nt = createNode(hashTable[hash(tnt)].tnt, __NONTERMINAL__); // Potential memleak
+        printf("Node created\n");
         addNode(&rules[i], lhs_nt);
+        printf("Node added\n");
+        printf("LHS: %s\n", tnt);
         tnt = strtok(NULL, delim);
         while (tnt != NULL)
         {
             tnt = trim(tnt);
-            // printf("%s\n", tnt);
+            printf("%s\n", tnt);
             if (hashTable[hash(tnt)].type == __NONE__)
             {
                 printf("None token found in rule %d RHS\n", i + 1);
@@ -1001,6 +1052,7 @@ grammar createRuleList(char *grammarFile, hash_table_element *hashTable)
             }
             else if (hashTable[hash(tnt)].type == __EPSILON__)
             {
+                printf("EPSILON found in rule %d RHS\n", i + 1);
                 break;
             }
             else
@@ -1152,7 +1204,6 @@ void prematureEndOfInputError(){
     FILE *fp1 = fopen("parseTree.txt", "w");
     printParseTree(fp1);
     fclose(fp1);
-    exit(1);
 }
 
 // int main()

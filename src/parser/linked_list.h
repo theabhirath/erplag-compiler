@@ -21,5 +21,6 @@ struct linked_list
 linked_list_node *createNode(TNT tnt, TNT_TYPE type);
 void addNode(linked_list *list, linked_list_node *node);
 void destroyList(linked_list *list);
+linked_list *createLinkedListArray(int n);
 
 #endif

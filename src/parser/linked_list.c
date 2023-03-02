@@ -41,3 +41,14 @@ void destroyList(linked_list *list)
     list->head = NULL;
     list->tail = NULL;
 }
+
+linked_list *createLinkedListArray(int n)
+{
+    linked_list *list = (linked_list *)malloc(n * sizeof(linked_list));
+    for (int i = 0; i < n; i++)
+    {
+        list[i].head = NULL;
+        list[i].tail = NULL;
+    }
+    return list;
+}
