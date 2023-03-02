@@ -490,17 +490,17 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
     printf("Read first token: %s\n", terminals[L.tokenID]);
     int count = 0;
     // Print non -1 entries of row program of Table
-    printf("Non -1 entries of row program of Table: \n");
-    for (int i = 0; i < NUM_TOKENS; i++)
+    //printf("Non -1 entries of row program of Table: \n");
+    /*for (int i = 0; i < NUM_TOKENS; i++)
     {
         if (Table[0][i] != -1)
         {
             printf("Token: %s, Rule Number: %d\n", terminals[i], Table[0][i]);
         }
-    }
+    }*/
     while (isEmpty(S) == 0)
     {
-        printf("Iteration Number: %d\n", count++);
+        printf("Iteration Number: %d and Line number : %d\n", count++, L.lineNumber);
         printf("Token: %s\n", terminals[L.tokenID]);
         // printf("Stack Top: %s\n", top(S).type == __TERMINAL__ ? terminals[top(S).tnt.tok] : nonterminals[top(S).tnt.nonterm]);
         /*if (L.tokenID == ID)
