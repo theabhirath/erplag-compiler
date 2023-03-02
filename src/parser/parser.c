@@ -841,12 +841,14 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
         // Space for error recovery, stack empty but input not finished
         FILE *fp1 = fopen("parseTree.txt", "w");
         printParseTree(fp1);
+        fclose(fp1);
     }
     else
     {
         printf("Parsing successful\n");
         FILE *fp1 = fopen(parseTreeFile, "w");
         printParseTree(fp1);
+        fclose(fp1);
     }
     fclose(fp);
     free(hashTable);
@@ -1010,6 +1012,7 @@ grammar createRuleList(char *grammarFile, hash_table_element *hashTable)
         }
         i++;
     }
+    fclose(fp);
     // free(lhs_nt);
     return rules;
 }
@@ -1148,6 +1151,7 @@ void prematureEndOfInputError(){
     printf("Expected more code\n");
     FILE *fp1 = fopen("parseTree.txt", "w");
     printParseTree(fp1);
+    fclose(fp1);
     exit(1);
 }
 

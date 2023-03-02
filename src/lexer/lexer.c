@@ -30,6 +30,7 @@ void initialiseTwinBuffers()
     bzero(buf2, bufferSize);
     begin = 2 * bufferSize;
     finish = 2 * bufferSize;
+    lineNumber = 1;
 }
 
 // takes source code, writes clean code to file without comments
