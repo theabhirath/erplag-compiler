@@ -1,0 +1,149 @@
+<lvalueIDStmt>,ASSIGNOP,<expression>,SEMICOL
+
+
+<lvalueARRStmt>,SQBO,<element_index_with_expression>,SQBC,ASSIGNOP,<expression>,SEMICOL
+
+<expression>,<booleanExpr>
+    <expression>.addr = <booleanExpr>.addr
+
+<booleanExpr>,<arithmeticExpr>,<BE00>
+
+
+<booleanExpr>,<bools>,<BE0>
+
+
+<BE00>,<relationalOp>,<arithmeticExpr>,<BE0>
+<BE00>,<BE0>
+<BE0>,<logicalOp>,<booleanExpr>
+<BE0>,EPSILON
+<arithmeticExpr>,<term>,<AE0>
+<arithmeticExpr>,<op1>,<term>,<AE0>
+<AE0>,<op1>,<term>,<AE0>
+<AE0>,EPSILON
+<term>,<factor>,<T0>
+<T0>,<op2>,<factor>,<T0>
+<T0>,EPSILON
+
+<factor>,BO,<expression>,BC
+    <factor>.addr = <expression>.addr
+    delete(BO)
+    delete(BC)
+
+<factor>,NUM
+    <factor>.addr = address(NUM)
+
+<factor>,RNUM
+    <factor>.addr = address(RNUM)
+
+<factor>,ID,<N_11>
+
+
+<N_11>,SQBO,<element_index_with_expression>,SQBC
+
+
+<N_11>,EPSILON
+    <N_11>.addr = NULL
+
+<element_index_with_expression>,<sign>,<N_10>
+
+
+<element_index_with_expression>,<arrExpr>
+    <element_index_with_expression>.addr = <arrExpr>.addr
+    delete(<arrExpr>)
+
+<sign>,PLUS
+<sign>,MINUS
+<sign>,EPSILON
+<N_10>,<new_index>
+    <N_10>.addr = <new_index>.addr
+    delete(<new_index>)
+
+<new_index>,NUM
+    <new_index>.addr = address(NUM)
+<new_index>,ID
+    <new_index>.addr = address(ID)
+
+<N_10>,BO,<arrExpr>,BC
+    <N_10>.addr = <arrExpr>.addr
+    delete(BO)
+    delete(BC)
+
+<arrExpr>,<arrTerm>,<arr_N4>
+
+
+<arr_N4>,<op1>,<arrTerm>,<arr_N4>
+
+<arr_N4>,EPSILON
+
+<arrTerm>,<arrFactor>,<arr_N5>
+    <arrTerm>.addr = <arrFactor>.addr
+    delete(<arrFactor>)
+
+    <arr_N5>.inh_addr = <arrTerm>.addr
+
+    <arrTerm>.syn_addr = <arr_N5>.syn_addr
+    
+
+<arr_N5>,<op2>,<arrFactor>,<arr_N5>'
+    <arr_N5>.addr = <op2>.addr
+    addRightChild(<arr_N5>.addr,<arrFactor>.addr)
+    delete(<arrFactor>)
+    delete(<op2>)
+
+    <arr_N5>'.inh_addr = <arr_N5>.addr
+    addLeftChild(<arr_N5>.addr,<arr_N5>.inh_addr)
+
+    <arr_N5>.syn_addr = <arr_N5>'.syn_addr
+    delete(<arr_N5>')
+     
+<arr_N5>,EPSILON
+    <arr_N5>.addr = NULL
+    delete(EPSILON)
+
+    <arr_N5>.syn_addr = <arr_N5>.inh_addr
+
+<arrFactor>,BO,<arrExpr>,BC
+    <arrFactor>.addr = <arrExpr>.addr
+    delete(<arrExpr>)
+    delete(BO)
+    delete(BC)
+<arrFactor>,<id_num_rnum>
+    <arrFactor>.addr = address(<id_num_rnum>)
+    delete(<id_num_rnum>)
+<id_num_rnum>,ID
+    <id_num_rnum>.addr = address(ID)
+<id_num_rnum>,NUM
+    <id_num_rnum>.addr = address(NUM)
+<id_num_rnum>,RNUM
+    <id_num_rnum>.addr = address(RNUM)
+<arrFactor>,<bools>
+    <arrFactor>.addr = <bools>.addr
+    delete(<bools>)
+
+<logicalOp>,AND
+<logicalOp>,OR
+<relationalOp>,EQ
+<relationalOp>,LT
+<relationalOp>,LE
+<relationalOp>,GT
+<relationalOp>,GE
+<relationalOp>,NE
+
+<op1>,PLUS
+    <op1>.addr = createASTNode(PLUS)
+    delete(PLUS)
+<op1>,MINUS
+    <op1>.addr = createASTNode(MINUS)
+    delete(MINUS)
+<op2>,MUL
+    <op2>.addr = createASTNode(MUL)
+    delete(MUL)
+<op2>,DIV
+    <op2>.addr = createASTNode(DIV)
+    delete(DIV)
+<bools>,TRUE
+    <bools>.addr = address(TRUE)
+    delete(TRUE)
+<bools>,FALSE
+    <bools>.addr = address(FALSE)
+    delete(FALSE)
