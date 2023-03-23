@@ -1,21 +1,115 @@
+<assignmentStmt>,ID,<whichStmt>
+    <assignmentStmt>.addr = address(ID)
+
+    <whichStmt>.inh_addr = <assignmentStmt>.addr
+
+    <assignmentStmt>.syn_addr = <whichStmt>.syn_addr
+    delete(<whichStmt>)
+<whichStmt>,<lvalueIDStmt>
+
+    <lvalueIDStmt>.inh_addr = <whichStmt>.inh_addr
+
+    <whichStmt>.syn_addr = <lvalueIDStmt>.syn_addr
+
+<whichStmt>,<lvalueARRStmt>
+    
+    <lvalueARRStmt>.inh_addr = <whichStmt>.inh_addr
+    
+    <whichStmt>.syn_addr = <lvalueARRStmt>.syn_addr
+
 <lvalueIDStmt>,ASSIGNOP,<expression>,SEMICOL
+    <lvalueIDStmt>.addr = createASTNode(EQUALS)
+    delete(ASSIGNOP)
+    addRightChild(<lvalueIDStmt>.addr,<expression>.addr)
+    delete(<expression>)
+    delete(SEMICOL)
+
+    addLeftChild(<lvalueIDStmt>.addr,<lvalueIDStmt>.inh_addr)
+
+    <lvalueIDStmt>.syn_addr = <lvalueIDStmt>.addr
+
+<lvalueARRStmt>,SQBO,<element_index_with_expression>,SQBC,ASSIGNOP,<expression>,SEMICOL
+    <lvalueARRStmt>.addr = createASTNode(EQUALS)
+    delete(SQBO)
+    
+    addRightChild(<lvalueARRStmt>.addr,<expression>.syn_addr)
+    delete(SQBC)
+    addRightChild(<lvalueARRStmt>.inh_addr, <element_index_with_expression>.syn_addr)
+    addLeftChild(<lvalueARRStmt>.addr,<lvalueARRStmt>.inh_addr)
+    delete(<element_index_with_expression>)
+    delete(ASSIGNOP)
+    delete(<expression>)
+    delete(SEMICOL)
+
+<lvalueIDStmt>,ASSIGNOP,<expression>,SEMICOL
+    <lvalueIDStmt>.addr = createASTNode(EQUALS)
+    delete(ASSIGNOP)
+    addRightChild(<lvalueIDStmt>.addr,<expression>.addr)
+    delete(<expression>)
+    delete(SEMICOL)
+
+    addLeftChild(<lvalueIDStmt>.addr,<lvalueIDStmt>.inh_addr)
+
+    <lvalueIDStmt>.syn_addr = <lvalueIDStmt>.addr
 
 
 <lvalueARRStmt>,SQBO,<element_index_with_expression>,SQBC,ASSIGNOP,<expression>,SEMICOL
+    delete(SQBO)
+    <lvalueARRStmt>.addr = <element_index_with_expression>.syn_addr
+    delete(SQBC)
+    delete(ASSIGNOP)
+
 
 <expression>,<booleanExpr>
-    <expression>.addr = <booleanExpr>.addr
+    <expression>.addr = <booleanExpr>.syn_addr
 
 <booleanExpr>,<arithmeticExpr>,<BE00>
+    <booleanExpr>.addr = <arithmeticExpr>.syn_addr
+    delete(<arithmeticExpr>)
+
+    <BE00>.inh_addr = <booleanExpr>.addr
+
+    <booleanExpr>.syn_addr = <BE00>.syn_addr
+    delete(<BE00>)
 
 
 <booleanExpr>,<bools>,<BE0>
+    <booleanExpr>.addr = <bools>.addr
+    delete(<bools>)
+
+    <BE0>.inh_addr = <booleanExpr>.addr
+
+    <booleanExpr>.syn_addr = <BE0>.syn_addr
 
 
 <BE00>,<relationalOp>,<arithmeticExpr>,<BE0>
+    <BE00>.addr = <relationalOp>.addr
+    addRightChild(<BE00>.addr,<arithmeticExpr>.syn_addr)
+    delete(<arithmeticExpr>)
+
+    addLeftChild(<BE00>.addr,<BE00>.inh_addr)
+    <BE0>.inh_addr = <BE00>.addr
+
+    <BE00>.syn_addr = <BE0>.syn_addr
+    delete(<BE0>)
+
 <BE00>,<BE0>
-<BE0>,<logicalOp>,<booleanExpr>
     
+    <BE0>.inh_addr = <BE00>.inh_addr
+
+    <BE00>.syn_addr = <BE0>.syn_addr
+    delete(<BE0>)
+
+<BE0>,<logicalOp>,<booleanExpr>
+    <BE0>.addr = <logicalOp>.addr
+    addRightChild(<BE0>.addr,<booleanExpr>.addr)
+    delete(<booleanExpr>)
+
+    addLeftChild(<BE0>.addr,<BE0>.inh_addr)
+
+    <BE0>.syn_addr = <BE0>.addr
+    delete(<BE0>)
+
 
 <BE0>,EPSILON
     <BE0>.addr = NULL
@@ -246,11 +340,23 @@
     delete(<logicalOp>)
 
 <relationalOp>,EQ
+    <relationalOp>.addr = createASTNode(EQ)
+    delete(EQ)
 <relationalOp>,LT
+    <relationalOp>.addr = createASTNode(LT)
+    delete(LT)
 <relationalOp>,LE
+    <relationalOp>.addr = createASTNode(LE)
+    delete(LE)
 <relationalOp>,GT
+    <relationalOp>.addr = createASTNode(GT)
+    delete(GT)
 <relationalOp>,GE
+    <relationalOp>.addr = createASTNode(GE)
+    delete(GE)
 <relationalOp>,NE
+    <relationalOp>.addr = createASTNode(NE)
+    delete(NE)
 
 <op1>,PLUS
     <op1>.addr = createASTNode(PLUS)

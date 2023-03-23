@@ -1,0 +1,168 @@
+<program>,<moduleDeclarations>,<otherModules>,<driverModule>,<otherModules>,PROGRAMEND
+<moduleDeclarations>,<moduleDeclaration>,<moduleDeclarations>
+<moduleDeclarations>,EPSILON
+<moduleDeclaration>,DECLARE,MODULE,ID,SEMICOL
+<otherModules>,<module>,<otherModules>
+    <otherModules>.addr = <module>.addr
+<otherModules>,EPSILON
+    <otherModules>.addr = NULL
+    delete(EPSILON)
+<driverModule>,DRIVERDEF,DRIVER,PROGRAM,DRIVERENDDEF,<moduleDef>
+
+<module>,DEF,MODULE,ID,ENDEF,TAKES,INPUT,SQBO,<input_plist>,SQBC,SEMICOL,<ret>,<moduleDef>
+    addToHashTable(SymbolTable, createModule(address(ID), <input_plist>.syn_addr, <ret>.addr, <moduleDef>.addr))
+    delete(DEF)
+    delete(MODULE)
+    delete(ENDEF)
+    delete(TAKES)
+    delete(INPUT)
+    delete(SQBO)
+    delete(<input_plist>)
+    delete(SQBC)
+    delete(SEMICOL)
+    delete(<ret>)
+    <module>.addr = <moduleDef>.addr
+    delete(<moduleDef>)
+<ret>,RETURNS,SQBO,<output_plist>,SQBC,SEMICOL
+    <ret>.addr = <output_plist>.syn_addr
+    delete(RETURNS)
+    delete(SQBO)
+    delete(<output_plist>)
+    delete(SQBC)
+    delete(SEMICOL)
+<ret>,EPSILON
+    <ret>.addr = NULL
+<input_plist>,ID,COLON,<dataType>,<iP0>
+    <input_plist>.syn_addr = insertAtFront(<iP0>.syn_addr, createLLNode(address(ID), <dataType>.syn_addr))
+    delete(COLON)
+    delete(<dataType>)
+    delete(<iP0>)
+<iP0>,COMMA,ID,COLON,<dataType>,<iP0>'
+    delete(COMMA)
+
+    <ip0>.syn_addr = insertAtFront(<iP0>'.syn_addr, createLLNode(address(ID), <dataType>.syn_addr))    
+    delete(COLON)
+    delete(<dataType>)
+
+    
+<iP0>,EPSILON
+    delete(EPSILON)
+
+    <iP0>.syn_addr = makeASTNode("LINKED LIST")
+
+<output_plist>,ID,COLON,<type>,<oP0>
+    <output_plist>.syn_addr = insertAtFront(<oP0>.syn_addr, createLLNode(address(ID), <type>.syn_addr))
+    delete(COLON)
+    delete(<type>)
+    delete(<oP0>)
+<oP0>,COMMA,ID,COLON,<type>,<oP0>'
+    delete(COMMA)
+    <oP0>.syn_addr = insertAtFront(<oP0>'.syn_addr, createLLNode(address(ID), <type>.syn_addr))
+    delete(COLON)
+    delete(<type>)
+<oP0>,EPSILON
+    delete(EPSILON)
+    <oP0>.syn_addr = makeASTNode("LINKED LIST")
+<dataType>,INTEGER
+    <dataType>.addr = createASTNode("INTEGER")
+<dataType>,REAL
+    <dataType>.addr = createASTNode("REAL")
+<dataType>,BOOLEAN
+    <dataType>.addr = createASTNode("BOOLEAN")
+<dataType>,ARRAY,SQBO,<range_arr>,SQBC,OF,<type>
+    <dataType>.addr = createASTNode("ARRAY")
+    addLeftChild(<dataType>.addr, <range_arr>.addr)
+    delete(SQBO)
+    delete(<range_arr>)
+    delete(SQBC)
+    addRightChild(<dataType>.addr, <type>.addr)
+    delete(<type>)
+<range_arr>,<index_arr>1,RANGEOP,<index_arr>2
+    <range_arr>.addr = createASTNode("RANGE")
+    addLeftChild(<range_arr>.addr, <index_arr>1.addr)
+    delete(<index_arr>1)
+    delete(RANGEOP)
+    addRightChild(<range_arr>.addr, <index_arr>2.addr)
+    delete(<index_arr>2)
+
+<index_arr>,<sign>,<new_index>
+    if(<sign>.addr == NULL)
+        <index_arr>.addr = <new_index>.addr
+    else
+        <index_arr>.addr = <sign>.addr
+        addRightChild(<index_arr>.addr, <new_index>.addr)
+    delete(<sign>)
+<new_index>,NUM
+    <new_index>.addr = address(NUM)
+<new_index>,ID
+    <new_index>.addr = address(ID)
+<type>,INTEGER
+<type>,REAL
+<type>,BOOLEAN
+<moduleDef>,START,<statements>,END
+     <moduleDef>.addr = <statements>.syn_addr
+<statements>,<statement>,<statements>'
+    <statements>.addr = <statement>.addr
+    delete(<statement>)
+    delete(<statements>')
+
+    <statements>.syn_addr = insertAtFront(<statements>'.syn_addr, <statements>.addr)
+
+<statements>,EPSILON
+    <statements>.syn_addr = makeASTNode("LINKED LIST")
+<statement>,<ioStmt>
+    <statement>.addr = <ioStmt>.addr
+    delete(<ioStmt>)
+<statement>,<simpleStmt>
+    <statement>.addr = <simpleStmt>.addr
+    delete(<simpleStmt>)
+<statement>,<declareStmt>
+    <statement>.addr = <declareStmt>.addr
+    delete(<declareStmt>)
+<statement>,<conditionalStmt>
+    <statement>.addr = <conditionalStmt>.addr
+    delete(<conditionalStmt>)
+<statement>,<iterativeStmt>
+    <statement>.addr = <iterativeStmt>.addr
+    delete(<iterativeStmt>)
+<ioStmt>,GET_VALUE,BO,ID,BC,SEMICOL
+    <ioStmt>.addr = createASTNode("GET_VALUE")
+    addRightChild(<ioStmt>.addr, address(ID))
+    delete(BO)
+    delete(BC)
+    delete(SEMICOL)
+
+<ioStmt>,PRINT,BO,<var3>,BC,SEMICOL
+    <ioStmt>.addr = createASTNode("PRINT")
+    addRightChild(<ioStmt>.addr, <var3>.addr)
+    delete(BO)
+    delete(BC)
+    delete(SEMICOL)
+<var3>,<var>
+    <var3>.addr = <var>.syn_addr
+<var3>,<bools>
+    <var3>.addr = <bools>.addr
+<var>,ID,<whichId>
+    <var>.addr = address(ID)
+    
+    <whichId>.inh_addr = <var>.addr
+<var>,NUM
+    <var>.addr = address(NUM)
+<var>,RNUM
+    <var>.addr = address(RNUM)
+<whichId>,SQBO,<wI0>
+    <whichId>.syn_addr = addRightChild(<whichId>.inh_addr, <wI0>.addr)
+    delete(SQBO)
+    delete(<wI0>)
+<whichId>,EPSILON
+    <whichId>.syn_addr = <whichId>.inh_addr
+<wI0>,<index_arr>,SQBC
+    <wI0>.addr = <index_arr>.addr
+    delete(SQBC)
+    delete(<index_arr>)
+<simpleStmt>,<assignmentStmt>
+    <simpleStmt>.addr = <assignmentStmt>.addr
+    delete(<assignmentStmt>)
+<simpleStmt>,<moduleReuseStmt>
+    <simpleStmt>.addr = <moduleReuseStmt>.addr
+    delete(<moduleReuseStmt>)
