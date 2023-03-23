@@ -256,6 +256,7 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, gramma
                                 {
                                     incomplete[nt] += 1;
                                     any_incomplete = 1;
+                                    unhandled[i] = 1;
                                     break;
                                 }
                             }
@@ -307,12 +308,10 @@ void computeFirstAndFollowSets(token_set *firstSet, token_set *followSet, gramma
     }
     // printf("First sets computed\n");
     changed = 1;
-    int iteration = 0;
 
     // Follow set computation
     while (changed)
     {
-        // printf("Iteration %d\n", iteration++);
         changed = 0;
         for (int i = 0; i < NUM_RULES; i++)
         {
@@ -526,7 +525,7 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
     // printf("Read first token: %s\n", terminals[L.tokenID]);
     int count = 0;
     // Print non -1 entries of row program of Table
-    //printf("Non -1 entries of row program of Table: \n");
+    // printf("Non -1 entries of row program of Table: \n");
     /*for (int i = 0; i < NUM_TOKENS; i++)
     {
         if (Table[0][i] != -1)
@@ -554,13 +553,13 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
             if (X.tnt.tok == L.tokenID)
             {
                 // printf("Matched\n");
-                //printf("Current Node: %s\n", terminals[currentNode->tnt.tok]);
+                // printf("Current Node: %s\n", terminals[currentNode->tnt.tok]);
                 currentNode->leafNodeFlag = 1; // Token can only be the leaf node.
-                //printf("Leaf Node Flag set\n");
+                // printf("Leaf Node Flag set\n");
                 currentNode->tnt.tok = L.tokenID;
-                //printf("Token set\n");
+                // printf("Token set\n");
                 currentNode->leafNodeInfo = L;
-                //printf("Flags set\n");
+                // printf("Flags set\n");
                 if (currentNode->sibling != NULL)
                 {
                     currentNode = currentNode->sibling;
@@ -571,7 +570,7 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
                     while (currentNode->parent != NULL)
                     {
                         currentNode = currentNode->parent;
-                        //printf("While recursing up the tree, current node: %s\n", nonterminals[currentNode->tnt.nonterm]);
+                        // printf("While recursing up the tree, current node: %s\n", nonterminals[currentNode->tnt.nonterm]);
                         if (currentNode->sibling != NULL)
                         {
                             currentNode = currentNode->sibling;
@@ -597,20 +596,21 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
                 token_set *syncSet = createTokenSet();
                 // Add SQBC to syncSet using addToken function
                 // addToken(syncSet, SEMICOL);
-                addToken(syncSet, END); 
-                if(isMember(&followSet[X.tnt.tok], EPSILON)){
+                addToken(syncSet, END);
+                if (isMember(&followSet[X.tnt.tok], EPSILON))
+                {
                     addToken(syncSet, SEMICOL);
                     addToken(syncSet, BC);
                     addToken(syncSet, START);
                     addToken(syncSet, SQBC);
                 }
-                //addToken(syncSet, SEMICOL);
-                //addToken(syncSet, BC);
-                //addToken(syncSet, START);
-                // Fill syncSet with all the tokens in followSet of the nonterminal on top of stack
+                // addToken(syncSet, SEMICOL);
+                // addToken(syncSet, BC);
+                // addToken(syncSet, START);
+                //  Fill syncSet with all the tokens in followSet of the nonterminal on top of stack
                 for (int i = 0; i < NUM_TOKENS; i++)
                 {
-                    if (isMember(&followSet[X.tnt.tok], i) && i!=EPSILON)
+                    if (isMember(&followSet[X.tnt.tok], i) && i != EPSILON)
                     {
                         addToken(syncSet, i);
                     }
@@ -620,28 +620,31 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
                 {
                     L = getNextToken(fp);
                     // TODO: Call function to print error - Premature end of input
-                    if (L.tokenID == PROGRAMEND && X.tnt.tok != PROGRAMEND){
-                    prematureEndOfInputError();
-                    return;
-                }
+                    if (L.tokenID == PROGRAMEND && X.tnt.tok != PROGRAMEND)
+                    {
+                        prematureEndOfInputError();
+                        return;
+                    }
                 }
                 // printf("Found token in syncSet %s\n", terminals[L.tokenID]);
-                //print X
+                // print X
                 // printf("X: %s\n", X.type == __TERMINAL__ ? terminals[X.tnt.tok] : nonterminals[X.tnt.nonterm]);
-                if(isMember(&followSet[X.tnt.tok], L.tokenID)){
+                if (isMember(&followSet[X.tnt.tok], L.tokenID))
+                {
                     // printf("Found token in followSet of X\n");
                     S = pop(S);
                     X = top(S);
                     continue;
                 }
-                //Pop stack till we either find L if X is a terminal or L is in first set of X if it is a nonterminal
+                // Pop stack till we either find L if X is a terminal or L is in first set of X if it is a nonterminal
                 /*while (((X.type == __TERMINAL__ && X.tnt.tok != L.tokenID) || (X.type == __NONTERMINAL__ && isMember(&followSet[X.tnt.nonterm], L.tokenID) == 1)) && isEmpty(S) == 0)
                 {
                     S = pop(S);
                     X = top(S);
                     printf("Popped\n");
                 }*/
-                while(((X.type == __NONTERMINAL__ && !isMember(&followSet[X.tnt.nonterm], L.tokenID)) || (X.type == __TERMINAL__ && !isMember(&followSet[X.tnt.tok], L.tokenID))) && isEmpty(S) == 0){
+                while (((X.type == __NONTERMINAL__ && !isMember(&followSet[X.tnt.nonterm], L.tokenID)) || (X.type == __TERMINAL__ && !isMember(&followSet[X.tnt.tok], L.tokenID))) && isEmpty(S) == 0)
+                {
                     S = pop(S);
                     X = top(S);
                     // printf("Popped\n");
@@ -791,25 +794,26 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
             {
                 // TODO: error recovery, no rule found in parse table
                 printf("Line: %d. Rule error\n", L.lineNumber);
-                //Keep getting tokens till we find something in the syncSet
+                // Keep getting tokens till we find something in the syncSet
                 token_set *syncSet = createTokenSet();
                 // Add SQBC to syncSet using addToken function
                 // addToken(syncSet, SEMICOL);
                 addToken(syncSet, END); // Why is there an error here?
-                //if follow set of X contains epsilon
-                if(isMember(&followSet[X.tnt.nonterm], EPSILON)){
+                // if follow set of X contains epsilon
+                if (isMember(&followSet[X.tnt.nonterm], EPSILON))
+                {
                     addToken(syncSet, SEMICOL);
                     addToken(syncSet, BC);
                     addToken(syncSet, START);
                     addToken(syncSet, SQBC);
                 }
-                //addToken(syncSet, SEMICOL);
-                //addToken(syncSet, BC);
-                //addToken(syncSet, START);
-                // Fill syncSet with all the tokens in followSet of the nonterminal on top of stack
+                // addToken(syncSet, SEMICOL);
+                // addToken(syncSet, BC);
+                // addToken(syncSet, START);
+                //  Fill syncSet with all the tokens in followSet of the nonterminal on top of stack
                 for (int i = 0; i < NUM_TOKENS; i++)
                 {
-                    if (isMember(&followSet[X.tnt.nonterm], i) && i!=EPSILON)
+                    if (isMember(&followSet[X.tnt.nonterm], i) && i != EPSILON)
                     {
                         addToken(syncSet, i);
                     }
@@ -818,35 +822,37 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
                 {
                     L = getNextToken(fp);
                     // TODO: Call function to print error - Premature end of input
-                    if (L.tokenID == PROGRAMEND){
-                    prematureEndOfInputError();
-                    return;
+                    if (L.tokenID == PROGRAMEND)
+                    {
+                        prematureEndOfInputError();
+                        return;
                     }
                 }
                 // printf("L: %s\n", terminals[L.tokenID]);
                 // printf("X: %s\n", X.type == __TERMINAL__ ? terminals[X.tnt.tok] : nonterminals[X.tnt.nonterm]);
-                if(isMember(&followSet[X.tnt.nonterm], L.tokenID)){
+                if (isMember(&followSet[X.tnt.nonterm], L.tokenID))
+                {
                     S = pop(S);
                     X = top(S);
                     continue;
                 }
-                //Keep popping non terminals till we find L in its first set or if X is a terminal, they are equal
-                while(((X.type == __NONTERMINAL__ && !isMember(&followSet[X.tnt.nonterm], L.tokenID)) || (X.type == __TERMINAL__ && !isMember(&followSet[X.tnt.tok], L.tokenID))) && isEmpty(S) == 0){
+                // Keep popping non terminals till we find L in its first set or if X is a terminal, they are equal
+                while (((X.type == __NONTERMINAL__ && !isMember(&followSet[X.tnt.nonterm], L.tokenID)) || (X.type == __TERMINAL__ && !isMember(&followSet[X.tnt.tok], L.tokenID))) && isEmpty(S) == 0)
+                {
                     S = pop(S);
                     X = top(S);
                     // printf("Popped\n");
                     // printf("X: %s\n", X.type == __TERMINAL__ ? terminals[X.tnt.tok] : nonterminals[X.tnt.nonterm]);
-                
                 }
-                //Print X now
-                // printf("X: %s\n", X.type == __TERMINAL__ ? terminals[X.tnt.tok] : nonterminals[X.tnt.nonterm]);
+                // Print X now
+                //  printf("X: %s\n", X.type == __TERMINAL__ ? terminals[X.tnt.tok] : nonterminals[X.tnt.nonterm]);
                 while (((X.type == __TERMINAL__ && X.tnt.tok != L.tokenID) || (X.type == __NONTERMINAL__ && isMember(&firstSet[X.tnt.nonterm], L.tokenID) == 0)) && isEmpty(S) == 0)
                 {
                     S = pop(S);
                     X = top(S);
                     // printf("Popped\n");
                 }
-                //Handle parse tree accordingly
+                // Handle parse tree accordingly
                 while (((X.type == __TERMINAL__ && terminals[X.tnt.tok] != terminals[currentNode->tnt.tok]) || (X.type == __NONTERMINAL__ && nonterminals[X.tnt.nonterm] != nonterminals[currentNode->tnt.nonterm])) && currentNode->parent != NULL)
                 {
                     // printf("Current Node: %s %s  LeafNode: %d\n", terminals[currentNode->tnt.tok], nonterminals[currentNode->tnt.nonterm], currentNode->leafNodeFlag);
@@ -875,7 +881,7 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
     }
     if (L.tokenID != PROGRAMEND)
     {
-        // printf("Parsing unsuccessful\n"); 
+        // printf("Parsing unsuccessful\n");
         // Space for error recovery, stack empty but input not finished
         FILE *fp1 = fopen("parseTree.txt", "w");
         printParseTree(fp1);
@@ -1124,11 +1130,11 @@ hash_table_element *createHashTable()
         // Print term colliding with epsilon
         // if (hashTable[h].type == __TERMINAL__)
         // {
-            // printf("Colliding term: %s\n", terminals[hashTable[h].tnt.tok]);
+        // printf("Colliding term: %s\n", terminals[hashTable[h].tnt.tok]);
         // }
         // else
         // {
-            // printf("Colliding nonterm: %s\n", nonterminals[hashTable[h].tnt.nonterm]);
+        // printf("Colliding nonterm: %s\n", nonterminals[hashTable[h].tnt.nonterm]);
         // }
     }
     // printf("Collisions in hash table: %d\n", collisions);
@@ -1188,9 +1194,10 @@ void printSet(token_set *set)
     }
 }
 
-void prematureEndOfInputError(){
-    //End of source code achieved but stack not empty
-    //TODO: Print a better error message in case needed.
+void prematureEndOfInputError()
+{
+    // End of source code achieved but stack not empty
+    // TODO: Print a better error message in case needed.
     printf("Expected more code\n");
     FILE *fp1 = fopen("parseTree.txt", "w");
     printParseTree(fp1);

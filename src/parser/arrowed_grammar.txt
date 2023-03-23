@@ -1,0 +1,133 @@
+1: <program> -> <moduleDeclarations> <otherModules> <driverModule> <otherModules> PROGRAMEND
+2: <moduleDeclarations> -> <moduleDeclaration> <moduleDeclarations>
+3: <moduleDeclarations> -> EPSILON
+4: <moduleDeclaration> -> DECLARE MODULE ID SEMICOL
+5: <otherModules> -> <module> <otherModules>
+6: <otherModules> -> EPSILON
+7: <driverModule> -> DRIVERDEF DRIVER PROGRAM DRIVERENDDEF <moduleDef>
+8: <module> -> DEF MODULE ID ENDEF TAKES INPUT SQBO <input_plist> SQBC SEMICOL <ret> <moduleDef>
+9: <ret> -> RETURNS SQBO <output_plist> SQBC SEMICOL
+10: <ret> -> EPSILON
+11: <input_plist> -> ID COLON <dataType> <iP0>
+12: <iP0> -> COMMA ID COLON <dataType> <iP0>
+13: <iP0> -> EPSILON
+14: <output_plist> -> ID COLON <type> <oP0>
+15: <oP0> -> COMMA ID COLON <type> <oP0>
+16: <oP0> -> EPSILON
+17: <dataType> -> INTEGER
+18: <dataType> -> REAL
+19: <dataType> -> BOOLEAN
+20: <dataType> -> ARRAY SQBO <range_arr> SQBC OF <type>
+21: <type> -> INTEGER
+22: <type> -> REAL
+23: <type> -> BOOLEAN
+24: <moduleDef> -> START <statements> END
+25: <statements> -> <statement> <statements>
+26: <statements> -> EPSILON
+27: <statement> -> <ioStmt>
+28: <statement> -> <simpleStmt>
+29: <statement> -> <declareStmt>
+30: <statement> -> <conditionalStmt>
+31: <statement> -> <iterativeStmt>
+32: <ioStmt> -> GET_VALUE BO ID BC SEMICOL
+33: <ioStmt> -> PRINT BO <var3> BC SEMICOL
+34: <var3> -> <var>
+35: <var3> -> <bools>
+36: <var> -> ID <whichId>
+37: <var> -> NUM
+38: <var> -> RNUM
+39: <whichId> -> SQBO <wI0>
+40: <whichId> -> EPSILON
+41: <wI0> -> <index_arr> SQBC
+42: <simpleStmt> -> <assignmentStmt>
+43: <simpleStmt> -> <moduleReuseStmt>
+44: <assignmentStmt> -> ID <whichStmt>
+45: <whichStmt> -> <lvalueIDStmt>
+46: <whichStmt> -> <lvalueARRStmt>
+47: <lvalueIDStmt> -> ASSIGNOP <expression> SEMICOL
+48: <lvalueARRStmt> -> SQBO <element_index_with_expression> SQBC ASSIGNOP <expression> SEMICOL
+49: <element_index_with_expression> -> <sign> <N_10>
+50: <sign> -> PLUS
+51: <sign> -> MINUS
+52: <sign> -> EPSILON
+53: <N_10> -> <arrExpr>
+54: <N_10> -> BO <arrExpr> BC
+55: <arrExpr> -> <arrTerm> <arr_N4>
+56: <arr_N4> -> <op1> <arrTerm> <arr_N4>
+57: <arr_N4> -> EPSILON
+58: <arrTerm> -> <arrFactor> <arr_N5>
+59: <arr_N5> -> <op2> <arrFactor> <arr_N5>
+60: <arr_N5> -> EPSILON
+61: <arrFactor> -> BO <arrExpr> BC
+62: <arrFactor> -> <id_num>
+63: <id_num> -> ID
+64: <id_num> -> NUM
+65: <arrFactor> -> <bools>
+66: <moduleReuseStmt> -> SQBO <idList> SQBC ASSIGNOP USE MODULE ID WITH PARAMETERS <actual_para_list> SEMICOL
+67: <moduleReuseStmt> -> USE MODULE ID WITH PARAMETERS <actual_para_list> SEMICOL
+68: <actual_para_list> -> <aP00> <aP1>
+69: <aP1> -> COMMA <aP00> <aP1>
+70: <aP1> -> EPSILON
+71: <aP00> -> <sign> <aP0>
+72: <aP00> -> <bools>
+73: <aP0> -> NUM
+74: <aP0> -> RNUM
+75: <aP0> -> ID <N_11>
+76: <optional> -> SQBO <idList> SQBC ASSIGNOP
+77: <optional> -> EPSILON
+78: <idList> -> ID <iL0>
+79: <iL0> -> COMMA ID <iL0>
+80: <iL0> -> EPSILON
+81: <expression> -> <booleanExpr>
+82: <booleanExpr> -> <arithmeticExpr> <BE00>
+83: <booleanExpr> -> <bools> <BE0>
+84: <BE00> -> <relationalOp> <arithmeticExpr> <BE0>
+85: <BE00> -> <BE0>
+86: <BE0> -> <logicalOp> <booleanExpr>
+87: <BE0> -> EPSILON
+88: <arithmeticExpr> -> <sign> <term> <AE0>
+89: <AE0> -> <op1> <term> <AE0>
+90: <AE0> -> EPSILON
+91: <term> -> <factor> <T0>
+92: <T0> -> <op2> <factor> <T0>
+93: <T0> -> EPSILON
+94: <op1> -> PLUS
+95: <op1> -> MINUS
+96: <op2> -> MUL
+97: <op2> -> DIV
+98: <bools> -> TRUE
+99: <bools> -> FALSE
+100: <factor> -> BO <expression> BC
+101: <factor> -> NUM
+102: <factor> -> RNUM
+103: <factor> -> ID <N_11>
+104: <N_11> -> SQBO <element_index_with_expression> SQBC
+105: <N_11> -> EPSILON
+106: <logicalOp> -> AND
+107: <logicalOp> -> OR
+108: <relationalOp> -> EQ
+109: <relationalOp> -> LT
+110: <relationalOp> -> LE
+111: <relationalOp> -> GT
+112: <relationalOp> -> GE
+113: <relationalOp> -> NE
+114: <declareStmt> -> DECLARE <idList> COLON <dataType> SEMICOL
+115: <conditionalStmt> -> SWITCH BO ID BC START <caseStmts> <default> END
+116: <caseStmts> -> <caseStmt> <caseStmts>
+117: <caseStmts> -> EPSILON
+118: <caseStmt> -> CASE <value> COLON <statements> BREAK SEMICOL
+119: <value> -> NUM
+120: <value> -> TRUE
+121: <value> -> FALSE
+122: <default> -> DEFAULT COLON <statements> BREAK SEMICOL
+123: <default> -> EPSILON
+124: <iterativeStmt> -> FOR BO ID IN <forrange> BC START <statements> END
+125: <iterativeStmt> -> WHILE BO <booleanExpr> BC START <statements> END
+126: <forrange> -> <sign> NUM RANGEOP <sign> NUM
+127: <range> -> <var2> RANGEOP <var2>
+128: <var2> -> ID <whichId>
+129: <var2> -> NUM
+130: <range_arr> -> <index_arr> RANGEOP <index_arr>
+131: <index_arr> -> <sign> <new_index>
+132: <new_index> -> NUM
+133: <new_index> -> ID

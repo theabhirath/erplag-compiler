@@ -47,11 +47,10 @@
 <lvalueIDStmt>,ASSIGNOP,<expression>,SEMICOL
 <lvalueARRStmt>,SQBO,<element_index_with_expression>,SQBC,ASSIGNOP,<expression>,SEMICOL
 <element_index_with_expression>,<sign>,<N_10>
-<element_index_with_expression>,<arrExpr>
 <sign>,PLUS
 <sign>,MINUS
 <sign>,EPSILON
-<N_10>,<new_index>
+<N_10>,<arrExpr>
 <N_10>,BO,<arrExpr>,BC
 <arrExpr>,<arrTerm>,<arr_N4>
 <arr_N4>,<op1>,<arrTerm>,<arr_N4>
@@ -86,8 +85,7 @@
 <BE00>,<BE0>
 <BE0>,<logicalOp>,<booleanExpr>
 <BE0>,EPSILON
-<arithmeticExpr>,<term>,<AE0>
-<arithmeticExpr>,<op1>,<term>,<AE0>
+<arithmeticExpr>,<sign>,<term>,<AE0>
 <AE0>,<op1>,<term>,<AE0>
 <AE0>,EPSILON
 <term>,<factor>,<T0>
