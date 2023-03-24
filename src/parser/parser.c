@@ -1040,7 +1040,7 @@ grammar createRuleList(char *grammarFile, hash_table_element *hashTable)
             // printf("%s\n", tnt);
             if (hashTable[hash(tnt)].type == __NONE__)
             {
-                // printf("None token found in rule %d RHS\n", i + 1);
+                printf("None token found in rule %d RHS\n", i + 1);
                 // printf("%s\n", tnt);
                 // printf("Length of string: %ld\n", strlen(tnt));
                 // printf("Nonterminals: %s\n", nonterminals[22]);

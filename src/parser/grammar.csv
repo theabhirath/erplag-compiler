@@ -73,8 +73,6 @@
 <aP0>,NUM
 <aP0>,RNUM
 <aP0>,ID,<N_11>
-<optional>,SQBO,<idList>,SQBC,ASSIGNOP
-<optional>,EPSILON
 <idList>,ID,<iL0>
 <iL0>,COMMA,ID,<iL0>
 <iL0>,EPSILON
@@ -124,9 +122,6 @@
 <iterativeStmt>,FOR,BO,ID,IN,<forrange>,BC,START,<statements>,END
 <iterativeStmt>,WHILE,BO,<booleanExpr>,BC,START,<statements>,END
 <forrange>,<sign>,NUM,RANGEOP,<sign>,NUM
-<range>,<var2>,RANGEOP,<var2>
-<var2>,ID,<whichId>
-<var2>,NUM
 <range_arr>,<index_arr>,RANGEOP,<index_arr>
 <index_arr>,<sign>,<new_index>
 <new_index>,NUM

@@ -73,61 +73,56 @@
 73: <aP0> -> NUM
 74: <aP0> -> RNUM
 75: <aP0> -> ID <N_11>
-76: <optional> -> SQBO <idList> SQBC ASSIGNOP
-77: <optional> -> EPSILON
-78: <idList> -> ID <iL0>
-79: <iL0> -> COMMA ID <iL0>
-80: <iL0> -> EPSILON
-81: <expression> -> <booleanExpr>
-82: <booleanExpr> -> <arithmeticExpr> <BE00>
-83: <booleanExpr> -> <bools> <BE0>
-84: <BE00> -> <relationalOp> <arithmeticExpr> <BE0>
-85: <BE00> -> <BE0>
-86: <BE0> -> <logicalOp> <booleanExpr>
-87: <BE0> -> EPSILON
-88: <arithmeticExpr> -> <sign> <term> <AE0>
-89: <AE0> -> <op1> <term> <AE0>
-90: <AE0> -> EPSILON
-91: <term> -> <factor> <T0>
-92: <T0> -> <op2> <factor> <T0>
-93: <T0> -> EPSILON
-94: <op1> -> PLUS
-95: <op1> -> MINUS
-96: <op2> -> MUL
-97: <op2> -> DIV
-98: <bools> -> TRUE
-99: <bools> -> FALSE
-100: <factor> -> BO <expression> BC
-101: <factor> -> NUM
-102: <factor> -> RNUM
-103: <factor> -> ID <N_11>
-104: <N_11> -> SQBO <element_index_with_expression> SQBC
-105: <N_11> -> EPSILON
-106: <logicalOp> -> AND
-107: <logicalOp> -> OR
-108: <relationalOp> -> EQ
-109: <relationalOp> -> LT
-110: <relationalOp> -> LE
-111: <relationalOp> -> GT
-112: <relationalOp> -> GE
-113: <relationalOp> -> NE
-114: <declareStmt> -> DECLARE <idList> COLON <dataType> SEMICOL
-115: <conditionalStmt> -> SWITCH BO ID BC START <caseStmts> <default> END
-116: <caseStmts> -> <caseStmt> <caseStmts>
-117: <caseStmts> -> EPSILON
-118: <caseStmt> -> CASE <value> COLON <statements> BREAK SEMICOL
-119: <value> -> NUM
-120: <value> -> TRUE
-121: <value> -> FALSE
-122: <default> -> DEFAULT COLON <statements> BREAK SEMICOL
-123: <default> -> EPSILON
-124: <iterativeStmt> -> FOR BO ID IN <forrange> BC START <statements> END
-125: <iterativeStmt> -> WHILE BO <booleanExpr> BC START <statements> END
-126: <forrange> -> <sign> NUM RANGEOP <sign> NUM
-127: <range> -> <var2> RANGEOP <var2>
-128: <var2> -> ID <whichId>
-129: <var2> -> NUM
-130: <range_arr> -> <index_arr> RANGEOP <index_arr>
-131: <index_arr> -> <sign> <new_index>
-132: <new_index> -> NUM
-133: <new_index> -> ID
+76: <idList> -> ID <iL0>
+77: <iL0> -> COMMA ID <iL0>
+78: <iL0> -> EPSILON
+79: <expression> -> <booleanExpr>
+80: <booleanExpr> -> <arithmeticExpr> <BE00>
+81: <booleanExpr> -> <bools> <BE0>
+82: <BE00> -> <relationalOp> <arithmeticExpr> <BE0>
+83: <BE00> -> <BE0>
+84: <BE0> -> <logicalOp> <booleanExpr>
+85: <BE0> -> EPSILON
+86: <arithmeticExpr> -> <sign> <term> <AE0>
+87: <AE0> -> <op1> <term> <AE0>
+88: <AE0> -> EPSILON
+89: <term> -> <factor> <T0>
+90: <T0> -> <op2> <factor> <T0>
+91: <T0> -> EPSILON
+92: <op1> -> PLUS
+93: <op1> -> MINUS
+94: <op2> -> MUL
+95: <op2> -> DIV
+96: <bools> -> TRUE
+97: <bools> -> FALSE
+98: <factor> -> BO <expression> BC
+99: <factor> -> NUM
+100: <factor> -> RNUM
+101: <factor> -> ID <N_11>
+102: <N_11> -> SQBO <element_index_with_expression> SQBC
+103: <N_11> -> EPSILON
+104: <logicalOp> -> AND
+105: <logicalOp> -> OR
+106: <relationalOp> -> EQ
+107: <relationalOp> -> LT
+108: <relationalOp> -> LE
+109: <relationalOp> -> GT
+110: <relationalOp> -> GE
+111: <relationalOp> -> NE
+112: <declareStmt> -> DECLARE <idList> COLON <dataType> SEMICOL
+113: <conditionalStmt> -> SWITCH BO ID BC START <caseStmts> <default> END
+114: <caseStmts> -> <caseStmt> <caseStmts>
+115: <caseStmts> -> EPSILON
+116: <caseStmt> -> CASE <value> COLON <statements> BREAK SEMICOL
+117: <value> -> NUM
+118: <value> -> TRUE
+119: <value> -> FALSE
+120: <default> -> DEFAULT COLON <statements> BREAK SEMICOL
+121: <default> -> EPSILON
+122: <iterativeStmt> -> FOR BO ID IN <forrange> BC START <statements> END
+123: <iterativeStmt> -> WHILE BO <booleanExpr> BC START <statements> END
+124: <forrange> -> <sign> NUM RANGEOP <sign> NUM
+125: <range_arr> -> <index_arr> RANGEOP <index_arr>
+126: <index_arr> -> <sign> <new_index>
+127: <new_index> -> NUM
+128: <new_index> -> ID
