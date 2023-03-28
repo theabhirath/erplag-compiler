@@ -156,6 +156,10 @@ void createParseTree(parse_tree parseTree, parse_tree_node *rootNode)
 void createParseTreeNode(TNT tnt, parse_tree_node *node)
 {
     node->tnt = tnt;
+
+    node->addr = NULL;
+    node->syn_addr = NULL;
+    node->inh_addr = NULL;
 }
 
 char *trim(char *str)

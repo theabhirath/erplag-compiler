@@ -116,6 +116,10 @@ typedef struct parse_tree_node
     int leafNodeFlag;
     int ruleNumber;
     tokenInfo leafNodeInfo;
+
+    struct ast_node *addr;
+    struct ast_node *syn_addr;
+    struct ast_node *inh_addr;
 } parse_tree_node;
 
 typedef struct parse_tree
