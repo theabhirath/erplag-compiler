@@ -108,7 +108,6 @@
     addLeftChild(<BE0>.addr,<BE0>.inh_addr)
 
     <BE0>.syn_addr = <BE0>.addr
-    delete(<BE0>)
 
 
 <BE0>,EPSILON
@@ -192,7 +191,6 @@
 
 <factor>,ID,<N_11>
     <factor>.addr = address(ID)
-    delete(ID)
 
     if(<N_11>.addr != NULL)
         addRightChild(<factor>.addr,<N_11>.addr)
@@ -498,6 +496,7 @@
         <index_arr>.addr = <sign>.addr
         addRightChild(<index_arr>.addr, <new_index>.addr)
     delete(<sign>)
+    delete(<new_index>)
 <new_index>,NUM
     <new_index>.addr = address(NUM)
 <new_index>,ID
