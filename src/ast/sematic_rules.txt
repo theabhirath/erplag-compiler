@@ -125,13 +125,13 @@
     delete(<sign>)
     if (<arithmeticExpr>.addr != NULL)
         addRightChild(<arithmeticExpr>.addr,<term>.addr)
-        delete(<term>)
     else
         <arithmeticExpr>.addr = <term>.addr
     
     <AE0>.inh_addr = <arithmeticExpr>.addr
 
     <arithmeticExpr>.syn_addr = <AE0>.syn_addr
+    delete(<term>)
     delete(<AE0>)
 
 <AE0>,<op1>,<term>,<AE0>'
@@ -317,7 +317,7 @@
     delete(BO)
     delete(BC)
 <arrFactor>,<id_num_rnum>
-    <arrFactor>.addr = address(<id_num_rnum>)
+    <arrFactor>.addr = <id_num_rnum>.addr
     delete(<id_num_rnum>)
 <id_num_rnum>,ID
     <id_num_rnum>.addr = address(ID)
@@ -713,7 +713,7 @@
     delete(<booleanExpr>)
     delete(<statements>)
 <forrange>,<sign>,NUM,RANGEOP,<sign>1,NUM
-    createASTNode("RANGE")
+    <forrange>.addr = createASTNode("RANGE")
     if (<sign>.addr != NULL)
         addLeftChild(<forrange>.addr, <sign>.addr)
         addRightChild(<sign>.addr, address(NUM))
