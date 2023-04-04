@@ -587,16 +587,11 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
                 // printf("Popped\n");
                 L = getNextToken(fp);
                 // printf("got next token\n");
-                // TODO: Call function to print error - Premature end of input
-                // if (L.tokenID == PROGRAMEND && X.tnt.tok != PROGRAMEND){
-                //     printf("Idhar se aa raha hai\n");
-                //     prematureEndOfInputError();
-                // }
             }
             else
             {
                 // Print error
-                printf("Line: %d. Error: Expected %s, but got %s instead\n", L.lineNumber, terminals[X.tnt.tok], terminals[L.tokenID]);
+                printf("Line: %d. Error: Expected %s, but got %s instead\n", L.lineNumber, terminals[X.tnt.tok], L.lexeme);
                 token_set *syncSet = createTokenSet();
                 // Add SQBC to syncSet using addToken function
                 // addToken(syncSet, SEMICOL);
@@ -623,7 +618,6 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
                 while (isMember(syncSet, L.tokenID) == 0)
                 {
                     L = getNextToken(fp);
-                    // TODO: Call function to print error - Premature end of input
                     if (L.tokenID == PROGRAMEND && X.tnt.tok != PROGRAMEND)
                     {
                         prematureEndOfInputError();
@@ -796,7 +790,6 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
             }
             else
             {
-                // TODO: error recovery, no rule found in parse table
                 printf("Line: %d. Rule error\n", L.lineNumber);
                 // Keep getting tokens till we find something in the syncSet
                 token_set *syncSet = createTokenSet();
@@ -825,7 +818,6 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
                 while (isMember(syncSet, L.tokenID) == 0)
                 {
                     L = getNextToken(fp);
-                    // TODO: Call function to print error - Premature end of input
                     if (L.tokenID == PROGRAMEND)
                     {
                         prematureEndOfInputError();
@@ -1201,7 +1193,6 @@ void printSet(token_set *set)
 void prematureEndOfInputError()
 {
     // End of source code achieved but stack not empty
-    // TODO: Print a better error message in case needed.
     printf("Expected more code\n");
     FILE *fp1 = fopen("parseTree.txt", "w");
     printParseTree(fp1);

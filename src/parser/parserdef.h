@@ -16,8 +16,6 @@ enum TNT_TYPE
 };
 typedef enum TNT_TYPE TNT_TYPE;
 
-extern int Table[NUM_NONTERMINALS][NUM_TOKENS];
-
 enum NONTERMINAL
 {
     __program__,
@@ -130,5 +128,8 @@ typedef struct parse_tree
 typedef struct linked_list linked_list;
 typedef struct linked_list_node linked_list_node;
 typedef struct linked_list* grammar;
+
+extern int Table[NUM_NONTERMINALS][NUM_TOKENS];
+extern parse_tree parseTree;
 
 #endif

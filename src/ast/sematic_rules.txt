@@ -690,9 +690,9 @@
     delete(EPSILON)
 <iterativeStmt>,FOR,BO,ID,IN,<forrange>,BC,START,<statements>,END
     <iterativeStmt>.addr = createASTNode("FOR")
-    addLeftChild(<iterativeStmt>.addr, address(ID))
-    addRightChild(address(ID), <forrange>.addr)
+    addLeftChild(<iterativeStmt>.addr, <forrange>.addr)
     addRightChild(<iterativeStmt>.addr, <statements>.syn_addr)
+    addAuxInfo(<iterativeStmt>.addr, address(ID))
     delete(FOR)
     delete(BO)
     delete(IN)
