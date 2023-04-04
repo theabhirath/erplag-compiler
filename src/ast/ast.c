@@ -1,73 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../lexer/lexerdef.h"
 #include "../parser/parserdef.h"
 #include "../lexer/lexer.h"
 #include "../parser/parser.h"
-
-enum TYPE{
-    __NUM__,
-    __RNUM__,
-    __BOOL__,
-    __ARRAY__,
-    __ERROR__
-};
-
-enum AST_NODE_TYPE{
-    PROGRAM_AST,
-    MODULE_DECLARATION_AST,
-    MODULE_DEF_AST,
-    DRIVER_MODULE_AST,
-    RANGE_AST,
-    GET_VALUE_AST,
-    PRINT_AST,
-    EQUALS_AST,
-    USE_AST,
-    DECLARE_AST,
-    SWITCH_AST,
-    CASE_AST,
-    DEFAULT_AST,
-    FOR_AST,
-    WHILE_AST,
-    PLUS_AST,
-    MINUS_AST,
-    MUL_AST,
-    DIV_AST,
-    AND_AST,
-    OR_AST,
-    EQ_AST,
-    NE_AST,
-    LT_AST,
-    LE_AST,
-    GT_AST,
-    GE_AST,
-    LINKED_LIST_AST,
-    INTEGER_AST,
-    REAL_AST,
-    BOOLEAN_AST,
-    ARRAY_AST,
-    FORMALPARAM_AST
-};
-
-typedef struct ast_node{
-    enum AST_NODE_TYPE nodeType;
-    struct ast_node *left;
-    struct ast_node *right;
-    enum TYPE type;
-    tokenInfo leafNodeInfo;
-    int isLeafNode;
-    void *aux_info;
-} ast_node;
-
-typedef struct ast {
-    ast_node *root;
-} ast;
-
-typedef struct LinkedListASTNode{
-    ast_node *data;
-    struct LinkedListASTNode *next;
-} LinkedListASTNode;
+#include "ast.h"
 
 LinkedListASTNode *insertAtFront(LinkedListASTNode *head, ast_node *data)
 {
@@ -82,11 +19,13 @@ LinkedListASTNode *insertAtEnd(LinkedListASTNode *head, ast_node *data)
     LinkedListASTNode *newNode = (LinkedListASTNode *)malloc(sizeof(LinkedListASTNode));
     newNode->data = data;
     newNode->next = NULL;
-    if(head == NULL)
+    if(head == NULL){
         return newNode;
+    }
     LinkedListASTNode *temp = head;
-    while(temp->next != NULL)
+    while(temp->next != NULL){
         temp = temp->next;
+    }
     temp->next = newNode;
     return head;
 }
@@ -555,7 +494,6 @@ ast_node *process_subtree(parse_tree_node *ptn)
         {
             parse_tree_node *Id = ptn->child;
             parse_tree_node *WhichId = Id->sibling;
-            // process_subtree(WhichId);
             ptn->addr = Id;
             WhichId->inh_addr = ptn->addr;
             process_subtree(WhichId);
@@ -1481,23 +1419,23 @@ ast_node *process_subtree(parse_tree_node *ptn)
             free(END);
             break;
         }
-        case 123: // 123: <iterativeStmt> -> WHILE BO <arithmeticOrBooleanExpr> BC START <statements> END
+        case 123: // 123: <iterativeStmt> -> WHILE BO <booleanExpr> BC START <statements> END
         {
             parse_tree_node *While = ptn->child;
             parse_tree_node *BO = While->sibling;
-            parse_tree_node *ArithmeticOrBooleanExpr = BO->sibling;
-            parse_tree_node *BC = ArithmeticOrBooleanExpr->sibling;
+            parse_tree_node *BooleanExpr = BO->sibling;
+            parse_tree_node *BC = BooleanExpr->sibling;
             parse_tree_node *START = BC->sibling;
             parse_tree_node *Statements = START->sibling;
             parse_tree_node *END = Statements->sibling;
-            process_subtree(ArithmeticOrBooleanExpr);
+            process_subtree(BooleanExpr);
             process_subtree(Statements);
             ptn->addr = createASTNode(WHILE_AST);
-            ptn->addr->left = ArithmeticOrBooleanExpr->addr;
+            ptn->addr->left = BooleanExpr->addr;
             ptn->addr->right = Statements->syn_addr;
             free(While);
             free(BO);
-            free(ArithmeticOrBooleanExpr);
+            free(BooleanExpr);
             free(BC);
             free(START);
             free(Statements);
