@@ -53,3 +53,5 @@ dkms.conf
 
 # vscode config
 .vscode/
+ast
+ast.txt
