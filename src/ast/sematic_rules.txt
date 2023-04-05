@@ -566,7 +566,7 @@
     delete(SQBC)
     delete(<index_arr>)
 <simpleStmt>,<assignmentStmt>
-    <simpleStmt>.addr = <assignmentStmt>.addr
+    <simpleStmt>.addr = <assignmentStmt>.syn_addr
     delete(<assignmentStmt>)
 <simpleStmt>,<moduleReuseStmt>
     <simpleStmt>.addr = <moduleReuseStmt>.addr

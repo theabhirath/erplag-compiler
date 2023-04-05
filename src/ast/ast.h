@@ -44,7 +44,8 @@ enum AST_NODE_TYPE{
     REAL_AST,
     BOOLEAN_AST,
     ARRAY_AST,
-    FORMALPARAM_AST
+    FORMALPARAM_AST,
+    ARR_ELEM_AST
 };
 
 typedef struct ast_node{

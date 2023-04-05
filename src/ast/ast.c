@@ -402,7 +402,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
     }
     case 26: // 26: <statements> -> EPSILON
     {
-        ptn->syn_addr = createASTNode(LINKED_LIST_AST);
+        ptn->syn_addr = NULL;
         break;
     }
     case 27: // 27: <statement> -> <ioStmt>
@@ -550,7 +550,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
     {
         parse_tree_node *AssignStmt = ptn->child;
         process_subtree(AssignStmt);
-        ptn->addr = AssignStmt->addr;
+        ptn->addr = AssignStmt->syn_addr;
         free(AssignStmt);
         break;
     }
@@ -615,12 +615,14 @@ ast_node *process_subtree(parse_tree_node *ptn)
         parse_tree_node *Expression = AssignOp->sibling;
         parse_tree_node *SemiCol = Expression->sibling;
         free(AssignOp);
-        ptn->addr = createASTNode(EQUALS_AST);
+        ptn->syn_addr = createASTNode(EQUALS_AST);
         process_subtree(ElementIndexWithExpression);
         process_subtree(Expression);
-        ptn->addr->right = Expression->addr;
-        ptn->inh_addr->right = ElementIndexWithExpression->syn_addr;
-        ptn->addr->left = ptn->inh_addr;
+        ast_node *temp = createASTNode(ARR_ELEM_AST);
+        temp->left = ptn->inh_addr;
+        temp->right = ElementIndexWithExpression->addr;
+        ptn->syn_addr->right = Expression->addr;
+        ptn->syn_addr->left = temp;
         free(ElementIndexWithExpression);
         free(Expression);
         free(SqBo);
@@ -1552,6 +1554,26 @@ void print_ll(LinkedListASTNode *head, int depth, FILE *fp)
     }
 }
 
+void print_ll_pt(LinkedListASTNode *head, int depth, FILE *fp)
+{
+    LinkedListASTNode *temp = head;
+    while (temp != NULL)
+    {
+        print_parse_tree_node(temp->data, depth, fp);
+        temp = temp->next;
+    }
+}
+
+void print_parse_tree_node(parse_tree_node *node, int depth, FILE *fp)
+{
+    if (node == NULL)
+    {
+        return;
+    }
+    fprintf(fp, "%*s", depth, "");
+    fprintf(fp, "%s\n", node->leafNodeInfo.lexeme);
+}
+
 void print_ast_node(ast_node *node, int depth, FILE *fp)
 {
 
@@ -1559,10 +1581,7 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     {
         return;
     }
-    for (int i = 0; i < depth; i++)
-    {
-        fprintf(fp, " ");
-    }
+    fprintf(fp, "%*s", depth, "");
     // printf("%d\n", node->type);
     printf("lmao\n");
     fflush(stdout);
@@ -1573,11 +1592,14 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
         fprintf(fp, "PROGRAM_AST\n\n");
         fflush(fp);
         struct ProgramAuxInfo *pai = (struct ProgramAuxInfo *)node->aux_info;
-        print_ast_node(pai->ModDec, depth + 1, fp);
-        print_ast_node(pai->OtherMod1, depth + 1, fp);
+        print_ll(pai->ModDec, depth + 1, fp);
+        print_ll(pai->OtherMod1, depth + 1, fp);
         print_ast_node(pai->DriverMod, depth + 1, fp);
-        print_ast_node(pai->OtherMod2, depth + 1, fp);
+        printf("Driver Module Printed\n");
+        fflush(stdout);
+        print_ll(pai->OtherMod2, depth + 1, fp);
         break;
+
     }
     case MODULE_DECLARATION_AST:
     {
@@ -1592,9 +1614,9 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
         fprintf(fp, "MODULE_DEF_AST\n\n");
         fflush(fp);
         struct ModuleDeclarationAuxInfo *mdai = (struct ModuleDeclarationAuxInfo *)node->aux_info;
-        print_ast_node(mdai->input_plist->data, depth + 1, fp);
-        print_ast_node(mdai->ret->data, depth + 1, fp);
-        print_ast_node(mdai->moduleDef->data, depth + 1, fp);
+        print_ll(mdai->input_plist, depth + 1, fp);
+        print_ll(mdai->ret, depth + 1, fp);
+        print_ll(mdai->moduleDef, depth + 1, fp);
         break;
     }
     case DRIVER_MODULE_AST:
@@ -1626,22 +1648,45 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     {
         fprintf(fp, "EQUALS_AST\n\n");
         fflush(fp);
-        print_ast_node(node->left, depth + 1, fp);
-        print_ast_node(node->right, depth + 1, fp);
+        if (node->right->nodeType == USE_AST)
+        {
+            print_ll_pt(node->left, depth + 1, fp);
+        }
+        else if (node->left->nodeType == ARR_ELEM_AST)
+        {
+            print_ast_node(node->left, depth + 1, fp);
+        }
+        else
+        {
+            print_parse_tree_node(node->left, depth + 1, fp);
+        }
+        if (node->right->nodeType == USE_AST)
+        {
+            print_ast_node(node->right, depth + 1, fp);
+        }
+        else if (node->right->nodeType >= PLUS && node->right->nodeType <= MINUS)
+        {
+            print_ast_node(node->right, depth + 1, fp);
+        }
+        else
+        {
+            print_parse_tree_node(node->right, depth + 1, fp);
+        }
         break;
     }
     case USE_AST:
     {
         fprintf(fp, "USE_AST\n\n");
         fflush(fp);
-        print_ast_node(node->right, depth + 1, fp);
+        print_parse_tree_node(node->left, depth + 1, fp);
+        print_ll_pt(node->right, depth + 1, fp);
         break;
     }
     case DECLARE_AST:
     {
         fprintf(fp, "DECLARE_AST\n\n");
         fflush(fp);
-        print_ast_node(node->left, depth + 1, fp);
+        print_ll_pt(node->left, depth + 1, fp);
         print_ast_node(node->right, depth + 1, fp);
         break;
     }
@@ -1818,13 +1863,21 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
         print_ast_node(node->right, depth + 1, fp);
         break;
     }
+    case ARR_ELEM_AST:
+    {
+        fprintf(fp, "ARR_ELEM_AST\n");
+        fflush(fp);
+        print_parse_tree_node(node->left, depth + 1, fp);
+        print_ast_node(node->right, depth + 1, fp);
+        break;
+    }
     default:
     {
         fprintf(fp, "UNKNOWN_AST\n\n");
         fflush(fp);
         break;
     }
-}
+    }
 }
 
 void print_ast(ast *a)
