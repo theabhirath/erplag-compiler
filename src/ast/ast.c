@@ -619,8 +619,16 @@ ast_node *process_subtree(parse_tree_node *ptn)
         process_subtree(ElementIndexWithExpression);
         process_subtree(Expression);
         ast_node *temp = createASTNode(ARR_ELEM_AST);
+        printf("inherted addr: %p\n", ptn->inh_addr);
+        parse_tree_node *temp1 = ptn->inh_addr;
+        printf("Token: %s\n", temp1->leafNodeInfo.lexeme);
         temp->left = ptn->inh_addr;
-        temp->right = ElementIndexWithExpression->addr;
+        temp->right = ElementIndexWithExpression->syn_addr;
+        if(ElementIndexWithExpression->syn_addr == NULL)
+        {
+            printf("rule is wrong\n");
+            fflush(stdout);
+        }
         ptn->syn_addr->right = Expression->addr;
         ptn->syn_addr->left = temp;
         free(ElementIndexWithExpression);
@@ -731,6 +739,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
     case 57: // 57: <arr_N4> -> EPSILON
     {
         ptn->addr = NULL;
+        ptn->syn_addr = ptn->inh_addr;
         break;
     }
     case 58: // 58: <arrTerm> -> <arrFactor> <arr_N5>
@@ -770,6 +779,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
     case 60: // 60: <arr_N5> -> EPSILON
     {
         ptn->addr = NULL;
+        ptn->syn_addr = ptn->inh_addr;
         break;
     }
     case 61: // 61: <arrFactor> -> BO <arrExpr> BC
@@ -789,6 +799,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         parse_tree_node *Id_num = ptn->child;
         process_subtree(Id_num);
         ptn->addr = Id_num->addr;
+        ptn->syn_addr = ptn->addr;
         free(Id_num);
         break;
     }
@@ -1568,10 +1579,13 @@ void print_parse_tree_node(parse_tree_node *node, int depth, FILE *fp)
 {
     if (node == NULL)
     {
+        printf("lmfao\n");
+        fflush(stdout);
         return;
     }
     fprintf(fp, "%*s", depth, "");
-    fprintf(fp, "%s\n", node->leafNodeInfo.lexeme);
+    fprintf(fp, "%s\n", node->leafNodeInfo.lexeme); // segfault
+    fflush(fp);
 }
 
 void print_ast_node(ast_node *node, int depth, FILE *fp)
@@ -1583,8 +1597,8 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     }
     fprintf(fp, "%*s", depth, "");
     // printf("%d\n", node->type);
-    printf("lmao\n");
-    fflush(stdout);
+    // printf("lmao\n");
+    fflush(fp);
     switch (node->nodeType)
     {
     case PROGRAM_AST:
@@ -1599,7 +1613,6 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
         fflush(stdout);
         print_ll(pai->OtherMod2, depth + 1, fp);
         break;
-
     }
     case MODULE_DECLARATION_AST:
     {
@@ -1657,20 +1670,37 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
             print_ast_node(node->left, depth + 1, fp);
         }
         else
-        {
+        {        
             print_parse_tree_node(node->left, depth + 1, fp);
         }
         if (node->right->nodeType == USE_AST)
         {
             print_ast_node(node->right, depth + 1, fp);
         }
-        else if (node->right->nodeType >= PLUS && node->right->nodeType <= MINUS)
+        else if (node->right->nodeType >= PLUS_AST && node->right->nodeType <= GE_AST)
         {
             print_ast_node(node->right, depth + 1, fp);
         }
         else
         {
-            print_parse_tree_node(node->right, depth + 1, fp);
+            if(node->right == NULL)
+            {
+                printf("NOT OK\n");
+                fflush(stdout);
+            }
+            else
+            {
+                printf("OK\n");
+                // node right nodeType 
+                printf("%d\n", node->right->nodeType);
+                fflush(stdout);
+                print_parse_tree_node(node->right, depth + 1, fp);
+                // fprintf(fp, "%*s", depth, "");
+                // printf("%d\n", node->right->leafNodeInfo.val);
+                // printf("working\n");
+                // fflush(stdout);
+            }
+            // print_parse_tree_node(node->right, depth + 1, fp);
         }
         break;
     }
@@ -1867,8 +1897,17 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     {
         fprintf(fp, "ARR_ELEM_AST\n");
         fflush(fp);
+        if(node->left == NULL)
+        {
+            printf("NULL\n");
+            fflush(stdout);
+        }
+        printf("before\n");
+        fflush(stdout);
         print_parse_tree_node(node->left, depth + 1, fp);
-        print_ast_node(node->right, depth + 1, fp);
+        print_parse_tree_node(node->right, depth + 1, fp);
+        printf("after\n");
+        fflush(stdout);
         break;
     }
     default:
@@ -1897,7 +1936,7 @@ void print_ast(ast *a)
 void main()
 {
     bufferSize = 1024;
-    parseInputSourceCode("tests/t_sammy.txt", "src/parser/parseTree.txt");
+    parseInputSourceCode("tests/t5.txt", "src/parser/parseTree.txt");
     ast *AST = create_ast(&parseTree);
     printf("AST created successfully.\n");
     print_ast(AST);
