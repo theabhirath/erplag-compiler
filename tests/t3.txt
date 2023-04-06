@@ -3,7 +3,7 @@ start
 	declare v_1_2_3:integer;
 	get_value(v_1_2_3);
 	declare result_:integer;
-	[result_]:=use module square with parameters 1.2, A[k], -2, - j, -A[v], _1_2_3; 
+	[result_]:=use module square with parameters 1.2, A[k], -2, - j, -A[v], _1_2_3;
         ** Modify rule for <actual_para_list>**
 	print(result);
 end
@@ -23,7 +23,6 @@ and print the following message on successful compilation on the console
 **
 **
 Modification for the rule for actual parameters list
-
 <actual_para_list> --> <actual_para_list> COMMA <K> | <K> | <sign> <K>
 <K> --> NUM | RNUM | <boolConstt> | ID <N_11> 
 <N_11> --> SQBO <element_index_with_expression> SQBC | epsilon

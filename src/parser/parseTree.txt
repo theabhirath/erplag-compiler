@@ -1,99 +1,92 @@
          lexeme	    lineNo	 tokenName	valueIfNumber	parentNodeSymbol	isLeafNode	          nodeSymbol
-        declare	         1	   DECLARE	  --------	<moduleDeclaration>	            YES	                  DECLARE	
+        declare	         3	   DECLARE	  --------	<moduleDeclaration>	            YES	                  DECLARE	
        --------	  --------	  --------	  --------	<moduleDeclarations>	             NO	      <moduleDeclaration>	
-         module	         1	    MODULE	  --------	<moduleDeclaration>	            YES	                   MODULE	
-        readArr	         1	        ID	  --------	<moduleDeclaration>	            YES	                       ID	
-              ;	         1	   SEMICOL	  --------	<moduleDeclaration>	            YES	                  SEMICOL	
+         module	         3	    MODULE	  --------	<moduleDeclaration>	            YES	                   MODULE	
+        compute	         3	        ID	  --------	<moduleDeclaration>	            YES	                       ID	
+              ;	         3	   SEMICOL	  --------	<moduleDeclaration>	            YES	                  SEMICOL	
        --------	  --------	  --------	  --------	 <program>	             NO	     <moduleDeclarations>	
        --------	  --------	  --------	  --------	<moduleDeclarations>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	<moduleDeclarations>	             NO	     <moduleDeclarations>	
        --------	  --------	  --------	  --------	  --------	             NO	                <program>	
-             <<	         3	       DEF	  --------	  <module>	            YES	                      DEF	
-       --------	  --------	  --------	  --------	<otherModules>	             NO	                 <module>	
-         module	         3	    MODULE	  --------	  <module>	            YES	                   MODULE	
-       arraySum	         3	        ID	  --------	  <module>	            YES	                       ID	
-             >>	         3	     ENDEF	  --------	  <module>	            YES	                    ENDEF	
-          takes	         4	     TAKES	  --------	  <module>	            YES	                    TAKES	
-          input	         4	     INPUT	  --------	  <module>	            YES	                    INPUT	
-              [	         4	      SQBO	  --------	  <module>	            YES	                     SQBO	
-           list	         4	        ID	  --------	<input_plist>	            YES	                       ID	
-       --------	  --------	  --------	  --------	  <module>	             NO	            <input_plist>	
-              :	         4	     COLON	  --------	<input_plist>	            YES	                    COLON	
-          array	         4	     ARRAY	  --------	<dataType>	            YES	                    ARRAY	
-       --------	  --------	  --------	  --------	<input_plist>	             NO	               <dataType>	
-              [	         4	      SQBO	  --------	<dataType>	            YES	                     SQBO	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<range_arr>	             NO	              <index_arr>	
-              1	         4	       NUM	         1	<new_index>	            YES	                      NUM	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	              <new_index>	
-       --------	  --------	  --------	  --------	<dataType>	             NO	              <range_arr>	
-             ..	         4	   RANGEOP	  --------	<range_arr>	            YES	                  RANGEOP	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<range_arr>	             NO	              <index_arr>	
-             15	         4	       NUM	        15	<new_index>	            YES	                      NUM	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	              <new_index>	
-              ]	         4	      SQBC	  --------	<dataType>	            YES	                     SQBC	
-             of	         4	        OF	  --------	<dataType>	            YES	                       OF	
-           real	         4	      REAL	  --------	    <type>	            YES	                     REAL	
-       --------	  --------	  --------	  --------	<dataType>	             NO	                   <type>	
-              ,	         4	     COMMA	  --------	     <iP0>	            YES	                    COMMA	
-       --------	  --------	  --------	  --------	<input_plist>	             NO	                    <iP0>	
-              n	         4	        ID	  --------	     <iP0>	            YES	                       ID	
-              :	         4	     COLON	  --------	     <iP0>	            YES	                    COLON	
-        integer	         4	   INTEGER	  --------	<dataType>	            YES	                  INTEGER	
-       --------	  --------	  --------	  --------	     <iP0>	             NO	               <dataType>	
-       --------	  --------	  --------	  --------	     <iP0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	     <iP0>	             NO	                    <iP0>	
-              ]	         4	      SQBC	  --------	  <module>	            YES	                     SQBC	
-              ;	         4	   SEMICOL	  --------	  <module>	            YES	                  SEMICOL	
-        returns	         5	   RETURNS	  --------	     <ret>	            YES	                  RETURNS	
-       --------	  --------	  --------	  --------	  <module>	             NO	                    <ret>	
-              [	         5	      SQBO	  --------	     <ret>	            YES	                     SQBO	
-            sum	         5	        ID	  --------	<output_plist>	            YES	                       ID	
-       --------	  --------	  --------	  --------	     <ret>	             NO	           <output_plist>	
-              :	         5	     COLON	  --------	<output_plist>	            YES	                    COLON	
-           real	         5	      REAL	  --------	    <type>	            YES	                     REAL	
-       --------	  --------	  --------	  --------	<output_plist>	             NO	                   <type>	
-       --------	  --------	  --------	  --------	     <oP0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<output_plist>	             NO	                    <oP0>	
-              ]	         5	      SQBC	  --------	     <ret>	            YES	                     SQBC	
-              ;	         5	   SEMICOL	  --------	     <ret>	            YES	                  SEMICOL	
-          start	         6	     START	  --------	<moduleDef>	            YES	                    START	
-       --------	  --------	  --------	  --------	  <module>	             NO	              <moduleDef>	
+       --------	  --------	  --------	  --------	<otherModules>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	 <program>	             NO	           <otherModules>	
+            <<<	         4	 DRIVERDEF	  --------	<driverModule>	            YES	                DRIVERDEF	
+       --------	  --------	  --------	  --------	 <program>	             NO	           <driverModule>	
+         driver	         4	    DRIVER	  --------	<driverModule>	            YES	                   DRIVER	
+        program	         4	   PROGRAM	  --------	<driverModule>	            YES	                  PROGRAM	
+            >>>	         4	DRIVERENDDEF	  --------	<driverModule>	            YES	             DRIVERENDDEF	
+          start	         5	     START	  --------	<moduleDef>	            YES	                    START	
+       --------	  --------	  --------	  --------	<driverModule>	             NO	              <moduleDef>	
+        declare	         6	   DECLARE	  --------	<declareStmt>	            YES	                  DECLARE	
+       --------	  --------	  --------	  --------	<statement>	             NO	            <declareStmt>	
+         var_1_	         6	        ID	  --------	  <idList>	            YES	                       ID	
+       --------	  --------	  --------	  --------	<declareStmt>	             NO	                 <idList>	
+              ,	         6	     COMMA	  --------	     <iL0>	            YES	                    COMMA	
+       --------	  --------	  --------	  --------	  <idList>	             NO	                    <iL0>	
+         var_2_	         6	        ID	  --------	     <iL0>	            YES	                       ID	
+              ,	         6	     COMMA	  --------	     <iL0>	            YES	                    COMMA	
+       --------	  --------	  --------	  --------	     <iL0>	             NO	                    <iL0>	
+         var_3_	         6	        ID	  --------	     <iL0>	            YES	                       ID	
+       --------	  --------	  --------	  --------	     <iL0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	     <iL0>	             NO	                    <iL0>	
+              :	         6	     COLON	  --------	<declareStmt>	            YES	                    COLON	
+        integer	         6	   INTEGER	  --------	<dataType>	            YES	                  INTEGER	
+       --------	  --------	  --------	  --------	<declareStmt>	             NO	               <dataType>	
+              ;	         6	   SEMICOL	  --------	<declareStmt>	            YES	                  SEMICOL	
+       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
+       --------	  --------	  --------	  --------	<moduleDef>	             NO	             <statements>	
         declare	         7	   DECLARE	  --------	<declareStmt>	            YES	                  DECLARE	
        --------	  --------	  --------	  --------	<statement>	             NO	            <declareStmt>	
-          index	         7	        ID	  --------	  <idList>	            YES	                       ID	
+         R1_abc	         7	        ID	  --------	  <idList>	            YES	                       ID	
        --------	  --------	  --------	  --------	<declareStmt>	             NO	                 <idList>	
        --------	  --------	  --------	  --------	     <iL0>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	  <idList>	             NO	                    <iL0>	
               :	         7	     COLON	  --------	<declareStmt>	            YES	                    COLON	
-        integer	         7	   INTEGER	  --------	<dataType>	            YES	                  INTEGER	
+        boolean	         7	   BOOLEAN	  --------	<dataType>	            YES	                  BOOLEAN	
        --------	  --------	  --------	  --------	<declareStmt>	             NO	               <dataType>	
               ;	         7	   SEMICOL	  --------	<declareStmt>	            YES	                  SEMICOL	
        --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<moduleDef>	             NO	             <statements>	
+       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
         declare	         8	   DECLARE	  --------	<declareStmt>	            YES	                  DECLARE	
        --------	  --------	  --------	  --------	<statement>	             NO	            <declareStmt>	
-              t	         8	        ID	  --------	  <idList>	            YES	                       ID	
+         r2_ABC	         8	        ID	  --------	  <idList>	            YES	                       ID	
        --------	  --------	  --------	  --------	<declareStmt>	             NO	                 <idList>	
        --------	  --------	  --------	  --------	     <iL0>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	  <idList>	             NO	                    <iL0>	
               :	         8	     COLON	  --------	<declareStmt>	            YES	                    COLON	
-        boolean	         8	   BOOLEAN	  --------	<dataType>	            YES	                  BOOLEAN	
+        integer	         8	   INTEGER	  --------	<dataType>	            YES	                  INTEGER	
        --------	  --------	  --------	  --------	<declareStmt>	             NO	               <dataType>	
               ;	         8	   SEMICOL	  --------	<declareStmt>	            YES	                  SEMICOL	
        --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
        --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-            sum	         9	        ID	  --------	<assignmentStmt>	            YES	                       ID	
+        declare	         9	   DECLARE	  --------	<declareStmt>	            YES	                  DECLARE	
+       --------	  --------	  --------	  --------	<statement>	             NO	            <declareStmt>	
+         R3_abc	         9	        ID	  --------	  <idList>	            YES	                       ID	
+       --------	  --------	  --------	  --------	<declareStmt>	             NO	                 <idList>	
+       --------	  --------	  --------	  --------	     <iL0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	  <idList>	             NO	                    <iL0>	
+              :	         9	     COLON	  --------	<declareStmt>	            YES	                    COLON	
+           real	         9	      REAL	  --------	<dataType>	            YES	                     REAL	
+       --------	  --------	  --------	  --------	<declareStmt>	             NO	               <dataType>	
+              ;	         9	   SEMICOL	  --------	<declareStmt>	            YES	                  SEMICOL	
+       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
+       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
+      get_value	        10	 GET_VALUE	  --------	  <ioStmt>	            YES	                GET_VALUE	
+       --------	  --------	  --------	  --------	<statement>	             NO	                 <ioStmt>	
+              (	        10	        BO	  --------	  <ioStmt>	            YES	                       BO	
+         var_1_	        10	        ID	  --------	  <ioStmt>	            YES	                       ID	
+              )	        10	        BC	  --------	  <ioStmt>	            YES	                       BC	
+              ;	        10	   SEMICOL	  --------	  <ioStmt>	            YES	                  SEMICOL	
+       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
+       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
+         var_2_	        11	        ID	  --------	<assignmentStmt>	            YES	                       ID	
        --------	  --------	  --------	  --------	<simpleStmt>	             NO	         <assignmentStmt>	
-             :=	         9	  ASSIGNOP	  --------	<lvalueIDStmt>	            YES	                 ASSIGNOP	
+             :=	        11	  ASSIGNOP	  --------	<lvalueIDStmt>	            YES	                 ASSIGNOP	
        --------	  --------	  --------	  --------	<whichStmt>	             NO	           <lvalueIDStmt>	
        --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
        --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
-            0.0	         9	      RNUM	  0.000000	  <factor>	            YES	                     RNUM	
+             10	        11	       NUM	        10	  <factor>	            YES	                      NUM	
        --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
        --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
        --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
@@ -105,440 +98,221 @@
        --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
        --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
        --------	  --------	  --------	  --------	<lvalueIDStmt>	             NO	             <expression>	
-              ;	         9	   SEMICOL	  --------	<lvalueIDStmt>	            YES	                  SEMICOL	
+              ;	        11	   SEMICOL	  --------	<lvalueIDStmt>	            YES	                  SEMICOL	
        --------	  --------	  --------	  --------	<assignmentStmt>	             NO	              <whichStmt>	
        --------	  --------	  --------	  --------	<statement>	             NO	             <simpleStmt>	
        --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
        --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-            for	        10	       FOR	  --------	<iterativeStmt>	            YES	                      FOR	
-       --------	  --------	  --------	  --------	<statement>	             NO	          <iterativeStmt>	
-              (	        10	        BO	  --------	<iterativeStmt>	            YES	                       BO	
-          index	        10	        ID	  --------	<iterativeStmt>	            YES	                       ID	
-             in	        10	        IN	  --------	<iterativeStmt>	            YES	                       IN	
-              -	        10	     MINUS	  --------	    <sign>	            YES	                    MINUS	
-       --------	  --------	  --------	  --------	<forrange>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<iterativeStmt>	             NO	               <forrange>	
-             10	        10	       NUM	        10	<forrange>	            YES	                      NUM	
-             ..	        10	   RANGEOP	  --------	<forrange>	            YES	                  RANGEOP	
-              +	        10	      PLUS	  --------	    <sign>	            YES	                     PLUS	
-       --------	  --------	  --------	  --------	<forrange>	             NO	                   <sign>	
-             15	        10	       NUM	        15	<forrange>	            YES	                      NUM	
-              )	        10	        BC	  --------	<iterativeStmt>	            YES	                       BC	
-          start	        11	     START	  --------	<iterativeStmt>	            YES	                    START	
-              t	        12	        ID	  --------	<assignmentStmt>	            YES	                       ID	
+         var_3_	        12	        ID	  --------	<assignmentStmt>	            YES	                       ID	
        --------	  --------	  --------	  --------	<simpleStmt>	             NO	         <assignmentStmt>	
              :=	        12	  ASSIGNOP	  --------	<lvalueIDStmt>	            YES	                 ASSIGNOP	
        --------	  --------	  --------	  --------	<whichStmt>	             NO	           <lvalueIDStmt>	
+              -	        12	     MINUS	  --------	    <sign>	            YES	                    MINUS	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
+              (	        12	        BO	  --------	  <factor>	            YES	                       BO	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
        --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
        --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
-          index	        12	        ID	  --------	  <factor>	            YES	                       ID	
+              6	        12	       NUM	         6	  <factor>	            YES	                      NUM	
        --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
-       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
        --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
        --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
        --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
        --------	  --------	  --------	  --------	<expression>	             NO	            <booleanExpr>	
-             <=	        12	        LE	  --------	<relationalOp>	            YES	                       LE	
-       --------	  --------	  --------	  --------	    <BE00>	             NO	           <relationalOp>	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
        --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	    <BE00>	             NO	         <arithmeticExpr>	
-              n	        12	        ID	  --------	  <factor>	            YES	                       ID	
-       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
-       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	             <expression>	
+              )	        12	        BC	  --------	  <factor>	            YES	                       BC	
        --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
        --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
        --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+       --------	  --------	  --------	  --------	<expression>	             NO	            <booleanExpr>	
        --------	  --------	  --------	  --------	     <BE0>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
        --------	  --------	  --------	  --------	<lvalueIDStmt>	             NO	             <expression>	
               ;	        12	   SEMICOL	  --------	<lvalueIDStmt>	            YES	                  SEMICOL	
        --------	  --------	  --------	  --------	<assignmentStmt>	             NO	              <whichStmt>	
        --------	  --------	  --------	  --------	<statement>	             NO	             <simpleStmt>	
        --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<iterativeStmt>	             NO	             <statements>	
-         switch	        13	    SWITCH	  --------	<conditionalStmt>	            YES	                   SWITCH	
-       --------	  --------	  --------	  --------	<statement>	             NO	        <conditionalStmt>	
-              (	        13	        BO	  --------	<conditionalStmt>	            YES	                       BO	
-              t	        13	        ID	  --------	<conditionalStmt>	            YES	                       ID	
-              )	        13	        BC	  --------	<conditionalStmt>	            YES	                       BC	
-          start	        14	     START	  --------	<conditionalStmt>	            YES	                    START	
-           case	        15	      CASE	  --------	<caseStmt>	            YES	                     CASE	
-       --------	  --------	  --------	  --------	<caseStmts>	             NO	               <caseStmt>	
-           true	        15	      TRUE	  --------	   <value>	            YES	                     TRUE	
-       --------	  --------	  --------	  --------	<caseStmt>	             NO	                  <value>	
-              :	        15	     COLON	  --------	<caseStmt>	            YES	                    COLON	
-          print	        15	     PRINT	  --------	  <ioStmt>	            YES	                    PRINT	
-       --------	  --------	  --------	  --------	<statement>	             NO	                 <ioStmt>	
-              (	        15	        BO	  --------	  <ioStmt>	            YES	                       BO	
-           list	        15	        ID	  --------	     <var>	            YES	                       ID	
-       --------	  --------	  --------	  --------	    <var3>	             NO	                    <var>	
-              [	        15	      SQBO	  --------	 <whichId>	            YES	                     SQBO	
-       --------	  --------	  --------	  --------	     <var>	             NO	                <whichId>	
-              +	        15	      PLUS	  --------	    <sign>	            YES	                     PLUS	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	     <wI0>	             NO	              <index_arr>	
-          index	        15	        ID	  --------	<new_index>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	              <new_index>	
-       --------	  --------	  --------	  --------	 <whichId>	             NO	                    <wI0>	
-              ]	        15	      SQBC	  --------	     <wI0>	            YES	                     SQBC	
-       --------	  --------	  --------	  --------	  <ioStmt>	             NO	                   <var3>	
-              )	        15	        BC	  --------	  <ioStmt>	            YES	                       BC	
-              ;	        15	   SEMICOL	  --------	  <ioStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<caseStmt>	             NO	             <statements>	
-            sum	        16	        ID	  --------	<assignmentStmt>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<simpleStmt>	             NO	         <assignmentStmt>	
-             :=	        16	  ASSIGNOP	  --------	<lvalueIDStmt>	            YES	                 ASSIGNOP	
-       --------	  --------	  --------	  --------	<whichStmt>	             NO	           <lvalueIDStmt>	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
-            sum	        16	        ID	  --------	  <factor>	            YES	                       ID	
-       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
-       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
-       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
-              +	        16	      PLUS	  --------	     <op1>	            YES	                     PLUS	
-       --------	  --------	  --------	  --------	     <AE0>	             NO	                    <op1>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
-           list	        16	        ID	  --------	  <factor>	            YES	                       ID	
-       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
-              [	        16	      SQBO	  --------	    <N_11>	            YES	                     SQBO	
-       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<element_index_with_expression>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	    <N_11>	             NO	<element_index_with_expression>	
-          index	        16	        ID	  --------	  <id_num>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<arrFactor>	             NO	                 <id_num>	
-       --------	  --------	  --------	  --------	 <arrTerm>	             NO	              <arrFactor>	
-       --------	  --------	  --------	  --------	 <arrExpr>	             NO	                <arrTerm>	
-       --------	  --------	  --------	  --------	  <arr_N5>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	 <arrTerm>	             NO	                 <arr_N5>	
-       --------	  --------	  --------	  --------	    <N_10>	             NO	                <arrExpr>	
-       --------	  --------	  --------	  --------	  <arr_N4>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	 <arrExpr>	             NO	                 <arr_N4>	
-       --------	  --------	  --------	  --------	<element_index_with_expression>	             NO	                   <N_10>	
-              ]	        16	      SQBC	  --------	    <N_11>	            YES	                     SQBC	
-       --------	  --------	  --------	  --------	     <AE0>	             NO	                   <term>	
-       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
-       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	     <AE0>	             NO	                    <AE0>	
-       --------	  --------	  --------	  --------	<expression>	             NO	            <booleanExpr>	
-       --------	  --------	  --------	  --------	     <BE0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
-       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
-       --------	  --------	  --------	  --------	<lvalueIDStmt>	             NO	             <expression>	
-              ;	        16	   SEMICOL	  --------	<lvalueIDStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<assignmentStmt>	             NO	              <whichStmt>	
-       --------	  --------	  --------	  --------	<statement>	             NO	             <simpleStmt>	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
        --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-       --------	  --------	  --------	  --------	<statements>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-          break	        17	     BREAK	  --------	<caseStmt>	            YES	                    BREAK	
-              ;	        17	   SEMICOL	  --------	<caseStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<conditionalStmt>	             NO	              <caseStmts>	
-           case	        18	      CASE	  --------	<caseStmt>	            YES	                     CASE	
-       --------	  --------	  --------	  --------	<caseStmts>	             NO	               <caseStmt>	
-          false	        18	     FALSE	  --------	   <value>	            YES	                    FALSE	
-       --------	  --------	  --------	  --------	<caseStmt>	             NO	                  <value>	
-              :	        18	     COLON	  --------	<caseStmt>	            YES	                    COLON	
-          print	        18	     PRINT	  --------	  <ioStmt>	            YES	                    PRINT	
-       --------	  --------	  --------	  --------	<statement>	             NO	                 <ioStmt>	
-              (	        18	        BO	  --------	  <ioStmt>	            YES	                       BO	
-            sum	        18	        ID	  --------	     <var>	            YES	                       ID	
-       --------	  --------	  --------	  --------	    <var3>	             NO	                    <var>	
-       --------	  --------	  --------	  --------	 <whichId>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	     <var>	             NO	                <whichId>	
-       --------	  --------	  --------	  --------	  <ioStmt>	             NO	                   <var3>	
-              )	        18	        BC	  --------	  <ioStmt>	            YES	                       BC	
-              ;	        18	   SEMICOL	  --------	  <ioStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<caseStmt>	             NO	             <statements>	
-          print	        19	     PRINT	  --------	  <ioStmt>	            YES	                    PRINT	
-       --------	  --------	  --------	  --------	<statement>	             NO	                 <ioStmt>	
-              (	        19	        BO	  --------	  <ioStmt>	            YES	                       BO	
-          index	        19	        ID	  --------	     <var>	            YES	                       ID	
-       --------	  --------	  --------	  --------	    <var3>	             NO	                    <var>	
-       --------	  --------	  --------	  --------	 <whichId>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	     <var>	             NO	                <whichId>	
-       --------	  --------	  --------	  --------	  <ioStmt>	             NO	                   <var3>	
-              )	        19	        BC	  --------	  <ioStmt>	            YES	                       BC	
-              ;	        19	   SEMICOL	  --------	  <ioStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-       --------	  --------	  --------	  --------	<statements>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-          break	        21	     BREAK	  --------	<caseStmt>	            YES	                    BREAK	
-              ;	        21	   SEMICOL	  --------	<caseStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<caseStmts>	             NO	              <caseStmts>	
-       --------	  --------	  --------	  --------	<caseStmts>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<caseStmts>	             NO	              <caseStmts>	
-       --------	  --------	  --------	  --------	 <default>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<conditionalStmt>	             NO	                <default>	
-            end	        22	       END	  --------	<conditionalStmt>	            YES	                      END	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-       --------	  --------	  --------	  --------	<statements>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-            end	        24	       END	  --------	<iterativeStmt>	            YES	                      END	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-          print	        25	     PRINT	  --------	  <ioStmt>	            YES	                    PRINT	
-       --------	  --------	  --------	  --------	<statement>	             NO	                 <ioStmt>	
-              (	        25	        BO	  --------	  <ioStmt>	            YES	                       BO	
-            sum	        25	        ID	  --------	     <var>	            YES	                       ID	
-       --------	  --------	  --------	  --------	    <var3>	             NO	                    <var>	
-       --------	  --------	  --------	  --------	 <whichId>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	     <var>	             NO	                <whichId>	
-       --------	  --------	  --------	  --------	  <ioStmt>	             NO	                   <var3>	
-              )	        25	        BC	  --------	  <ioStmt>	            YES	                       BC	
-              ;	        25	   SEMICOL	  --------	  <ioStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-       --------	  --------	  --------	  --------	<statements>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-            end	        26	       END	  --------	<moduleDef>	            YES	                      END	
-       --------	  --------	  --------	  --------	 <program>	             NO	           <otherModules>	
-       --------	  --------	  --------	  --------	<otherModules>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<otherModules>	             NO	           <otherModules>	
-            <<<	        27	 DRIVERDEF	  --------	<driverModule>	            YES	                DRIVERDEF	
-       --------	  --------	  --------	  --------	 <program>	             NO	           <driverModule>	
-         driver	        27	    DRIVER	  --------	<driverModule>	            YES	                   DRIVER	
-        program	        27	   PROGRAM	  --------	<driverModule>	            YES	                  PROGRAM	
-            >>>	        27	DRIVERENDDEF	  --------	<driverModule>	            YES	             DRIVERENDDEF	
-          start	        28	     START	  --------	<moduleDef>	            YES	                    START	
-       --------	  --------	  --------	  --------	<driverModule>	             NO	              <moduleDef>	
-        declare	        29	   DECLARE	  --------	<declareStmt>	            YES	                  DECLARE	
-       --------	  --------	  --------	  --------	<statement>	             NO	            <declareStmt>	
-              A	        29	        ID	  --------	  <idList>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<declareStmt>	             NO	                 <idList>	
-       --------	  --------	  --------	  --------	     <iL0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	  <idList>	             NO	                    <iL0>	
-              :	        29	     COLON	  --------	<declareStmt>	            YES	                    COLON	
-          array	        29	     ARRAY	  --------	<dataType>	            YES	                    ARRAY	
-       --------	  --------	  --------	  --------	<declareStmt>	             NO	               <dataType>	
-              [	        29	      SQBO	  --------	<dataType>	            YES	                     SQBO	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<range_arr>	             NO	              <index_arr>	
-              1	        29	       NUM	         1	<new_index>	            YES	                      NUM	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	              <new_index>	
-       --------	  --------	  --------	  --------	<dataType>	             NO	              <range_arr>	
-             ..	        29	   RANGEOP	  --------	<range_arr>	            YES	                  RANGEOP	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<range_arr>	             NO	              <index_arr>	
-             15	        29	       NUM	        15	<new_index>	            YES	                      NUM	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	              <new_index>	
-              ]	        29	      SQBC	  --------	<dataType>	            YES	                     SQBC	
-             of	        29	        OF	  --------	<dataType>	            YES	                       OF	
-           real	        29	      REAL	  --------	    <type>	            YES	                     REAL	
-       --------	  --------	  --------	  --------	<dataType>	             NO	                   <type>	
-              ;	        29	   SEMICOL	  --------	<declareStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<moduleDef>	             NO	             <statements>	
-        declare	        30	   DECLARE	  --------	<declareStmt>	            YES	                  DECLARE	
-       --------	  --------	  --------	  --------	<statement>	             NO	            <declareStmt>	
-              k	        30	        ID	  --------	  <idList>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<declareStmt>	             NO	                 <idList>	
-       --------	  --------	  --------	  --------	     <iL0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	  <idList>	             NO	                    <iL0>	
-              :	        30	     COLON	  --------	<declareStmt>	            YES	                    COLON	
-        integer	        30	   INTEGER	  --------	<dataType>	            YES	                  INTEGER	
-       --------	  --------	  --------	  --------	<declareStmt>	             NO	               <dataType>	
-              ;	        30	   SEMICOL	  --------	<declareStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-        declare	        31	   DECLARE	  --------	<declareStmt>	            YES	                  DECLARE	
-       --------	  --------	  --------	  --------	<statement>	             NO	            <declareStmt>	
-              s	        31	        ID	  --------	  <idList>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<declareStmt>	             NO	                 <idList>	
-       --------	  --------	  --------	  --------	     <iL0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	  <idList>	             NO	                    <iL0>	
-              :	        31	     COLON	  --------	<declareStmt>	            YES	                    COLON	
-           real	        31	      REAL	  --------	<dataType>	            YES	                     REAL	
-       --------	  --------	  --------	  --------	<declareStmt>	             NO	               <dataType>	
-              ;	        31	   SEMICOL	  --------	<declareStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-      get_value	        32	 GET_VALUE	  --------	  <ioStmt>	            YES	                GET_VALUE	
-       --------	  --------	  --------	  --------	<statement>	             NO	                 <ioStmt>	
-              (	        32	        BO	  --------	  <ioStmt>	            YES	                       BO	
-              k	        32	        ID	  --------	  <ioStmt>	            YES	                       ID	
-              )	        32	        BC	  --------	  <ioStmt>	            YES	                       BC	
-              ;	        32	   SEMICOL	  --------	  <ioStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-            use	        33	       USE	  --------	<moduleReuseStmt>	            YES	                      USE	
+              [	        13	      SQBO	  --------	<moduleReuseStmt>	            YES	                     SQBO	
        --------	  --------	  --------	  --------	<simpleStmt>	             NO	        <moduleReuseStmt>	
-         module	        33	    MODULE	  --------	<moduleReuseStmt>	            YES	                   MODULE	
-        readArr	        33	        ID	  --------	<moduleReuseStmt>	            YES	                       ID	
-           with	        33	      WITH	  --------	<moduleReuseStmt>	            YES	                     WITH	
-     parameters	        33	PARAMETERS	  --------	<moduleReuseStmt>	            YES	               PARAMETERS	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	    <aP00>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<actual_para_list>	             NO	                   <aP00>	
-              A	        33	        ID	  --------	     <aP0>	            YES	                       ID	
-       --------	  --------	  --------	  --------	    <aP00>	             NO	                    <aP0>	
-       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	     <aP0>	             NO	                   <N_11>	
-       --------	  --------	  --------	  --------	<moduleReuseStmt>	             NO	       <actual_para_list>	
-              ,	        33	     COMMA	  --------	     <aP1>	            YES	                    COMMA	
-       --------	  --------	  --------	  --------	<actual_para_list>	             NO	                    <aP1>	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	    <aP00>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	     <aP1>	             NO	                   <aP00>	
-              k	        33	        ID	  --------	     <aP0>	            YES	                       ID	
-       --------	  --------	  --------	  --------	    <aP00>	             NO	                    <aP0>	
-       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	     <aP0>	             NO	                   <N_11>	
-       --------	  --------	  --------	  --------	     <aP1>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	     <aP1>	             NO	                    <aP1>	
-              ;	        33	   SEMICOL	  --------	<moduleReuseStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<statement>	             NO	             <simpleStmt>	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-              [	        34	      SQBO	  --------	<moduleReuseStmt>	            YES	                     SQBO	
-       --------	  --------	  --------	  --------	<simpleStmt>	             NO	        <moduleReuseStmt>	
-              s	        34	        ID	  --------	  <idList>	            YES	                       ID	
+         R1_abc	        13	        ID	  --------	  <idList>	            YES	                       ID	
        --------	  --------	  --------	  --------	<moduleReuseStmt>	             NO	                 <idList>	
-       --------	  --------	  --------	  --------	     <iL0>	             NO	               <caseStmt>	
+              ,	        13	     COMMA	  --------	     <iL0>	            YES	                    COMMA	
        --------	  --------	  --------	  --------	  <idList>	             NO	                    <iL0>	
-              ]	        34	      SQBC	  --------	<moduleReuseStmt>	            YES	                     SQBC	
-             :=	        34	  ASSIGNOP	  --------	<moduleReuseStmt>	            YES	                 ASSIGNOP	
-            use	        34	       USE	  --------	<moduleReuseStmt>	            YES	                      USE	
-         module	        34	    MODULE	  --------	<moduleReuseStmt>	            YES	                   MODULE	
-       arraySum	        34	        ID	  --------	<moduleReuseStmt>	            YES	                       ID	
-           with	        34	      WITH	  --------	<moduleReuseStmt>	            YES	                     WITH	
-     parameters	        34	PARAMETERS	  --------	<moduleReuseStmt>	            YES	               PARAMETERS	
+         r2_ABC	        13	        ID	  --------	     <iL0>	            YES	                       ID	
+              ,	        13	     COMMA	  --------	     <iL0>	            YES	                    COMMA	
+       --------	  --------	  --------	  --------	     <iL0>	             NO	                    <iL0>	
+         R3_abc	        13	        ID	  --------	     <iL0>	            YES	                       ID	
+       --------	  --------	  --------	  --------	     <iL0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	     <iL0>	             NO	                    <iL0>	
+              ]	        13	      SQBC	  --------	<moduleReuseStmt>	            YES	                     SQBC	
+             :=	        13	  ASSIGNOP	  --------	<moduleReuseStmt>	            YES	                 ASSIGNOP	
+            use	        13	       USE	  --------	<moduleReuseStmt>	            YES	                      USE	
+         module	        13	    MODULE	  --------	<moduleReuseStmt>	            YES	                   MODULE	
+        compute	        13	        ID	  --------	<moduleReuseStmt>	            YES	                       ID	
+           with	        13	      WITH	  --------	<moduleReuseStmt>	            YES	                     WITH	
+     parameters	        13	PARAMETERS	  --------	<moduleReuseStmt>	            YES	               PARAMETERS	
        --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	    <aP00>	             NO	                   <sign>	
        --------	  --------	  --------	  --------	<actual_para_list>	             NO	                   <aP00>	
-              A	        34	        ID	  --------	     <aP0>	            YES	                       ID	
+         var_1_	        13	        ID	  --------	     <aP0>	            YES	                       ID	
        --------	  --------	  --------	  --------	    <aP00>	             NO	                    <aP0>	
        --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	     <aP0>	             NO	                   <N_11>	
        --------	  --------	  --------	  --------	<moduleReuseStmt>	             NO	       <actual_para_list>	
-              ,	        34	     COMMA	  --------	     <aP1>	            YES	                    COMMA	
+              ,	        13	     COMMA	  --------	     <aP1>	            YES	                    COMMA	
        --------	  --------	  --------	  --------	<actual_para_list>	             NO	                    <aP1>	
        --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	    <aP00>	             NO	                   <sign>	
        --------	  --------	  --------	  --------	     <aP1>	             NO	                   <aP00>	
-              k	        34	        ID	  --------	     <aP0>	            YES	                       ID	
+         var_2_	        13	        ID	  --------	     <aP0>	            YES	                       ID	
+       --------	  --------	  --------	  --------	    <aP00>	             NO	                    <aP0>	
+       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	     <aP0>	             NO	                   <N_11>	
+              ,	        13	     COMMA	  --------	     <aP1>	            YES	                    COMMA	
+       --------	  --------	  --------	  --------	     <aP1>	             NO	                    <aP1>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <aP00>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	     <aP1>	             NO	                   <aP00>	
+         var_34	        13	        ID	  --------	     <aP0>	            YES	                       ID	
        --------	  --------	  --------	  --------	    <aP00>	             NO	                    <aP0>	
        --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	     <aP0>	             NO	                   <N_11>	
        --------	  --------	  --------	  --------	     <aP1>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	     <aP1>	             NO	                    <aP1>	
-              ;	        34	   SEMICOL	  --------	<moduleReuseStmt>	            YES	                  SEMICOL	
+              ;	        13	   SEMICOL	  --------	<moduleReuseStmt>	            YES	                  SEMICOL	
        --------	  --------	  --------	  --------	<statement>	             NO	             <simpleStmt>	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-          print	        35	     PRINT	  --------	  <ioStmt>	            YES	                    PRINT	
-       --------	  --------	  --------	  --------	<statement>	             NO	                 <ioStmt>	
-              (	        35	        BO	  --------	  <ioStmt>	            YES	                       BO	
-              s	        35	        ID	  --------	     <var>	            YES	                       ID	
-       --------	  --------	  --------	  --------	    <var3>	             NO	                    <var>	
-       --------	  --------	  --------	  --------	 <whichId>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	     <var>	             NO	                <whichId>	
-       --------	  --------	  --------	  --------	  <ioStmt>	             NO	                   <var3>	
-              )	        35	        BC	  --------	  <ioStmt>	            YES	                       BC	
-              ;	        35	   SEMICOL	  --------	  <ioStmt>	            YES	                  SEMICOL	
        --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
        --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
        --------	  --------	  --------	  --------	<statements>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-            end	        36	       END	  --------	<moduleDef>	            YES	                      END	
-             <<	        43	       DEF	  --------	  <module>	            YES	                      DEF	
+            end	        15	       END	  --------	<moduleDef>	            YES	                      END	
+             <<	        16	       DEF	  --------	  <module>	            YES	                      DEF	
        --------	  --------	  --------	  --------	<otherModules>	             NO	                 <module>	
-         module	        43	    MODULE	  --------	  <module>	            YES	                   MODULE	
-        readArr	        43	        ID	  --------	  <module>	            YES	                       ID	
-             >>	        43	     ENDEF	  --------	  <module>	            YES	                    ENDEF	
-          takes	        44	     TAKES	  --------	  <module>	            YES	                    TAKES	
-          input	        44	     INPUT	  --------	  <module>	            YES	                    INPUT	
-              [	        44	      SQBO	  --------	  <module>	            YES	                     SQBO	
-           arr1	        44	        ID	  --------	<input_plist>	            YES	                       ID	
+         module	        16	    MODULE	  --------	  <module>	            YES	                   MODULE	
+        compute	        16	        ID	  --------	  <module>	            YES	                       ID	
+             >>	        16	     ENDEF	  --------	  <module>	            YES	                    ENDEF	
+          takes	        17	     TAKES	  --------	  <module>	            YES	                    TAKES	
+          input	        17	     INPUT	  --------	  <module>	            YES	                    INPUT	
+              [	        17	      SQBO	  --------	  <module>	            YES	                     SQBO	
+              a	        17	        ID	  --------	<input_plist>	            YES	                       ID	
        --------	  --------	  --------	  --------	  <module>	             NO	            <input_plist>	
-              :	        44	     COLON	  --------	<input_plist>	            YES	                    COLON	
-          array	        44	     ARRAY	  --------	<dataType>	            YES	                    ARRAY	
+              :	        17	     COLON	  --------	<input_plist>	            YES	                    COLON	
+        integer	        17	   INTEGER	  --------	<dataType>	            YES	                  INTEGER	
        --------	  --------	  --------	  --------	<input_plist>	             NO	               <dataType>	
-              [	        44	      SQBO	  --------	<dataType>	            YES	                     SQBO	
-              -	        44	     MINUS	  --------	    <sign>	            YES	                    MINUS	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<range_arr>	             NO	              <index_arr>	
-             10	        44	       NUM	        10	<new_index>	            YES	                      NUM	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	              <new_index>	
-       --------	  --------	  --------	  --------	<dataType>	             NO	              <range_arr>	
-             ..	        44	   RANGEOP	  --------	<range_arr>	            YES	                  RANGEOP	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<range_arr>	             NO	              <index_arr>	
-             25	        44	       NUM	        25	<new_index>	            YES	                      NUM	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	              <new_index>	
-              ]	        44	      SQBC	  --------	<dataType>	            YES	                     SQBC	
-             of	        44	        OF	  --------	<dataType>	            YES	                       OF	
-           real	        44	      REAL	  --------	    <type>	            YES	                     REAL	
-       --------	  --------	  --------	  --------	<dataType>	             NO	                   <type>	
-              ,	        44	     COMMA	  --------	     <iP0>	            YES	                    COMMA	
+              ,	        17	     COMMA	  --------	     <iP0>	            YES	                    COMMA	
        --------	  --------	  --------	  --------	<input_plist>	             NO	                    <iP0>	
-              k	        44	        ID	  --------	     <iP0>	            YES	                       ID	
-              :	        44	     COLON	  --------	     <iP0>	            YES	                    COLON	
-        integer	        44	   INTEGER	  --------	<dataType>	            YES	                  INTEGER	
+              b	        17	        ID	  --------	     <iP0>	            YES	                       ID	
+              :	        17	     COLON	  --------	     <iP0>	            YES	                    COLON	
+        integer	        17	   INTEGER	  --------	<dataType>	            YES	                  INTEGER	
+       --------	  --------	  --------	  --------	     <iP0>	             NO	               <dataType>	
+              ,	        17	     COMMA	  --------	     <iP0>	            YES	                    COMMA	
+       --------	  --------	  --------	  --------	     <iP0>	             NO	                    <iP0>	
+              c	        17	        ID	  --------	     <iP0>	            YES	                       ID	
+              :	        17	     COLON	  --------	     <iP0>	            YES	                    COLON	
+        integer	        17	   INTEGER	  --------	<dataType>	            YES	                  INTEGER	
        --------	  --------	  --------	  --------	     <iP0>	             NO	               <dataType>	
        --------	  --------	  --------	  --------	     <iP0>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	     <iP0>	             NO	                    <iP0>	
-              ]	        44	      SQBC	  --------	  <module>	            YES	                     SQBC	
-              ;	        44	   SEMICOL	  --------	  <module>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	     <ret>	             NO	               <caseStmt>	
+              ]	        17	      SQBC	  --------	  <module>	            YES	                     SQBC	
+              ;	        17	   SEMICOL	  --------	  <module>	            YES	                  SEMICOL	
+        returns	        18	   RETURNS	  --------	     <ret>	            YES	                  RETURNS	
        --------	  --------	  --------	  --------	  <module>	             NO	                    <ret>	
-          start	        45	     START	  --------	<moduleDef>	            YES	                    START	
+              [	        18	      SQBO	  --------	     <ret>	            YES	                     SQBO	
+          res_1	        18	        ID	  --------	<output_plist>	            YES	                       ID	
+       --------	  --------	  --------	  --------	     <ret>	             NO	           <output_plist>	
+              :	        18	     COLON	  --------	<output_plist>	            YES	                    COLON	
+        boolean	        18	   BOOLEAN	  --------	    <type>	            YES	                  BOOLEAN	
+       --------	  --------	  --------	  --------	<output_plist>	             NO	                   <type>	
+              ,	        18	     COMMA	  --------	     <oP0>	            YES	                    COMMA	
+       --------	  --------	  --------	  --------	<output_plist>	             NO	                    <oP0>	
+        res_2_a	        18	        ID	  --------	     <oP0>	            YES	                       ID	
+              :	        18	     COLON	  --------	     <oP0>	            YES	                    COLON	
+        integer	        18	   INTEGER	  --------	    <type>	            YES	                  INTEGER	
+       --------	  --------	  --------	  --------	     <oP0>	             NO	                   <type>	
+              ,	        18	     COMMA	  --------	     <oP0>	            YES	                    COMMA	
+       --------	  --------	  --------	  --------	     <oP0>	             NO	                    <oP0>	
+       res_2__b	        18	        ID	  --------	     <oP0>	            YES	                       ID	
+              :	        18	     COLON	  --------	     <oP0>	            YES	                    COLON	
+           real	        18	      REAL	  --------	    <type>	            YES	                     REAL	
+       --------	  --------	  --------	  --------	     <oP0>	             NO	                   <type>	
+       --------	  --------	  --------	  --------	     <oP0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	     <oP0>	             NO	                    <oP0>	
+              ]	        18	      SQBC	  --------	     <ret>	            YES	                     SQBC	
+              ;	        18	   SEMICOL	  --------	     <ret>	            YES	                  SEMICOL	
+          start	        19	     START	  --------	<moduleDef>	            YES	                    START	
        --------	  --------	  --------	  --------	  <module>	             NO	              <moduleDef>	
-        declare	        46	   DECLARE	  --------	<declareStmt>	            YES	                  DECLARE	
+        declare	        20	   DECLARE	  --------	<declareStmt>	            YES	                  DECLARE	
        --------	  --------	  --------	  --------	<statement>	             NO	            <declareStmt>	
-        tempvar	        46	        ID	  --------	  <idList>	            YES	                       ID	
+              b	        20	        ID	  --------	  <idList>	            YES	                       ID	
        --------	  --------	  --------	  --------	<declareStmt>	             NO	                 <idList>	
        --------	  --------	  --------	  --------	     <iL0>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	  <idList>	             NO	                    <iL0>	
-              :	        46	     COLON	  --------	<declareStmt>	            YES	                    COLON	
-           real	        46	      REAL	  --------	<dataType>	            YES	                     REAL	
+              :	        20	     COLON	  --------	<declareStmt>	            YES	                    COLON	
+        boolean	        20	   BOOLEAN	  --------	<dataType>	            YES	                  BOOLEAN	
        --------	  --------	  --------	  --------	<declareStmt>	             NO	               <dataType>	
-              ;	        46	   SEMICOL	  --------	<declareStmt>	            YES	                  SEMICOL	
+              ;	        20	   SEMICOL	  --------	<declareStmt>	            YES	                  SEMICOL	
        --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
        --------	  --------	  --------	  --------	<moduleDef>	             NO	             <statements>	
-        declare	        47	   DECLARE	  --------	<declareStmt>	            YES	                  DECLARE	
-       --------	  --------	  --------	  --------	<statement>	             NO	            <declareStmt>	
-              i	        47	        ID	  --------	  <idList>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<declareStmt>	             NO	                 <idList>	
-       --------	  --------	  --------	  --------	     <iL0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	  <idList>	             NO	                    <iL0>	
-              :	        47	     COLON	  --------	<declareStmt>	            YES	                    COLON	
-        integer	        47	   INTEGER	  --------	<dataType>	            YES	                  INTEGER	
-       --------	  --------	  --------	  --------	<declareStmt>	             NO	               <dataType>	
-              ;	        47	   SEMICOL	  --------	<declareStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-              i	        49	        ID	  --------	<assignmentStmt>	            YES	                       ID	
+        res_2_a	        21	        ID	  --------	<assignmentStmt>	            YES	                       ID	
        --------	  --------	  --------	  --------	<simpleStmt>	             NO	         <assignmentStmt>	
-             :=	        49	  ASSIGNOP	  --------	<lvalueIDStmt>	            YES	                 ASSIGNOP	
+             :=	        21	  ASSIGNOP	  --------	<lvalueIDStmt>	            YES	                 ASSIGNOP	
        --------	  --------	  --------	  --------	<whichStmt>	             NO	           <lvalueIDStmt>	
+              -	        21	     MINUS	  --------	    <sign>	            YES	                    MINUS	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
+              (	        21	        BO	  --------	  <factor>	            YES	                       BO	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
        --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
        --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
-              1	        49	       NUM	         1	  <factor>	            YES	                      NUM	
+              a	        21	        ID	  --------	  <factor>	            YES	                       ID	
        --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+              *	        21	       MUL	  --------	     <op2>	            YES	                      MUL	
+       --------	  --------	  --------	  --------	      <T0>	             NO	                    <op2>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+              b	        21	        ID	  --------	  <factor>	            YES	                       ID	
+       --------	  --------	  --------	  --------	      <T0>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	                     <T0>	
+              -	        21	     MINUS	  --------	     <op1>	            YES	                    MINUS	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	                    <op1>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+              c	        21	        ID	  --------	  <factor>	            YES	                       ID	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	                   <term>	
+              /	        21	       DIV	  --------	     <op2>	            YES	                      DIV	
+       --------	  --------	  --------	  --------	      <T0>	             NO	                    <op2>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+              5	        21	       NUM	         5	  <factor>	            YES	                      NUM	
+       --------	  --------	  --------	  --------	      <T0>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	                    <AE0>	
+       --------	  --------	  --------	  --------	<expression>	             NO	            <booleanExpr>	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	             <expression>	
+              )	        21	        BC	  --------	  <factor>	            YES	                       BC	
        --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
        --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
@@ -549,227 +323,42 @@
        --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
        --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
        --------	  --------	  --------	  --------	<lvalueIDStmt>	             NO	             <expression>	
-              ;	        49	   SEMICOL	  --------	<lvalueIDStmt>	            YES	                  SEMICOL	
+              ;	        21	   SEMICOL	  --------	<lvalueIDStmt>	            YES	                  SEMICOL	
        --------	  --------	  --------	  --------	<assignmentStmt>	             NO	              <whichStmt>	
        --------	  --------	  --------	  --------	<statement>	             NO	             <simpleStmt>	
        --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
        --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-          while	        50	     WHILE	  --------	<iterativeStmt>	            YES	                    WHILE	
-       --------	  --------	  --------	  --------	<statement>	             NO	          <iterativeStmt>	
-              (	        50	        BO	  --------	<iterativeStmt>	            YES	                       BO	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
-              i	        50	        ID	  --------	  <factor>	            YES	                       ID	
-       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
-       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
-       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
-       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
-       --------	  --------	  --------	  --------	<iterativeStmt>	             NO	            <booleanExpr>	
-             <=	        50	        LE	  --------	<relationalOp>	            YES	                       LE	
-       --------	  --------	  --------	  --------	    <BE00>	             NO	           <relationalOp>	
-       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	    <BE00>	             NO	         <arithmeticExpr>	
-              k	        50	        ID	  --------	  <factor>	            YES	                       ID	
-       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
-       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
-       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
-       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
-       --------	  --------	  --------	  --------	     <BE0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
-              )	        50	        BC	  --------	<iterativeStmt>	            YES	                       BC	
-          start	        51	     START	  --------	<iterativeStmt>	            YES	                    START	
-      get_value	        52	 GET_VALUE	  --------	  <ioStmt>	            YES	                GET_VALUE	
-       --------	  --------	  --------	  --------	<statement>	             NO	                 <ioStmt>	
-              (	        52	        BO	  --------	  <ioStmt>	            YES	                       BO	
-        tempvar	        52	        ID	  --------	  <ioStmt>	            YES	                       ID	
-              )	        52	        BC	  --------	  <ioStmt>	            YES	                       BC	
-              ;	        52	   SEMICOL	  --------	  <ioStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<iterativeStmt>	             NO	             <statements>	
-           arr1	        53	        ID	  --------	<assignmentStmt>	            YES	                       ID	
+       res_2__b	        22	        ID	  --------	<assignmentStmt>	            YES	                       ID	
        --------	  --------	  --------	  --------	<simpleStmt>	             NO	         <assignmentStmt>	
-              [	        53	      SQBO	  --------	<lvalueARRStmt>	            YES	                     SQBO	
-       --------	  --------	  --------	  --------	<whichStmt>	             NO	          <lvalueARRStmt>	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<element_index_with_expression>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<lvalueARRStmt>	             NO	<element_index_with_expression>	
-              i	        53	        ID	  --------	  <id_num>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<arrFactor>	             NO	                 <id_num>	
-       --------	  --------	  --------	  --------	 <arrTerm>	             NO	              <arrFactor>	
-       --------	  --------	  --------	  --------	 <arrExpr>	             NO	                <arrTerm>	
-       --------	  --------	  --------	  --------	  <arr_N5>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	 <arrTerm>	             NO	                 <arr_N5>	
-       --------	  --------	  --------	  --------	    <N_10>	             NO	                <arrExpr>	
-       --------	  --------	  --------	  --------	  <arr_N4>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	 <arrExpr>	             NO	                 <arr_N4>	
-       --------	  --------	  --------	  --------	<element_index_with_expression>	             NO	                   <N_10>	
-              ]	        53	      SQBC	  --------	<lvalueARRStmt>	            YES	                     SQBC	
-             :=	        53	  ASSIGNOP	  --------	<lvalueARRStmt>	            YES	                 ASSIGNOP	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
-        tempvar	        53	        ID	  --------	  <factor>	            YES	                       ID	
-       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
-       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
-       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
-       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
-       --------	  --------	  --------	  --------	<expression>	             NO	            <booleanExpr>	
-       --------	  --------	  --------	  --------	     <BE0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
-       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
-       --------	  --------	  --------	  --------	<lvalueARRStmt>	             NO	             <expression>	
-              ;	        53	   SEMICOL	  --------	<lvalueARRStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<assignmentStmt>	             NO	              <whichStmt>	
-       --------	  --------	  --------	  --------	<statement>	             NO	             <simpleStmt>	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-        declare	        54	   DECLARE	  --------	<declareStmt>	            YES	                  DECLARE	
-       --------	  --------	  --------	  --------	<statement>	             NO	            <declareStmt>	
-              B	        54	        ID	  --------	  <idList>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<declareStmt>	             NO	                 <idList>	
-       --------	  --------	  --------	  --------	     <iL0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	  <idList>	             NO	                    <iL0>	
-              :	        54	     COLON	  --------	<declareStmt>	            YES	                    COLON	
-          array	        54	     ARRAY	  --------	<dataType>	            YES	                    ARRAY	
-       --------	  --------	  --------	  --------	<declareStmt>	             NO	               <dataType>	
-              [	        54	      SQBO	  --------	<dataType>	            YES	                     SQBO	
-              -	        54	     MINUS	  --------	    <sign>	            YES	                    MINUS	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<range_arr>	             NO	              <index_arr>	
-              p	        54	        ID	  --------	<new_index>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	              <new_index>	
-       --------	  --------	  --------	  --------	<dataType>	             NO	              <range_arr>	
-             ..	        54	   RANGEOP	  --------	<range_arr>	            YES	                  RANGEOP	
-              +	        54	      PLUS	  --------	    <sign>	            YES	                     PLUS	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<range_arr>	             NO	              <index_arr>	
-              q	        54	        ID	  --------	<new_index>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<index_arr>	             NO	              <new_index>	
-              ]	        54	      SQBC	  --------	<dataType>	            YES	                     SQBC	
-             of	        54	        OF	  --------	<dataType>	            YES	                       OF	
-        boolean	        54	   BOOLEAN	  --------	    <type>	            YES	                  BOOLEAN	
-       --------	  --------	  --------	  --------	<dataType>	             NO	                   <type>	
-              ;	        54	   SEMICOL	  --------	<declareStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-        tempvar	        55	        ID	  --------	<assignmentStmt>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<simpleStmt>	             NO	         <assignmentStmt>	
-             :=	        55	  ASSIGNOP	  --------	<lvalueIDStmt>	            YES	                 ASSIGNOP	
+             :=	        22	  ASSIGNOP	  --------	<lvalueIDStmt>	            YES	                 ASSIGNOP	
        --------	  --------	  --------	  --------	<whichStmt>	             NO	           <lvalueIDStmt>	
-              -	        55	     MINUS	  --------	    <sign>	            YES	                    MINUS	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
        --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
-              (	        55	        BO	  --------	  <factor>	            YES	                       BO	
+              (	        22	        BO	  --------	  <factor>	            YES	                       BO	
        --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
        --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
        --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
-        tempvar	        55	        ID	  --------	  <factor>	            YES	                       ID	
+              (	        22	        BO	  --------	  <factor>	            YES	                       BO	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
+        res_2_a	        22	        ID	  --------	  <factor>	            YES	                       ID	
        --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
        --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
        --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
        --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
-              +	        55	      PLUS	  --------	     <op1>	            YES	                     PLUS	
+              +	        22	      PLUS	  --------	     <op1>	            YES	                     PLUS	
        --------	  --------	  --------	  --------	     <AE0>	             NO	                    <op1>	
        --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
-              B	        55	        ID	  --------	  <factor>	            YES	                       ID	
+              a	        22	        ID	  --------	  <factor>	            YES	                       ID	
        --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
-              [	        55	      SQBO	  --------	    <N_11>	            YES	                     SQBO	
+       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<element_index_with_expression>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	    <N_11>	             NO	<element_index_with_expression>	
-              a	        55	        ID	  --------	  <id_num>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<arrFactor>	             NO	                 <id_num>	
-       --------	  --------	  --------	  --------	 <arrTerm>	             NO	              <arrFactor>	
-       --------	  --------	  --------	  --------	 <arrExpr>	             NO	                <arrTerm>	
-       --------	  --------	  --------	  --------	  <arr_N5>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	 <arrTerm>	             NO	                 <arr_N5>	
-       --------	  --------	  --------	  --------	    <N_10>	             NO	                <arrExpr>	
-              +	        55	      PLUS	  --------	     <op1>	            YES	                     PLUS	
-       --------	  --------	  --------	  --------	  <arr_N4>	             NO	                    <op1>	
-       --------	  --------	  --------	  --------	 <arrExpr>	             NO	                 <arr_N4>	
-              b	        55	        ID	  --------	  <id_num>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<arrFactor>	             NO	                 <id_num>	
-       --------	  --------	  --------	  --------	 <arrTerm>	             NO	              <arrFactor>	
-       --------	  --------	  --------	  --------	  <arr_N4>	             NO	                <arrTerm>	
-              *	        55	       MUL	  --------	     <op2>	            YES	                      MUL	
-       --------	  --------	  --------	  --------	  <arr_N5>	             NO	                    <op2>	
-       --------	  --------	  --------	  --------	 <arrTerm>	             NO	                 <arr_N5>	
-              c	        55	        ID	  --------	  <id_num>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<arrFactor>	             NO	                 <id_num>	
-       --------	  --------	  --------	  --------	  <arr_N5>	             NO	              <arrFactor>	
-       --------	  --------	  --------	  --------	  <arr_N5>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	  <arr_N5>	             NO	                 <arr_N5>	
-       --------	  --------	  --------	  --------	  <arr_N4>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	  <arr_N4>	             NO	                 <arr_N4>	
-       --------	  --------	  --------	  --------	<element_index_with_expression>	             NO	                   <N_10>	
-              ]	        55	      SQBC	  --------	    <N_11>	            YES	                     SQBC	
-       --------	  --------	  --------	  --------	     <AE0>	             NO	                   <term>	
-       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
-              +	        55	      PLUS	  --------	     <op1>	            YES	                     PLUS	
-       --------	  --------	  --------	  --------	     <AE0>	             NO	                    <op1>	
-       --------	  --------	  --------	  --------	     <AE0>	             NO	                    <AE0>	
-              A	        55	        ID	  --------	  <factor>	            YES	                       ID	
-       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
-              [	        55	      SQBO	  --------	    <N_11>	            YES	                     SQBO	
-       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
-              +	        55	      PLUS	  --------	    <sign>	            YES	                     PLUS	
-       --------	  --------	  --------	  --------	<element_index_with_expression>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	    <N_11>	             NO	<element_index_with_expression>	
-              5	        55	       NUM	         5	  <id_num>	            YES	                      NUM	
-       --------	  --------	  --------	  --------	<arrFactor>	             NO	                 <id_num>	
-       --------	  --------	  --------	  --------	 <arrTerm>	             NO	              <arrFactor>	
-       --------	  --------	  --------	  --------	 <arrExpr>	             NO	                <arrTerm>	
-       --------	  --------	  --------	  --------	  <arr_N5>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	 <arrTerm>	             NO	                 <arr_N5>	
-       --------	  --------	  --------	  --------	    <N_10>	             NO	                <arrExpr>	
-       --------	  --------	  --------	  --------	  <arr_N4>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	 <arrExpr>	             NO	                 <arr_N4>	
-       --------	  --------	  --------	  --------	<element_index_with_expression>	             NO	                   <N_10>	
-              ]	        55	      SQBC	  --------	    <N_11>	            YES	                     SQBC	
-       --------	  --------	  --------	  --------	     <AE0>	             NO	                   <term>	
-       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
-              -	        55	     MINUS	  --------	     <op1>	            YES	                    MINUS	
-       --------	  --------	  --------	  --------	     <AE0>	             NO	                    <op1>	
-       --------	  --------	  --------	  --------	     <AE0>	             NO	                    <AE0>	
-              A	        55	        ID	  --------	  <factor>	            YES	                       ID	
-       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
-              [	        55	      SQBO	  --------	    <N_11>	            YES	                     SQBO	
-       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
-              -	        55	     MINUS	  --------	    <sign>	            YES	                    MINUS	
-       --------	  --------	  --------	  --------	<element_index_with_expression>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	    <N_11>	             NO	<element_index_with_expression>	
-             10	        55	       NUM	        10	  <id_num>	            YES	                      NUM	
-       --------	  --------	  --------	  --------	<arrFactor>	             NO	                 <id_num>	
-       --------	  --------	  --------	  --------	 <arrTerm>	             NO	              <arrFactor>	
-       --------	  --------	  --------	  --------	 <arrExpr>	             NO	                <arrTerm>	
-       --------	  --------	  --------	  --------	  <arr_N5>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	 <arrTerm>	             NO	                 <arr_N5>	
-       --------	  --------	  --------	  --------	    <N_10>	             NO	                <arrExpr>	
-       --------	  --------	  --------	  --------	  <arr_N4>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	 <arrExpr>	             NO	                 <arr_N4>	
-       --------	  --------	  --------	  --------	<element_index_with_expression>	             NO	                   <N_10>	
-              ]	        55	      SQBC	  --------	    <N_11>	            YES	                     SQBC	
        --------	  --------	  --------	  --------	     <AE0>	             NO	                   <term>	
        --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
@@ -780,79 +369,19 @@
        --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
        --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
        --------	  --------	  --------	  --------	  <factor>	             NO	             <expression>	
-              )	        55	        BC	  --------	  <factor>	            YES	                       BC	
+              )	        22	        BC	  --------	  <factor>	            YES	                       BC	
        --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
-       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+              *	        22	       MUL	  --------	     <op2>	            YES	                      MUL	
+       --------	  --------	  --------	  --------	      <T0>	             NO	                    <op2>	
        --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
-       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
-       --------	  --------	  --------	  --------	<expression>	             NO	            <booleanExpr>	
-       --------	  --------	  --------	  --------	     <BE0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
-       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
-       --------	  --------	  --------	  --------	<lvalueIDStmt>	             NO	             <expression>	
-              ;	        55	   SEMICOL	  --------	<lvalueIDStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<assignmentStmt>	             NO	              <whichStmt>	
-       --------	  --------	  --------	  --------	<statement>	             NO	             <simpleStmt>	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-              B	        56	        ID	  --------	<assignmentStmt>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<simpleStmt>	             NO	         <assignmentStmt>	
-              [	        56	      SQBO	  --------	<lvalueARRStmt>	            YES	                     SQBO	
-       --------	  --------	  --------	  --------	<whichStmt>	             NO	          <lvalueARRStmt>	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<element_index_with_expression>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<lvalueARRStmt>	             NO	<element_index_with_expression>	
-              k	        56	        ID	  --------	  <id_num>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<arrFactor>	             NO	                 <id_num>	
-       --------	  --------	  --------	  --------	 <arrTerm>	             NO	              <arrFactor>	
-       --------	  --------	  --------	  --------	 <arrExpr>	             NO	                <arrTerm>	
-       --------	  --------	  --------	  --------	  <arr_N5>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	 <arrTerm>	             NO	                 <arr_N5>	
-       --------	  --------	  --------	  --------	    <N_10>	             NO	                <arrExpr>	
-       --------	  --------	  --------	  --------	  <arr_N4>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	 <arrExpr>	             NO	                 <arr_N4>	
-       --------	  --------	  --------	  --------	<element_index_with_expression>	             NO	                   <N_10>	
-              ]	        56	      SQBC	  --------	<lvalueARRStmt>	            YES	                     SQBC	
-             :=	        56	  ASSIGNOP	  --------	<lvalueARRStmt>	            YES	                 ASSIGNOP	
-              -	        56	     MINUS	  --------	    <sign>	            YES	                    MINUS	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
-             10	        56	       NUM	        10	  <factor>	            YES	                      NUM	
-       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+             12	        22	       NUM	        12	  <factor>	            YES	                      NUM	
+       --------	  --------	  --------	  --------	      <T0>	             NO	                 <factor>	
        --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
-       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
-       --------	  --------	  --------	  --------	<expression>	             NO	            <booleanExpr>	
-       --------	  --------	  --------	  --------	     <BE0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
-       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
-       --------	  --------	  --------	  --------	<lvalueARRStmt>	             NO	             <expression>	
-              ;	        56	   SEMICOL	  --------	<lvalueARRStmt>	            YES	                  SEMICOL	
-       --------	  --------	  --------	  --------	<assignmentStmt>	             NO	              <whichStmt>	
-       --------	  --------	  --------	  --------	<statement>	             NO	             <simpleStmt>	
-       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
-       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-              i	        57	        ID	  --------	<assignmentStmt>	            YES	                       ID	
-       --------	  --------	  --------	  --------	<simpleStmt>	             NO	         <assignmentStmt>	
-             :=	        57	  ASSIGNOP	  --------	<lvalueIDStmt>	            YES	                 ASSIGNOP	
-       --------	  --------	  --------	  --------	<whichStmt>	             NO	           <lvalueIDStmt>	
-       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
-       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
-              i	        57	        ID	  --------	  <factor>	            YES	                       ID	
-       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
-       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
-       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
-       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
-       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
-              +	        57	      PLUS	  --------	     <op1>	            YES	                     PLUS	
+       --------	  --------	  --------	  --------	      <T0>	             NO	                     <T0>	
+              +	        22	      PLUS	  --------	     <op1>	            YES	                     PLUS	
        --------	  --------	  --------	  --------	     <AE0>	             NO	                    <op1>	
        --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
-              1	        57	       NUM	         1	  <factor>	            YES	                      NUM	
+       22.34E-2	        22	      RNUM	  0.223400	  <factor>	            YES	                     RNUM	
        --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
        --------	  --------	  --------	  --------	     <AE0>	             NO	                   <term>	
        --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
@@ -863,21 +392,306 @@
        --------	  --------	  --------	  --------	     <BE0>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
        --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	             <expression>	
+              )	        22	        BC	  --------	  <factor>	            YES	                       BC	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+              /	        22	       DIV	  --------	     <op2>	            YES	                      DIV	
+       --------	  --------	  --------	  --------	      <T0>	             NO	                    <op2>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+             13	        22	       NUM	        13	  <factor>	            YES	                      NUM	
+       --------	  --------	  --------	  --------	      <T0>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+       --------	  --------	  --------	  --------	<expression>	             NO	            <booleanExpr>	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
        --------	  --------	  --------	  --------	<lvalueIDStmt>	             NO	             <expression>	
-              ;	        57	   SEMICOL	  --------	<lvalueIDStmt>	            YES	                  SEMICOL	
+              ;	        22	   SEMICOL	  --------	<lvalueIDStmt>	            YES	                  SEMICOL	
        --------	  --------	  --------	  --------	<assignmentStmt>	             NO	              <whichStmt>	
        --------	  --------	  --------	  --------	<statement>	             NO	             <simpleStmt>	
        --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
        --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-       --------	  --------	  --------	  --------	<statements>	             NO	               <caseStmt>	
+              b	        23	        ID	  --------	<assignmentStmt>	            YES	                       ID	
+       --------	  --------	  --------	  --------	<simpleStmt>	             NO	         <assignmentStmt>	
+             :=	        23	  ASSIGNOP	  --------	<lvalueIDStmt>	            YES	                 ASSIGNOP	
+       --------	  --------	  --------	  --------	<whichStmt>	             NO	           <lvalueIDStmt>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
+              a	        23	        ID	  --------	  <factor>	            YES	                       ID	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+       --------	  --------	  --------	  --------	<expression>	             NO	            <booleanExpr>	
+             <=	        23	        LE	  --------	<relationalOp>	            YES	                       LE	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	           <relationalOp>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	         <arithmeticExpr>	
+              b	        23	        ID	  --------	  <factor>	            YES	                       ID	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+            AND	        23	       AND	  --------	<logicalOp>	            YES	                      AND	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	              <logicalOp>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
+              c	        23	        ID	  --------	  <factor>	            YES	                       ID	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	            <booleanExpr>	
+             >=	        23	        GE	  --------	<relationalOp>	            YES	                       GE	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	           <relationalOp>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	         <arithmeticExpr>	
+              a	        23	        ID	  --------	  <factor>	            YES	                       ID	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+             OR	        23	        OR	  --------	<logicalOp>	            YES	                       OR	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	              <logicalOp>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
+              a	        23	        ID	  --------	  <factor>	            YES	                       ID	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	            <booleanExpr>	
+              <	        23	        LT	  --------	<relationalOp>	            YES	                       LT	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	           <relationalOp>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	         <arithmeticExpr>	
+              0	        23	       NUM	         0	  <factor>	            YES	                      NUM	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+            AND	        23	       AND	  --------	<logicalOp>	            YES	                      AND	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	              <logicalOp>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
+          false	        23	     FALSE	  --------	   <bools>	            YES	                    FALSE	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                  <bools>	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	            <booleanExpr>	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                    <BE0>	
+       --------	  --------	  --------	  --------	<lvalueIDStmt>	             NO	             <expression>	
+              ;	        23	   SEMICOL	  --------	<lvalueIDStmt>	            YES	                  SEMICOL	
+       --------	  --------	  --------	  --------	<assignmentStmt>	             NO	              <whichStmt>	
+       --------	  --------	  --------	  --------	<statement>	             NO	             <simpleStmt>	
+       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
        --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-            end	        59	       END	  --------	<iterativeStmt>	            YES	                      END	
+          res_1	        24	        ID	  --------	<assignmentStmt>	            YES	                       ID	
+       --------	  --------	  --------	  --------	<simpleStmt>	             NO	         <assignmentStmt>	
+             :=	        24	  ASSIGNOP	  --------	<lvalueIDStmt>	            YES	                 ASSIGNOP	
+       --------	  --------	  --------	  --------	<whichStmt>	             NO	           <lvalueIDStmt>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
+              (	        24	        BO	  --------	  <factor>	            YES	                       BO	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+           true	        24	      TRUE	  --------	   <bools>	            YES	                     TRUE	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                  <bools>	
+       --------	  --------	  --------	  --------	<expression>	             NO	            <booleanExpr>	
+            AND	        24	       AND	  --------	<logicalOp>	            YES	                      AND	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	              <logicalOp>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                    <BE0>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
+              c	        24	        ID	  --------	  <factor>	            YES	                       ID	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	            <booleanExpr>	
+             ==	        24	        EQ	  --------	<relationalOp>	            YES	                       EQ	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	           <relationalOp>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	         <arithmeticExpr>	
+              b	        24	        ID	  --------	  <factor>	            YES	                       ID	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	             <expression>	
+              )	        24	        BC	  --------	  <factor>	            YES	                       BC	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+       --------	  --------	  --------	  --------	<expression>	             NO	            <booleanExpr>	
+             OR	        24	        OR	  --------	<logicalOp>	            YES	                       OR	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	              <logicalOp>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
+              (	        24	        BO	  --------	  <factor>	            YES	                       BO	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
+              b	        24	        ID	  --------	  <factor>	            YES	                       ID	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+       --------	  --------	  --------	  --------	<expression>	             NO	            <booleanExpr>	
+              >	        24	        GT	  --------	<relationalOp>	            YES	                       GT	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	           <relationalOp>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	         <arithmeticExpr>	
+              p	        24	        ID	  --------	  <factor>	            YES	                       ID	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+            AND	        24	       AND	  --------	<logicalOp>	            YES	                      AND	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	              <logicalOp>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
+              (	        24	        BO	  --------	  <factor>	            YES	                       BO	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	         <arithmeticExpr>	
+              a	        24	        ID	  --------	  <factor>	            YES	                       ID	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+       --------	  --------	  --------	  --------	<expression>	             NO	            <booleanExpr>	
+             <=	        24	        LE	  --------	<relationalOp>	            YES	                       LE	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	           <relationalOp>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
+       --------	  --------	  --------	  --------	    <sign>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <sign>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	         <arithmeticExpr>	
+              c	        24	        ID	  --------	  <factor>	            YES	                       ID	
+       --------	  --------	  --------	  --------	    <term>	             NO	                 <factor>	
+       --------	  --------	  --------	  --------	    <N_11>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	                   <N_11>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	             <expression>	
+              )	        24	        BC	  --------	  <factor>	            YES	                       BC	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	            <booleanExpr>	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
+       --------	  --------	  --------	  --------	  <factor>	             NO	             <expression>	
+              )	        24	        BC	  --------	  <factor>	            YES	                       BC	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                   <term>	
+       --------	  --------	  --------	  --------	      <T0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <term>	             NO	                     <T0>	
+       --------	  --------	  --------	  --------	     <AE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	<arithmeticExpr>	             NO	                    <AE0>	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	            <booleanExpr>	
+       --------	  --------	  --------	  --------	     <BE0>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	    <BE00>	             NO	                    <BE0>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
+       --------	  --------	  --------	  --------	<booleanExpr>	             NO	                   <BE00>	
+       --------	  --------	  --------	  --------	<lvalueIDStmt>	             NO	             <expression>	
+              ;	        24	   SEMICOL	  --------	<lvalueIDStmt>	            YES	                  SEMICOL	
+       --------	  --------	  --------	  --------	<assignmentStmt>	             NO	              <whichStmt>	
+       --------	  --------	  --------	  --------	<statement>	             NO	             <simpleStmt>	
+       --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
+       --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
+          print	        26	     PRINT	  --------	  <ioStmt>	            YES	                    PRINT	
+       --------	  --------	  --------	  --------	<statement>	             NO	                 <ioStmt>	
+              (	        26	        BO	  --------	  <ioStmt>	            YES	                       BO	
+          res_1	        26	        ID	  --------	     <var>	            YES	                       ID	
+       --------	  --------	  --------	  --------	    <var3>	             NO	                    <var>	
+       --------	  --------	  --------	  --------	 <whichId>	             NO	               <caseStmt>	
+       --------	  --------	  --------	  --------	     <var>	             NO	                <whichId>	
+       --------	  --------	  --------	  --------	  <ioStmt>	             NO	                   <var3>	
+              )	        26	        BC	  --------	  <ioStmt>	            YES	                       BC	
+              ;	        26	   SEMICOL	  --------	  <ioStmt>	            YES	                  SEMICOL	
        --------	  --------	  --------	  --------	<statements>	             NO	              <statement>	
        --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
        --------	  --------	  --------	  --------	<statements>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	<statements>	             NO	             <statements>	
-            end	        60	       END	  --------	<moduleDef>	            YES	                      END	
+            end	        27	       END	  --------	<moduleDef>	            YES	                      END	
        --------	  --------	  --------	  --------	 <program>	             NO	           <otherModules>	
        --------	  --------	  --------	  --------	<otherModules>	             NO	               <caseStmt>	
        --------	  --------	  --------	  --------	<otherModules>	             NO	           <otherModules>	
-               	        61	PROGRAMEND	  --------	 <program>	            YES	               PROGRAMEND	
+               	        31	PROGRAMEND	  --------	 <program>	            YES	               PROGRAMEND	

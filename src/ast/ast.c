@@ -14,6 +14,14 @@ LinkedListASTNode *insertAtFront(LinkedListASTNode *head, ast_node *data)
     return newNode;
 }
 
+LinkedListASTNode *createLinkedListASTNode(ast_node *data)
+{
+    LinkedListASTNode *newNode = (LinkedListASTNode *)malloc(sizeof(LinkedListASTNode));
+    newNode->data = data;
+    newNode->next = NULL;
+    return newNode;
+}
+
 LinkedListASTNode *insertAtEnd(LinkedListASTNode *head, ast_node *data)
 {
     LinkedListASTNode *newNode = (LinkedListASTNode *)malloc(sizeof(LinkedListASTNode));
@@ -63,16 +71,16 @@ void *createProgram(ast_node *ModDec, ast_node *OtherMod1, ast_node *DriverMod, 
 
 struct ModuleDeclarationAuxInfo
 {
-    parse_tree_node *ID;
+    parse_tree_node *Id;
     LinkedListASTNode *input_plist;
     LinkedListASTNode *ret;
     LinkedListASTNode *moduleDef;
 };
 
-void *createModule(parse_tree_node *ID, LinkedListASTNode *input_plist, LinkedListASTNode *ret, LinkedListASTNode *moduleDef)
+void *createModule(parse_tree_node *Id, LinkedListASTNode *input_plist, LinkedListASTNode *ret, LinkedListASTNode *moduleDef)
 {
     struct ModuleDeclarationAuxInfo *aux_info = (struct ModuleDeclarationAuxInfo *)malloc(sizeof(struct ModuleDeclarationAuxInfo));
-    aux_info->ID = ID;
+    aux_info->Id = Id;
     aux_info->input_plist = input_plist;
     aux_info->ret = ret;
     aux_info->moduleDef = moduleDef;
@@ -142,14 +150,14 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr = NULL;
         break;
     }
-    case 4: // 4: <moduleDeclaration> -> DECLARE MODULE ID SEMICOL
+    case 4: // 4: <moduleDeclaration> -> DECLARE MODULE Id SEMICOL
     {
         parse_tree_node *Declare = ptn->child;
         parse_tree_node *Module = Declare->sibling;
-        parse_tree_node *ID = Module->sibling;
-        parse_tree_node *SemiCol = ID->sibling;
+        parse_tree_node *Id = Module->sibling;
+        parse_tree_node *SemiCol = Id->sibling;
         ast_node *cur_node = createASTNode(MODULE_DECLARATION_AST);
-        cur_node->aux_info = ID;
+        cur_node->aux_info = Id;
         ptn->addr = cur_node;
         free(Declare);
         free(Module);
@@ -191,12 +199,12 @@ ast_node *process_subtree(parse_tree_node *ptn)
         free(ModDef);
         break;
     }
-    case 8: // 8: <module> -> DEF MODULE ID ENDDEF TAKES INPUT SQBO <input_plist> SQBC SEMICOL <ret> <moduleDef>
+    case 8: // 8: <module> -> DEF MODULE Id ENDDEF TAKES INPUT SQBO <input_plist> SQBC SEMICOL <ret> <moduleDef>
     {
         parse_tree_node *Def = ptn->child;
         parse_tree_node *Module = Def->sibling;
-        parse_tree_node *ID = Module->sibling;
-        parse_tree_node *EndDef = ID->sibling;
+        parse_tree_node *Id = Module->sibling;
+        parse_tree_node *EndDef = Id->sibling;
         parse_tree_node *Takes = EndDef->sibling;
         parse_tree_node *Input = Takes->sibling;
         parse_tree_node *SqBo = Input->sibling;
@@ -209,7 +217,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         process_subtree(Ret);
         process_subtree(ModDef);
         ast_node *cur_node = createASTNode(MODULE_DEF_AST);
-        cur_node->aux_info = createModule(ID, InputPlist->syn_addr, Ret->addr, ModDef->addr);
+        cur_node->aux_info = createModule(Id, InputPlist->syn_addr, Ret->addr, ModDef->addr);
         ptn->addr = cur_node;
         free(Def);
         free(Module);
@@ -244,16 +252,16 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr = NULL;
         break;
     }
-    case 11: // 11: <input_plist> -> ID COLON <dataType> <iP0>
+    case 11: // 11: <input_plist> -> Id COLON <dataType> <iP0>
     {
-        parse_tree_node *ID = ptn->child;
-        parse_tree_node *Colon = ID->sibling;
+        parse_tree_node *Id = ptn->child;
+        parse_tree_node *Colon = Id->sibling;
         parse_tree_node *DataType = Colon->sibling;
         parse_tree_node *IP0 = DataType->sibling;
         process_subtree(DataType);
         process_subtree(IP0);
         ast_node *cur_node = createASTNode(FORMALPARAM_AST);
-        cur_node->left = ID;
+        cur_node->left = Id;
         cur_node->right = DataType->syn_addr;
         ptn->syn_addr = insertAtFront(IP0->syn_addr, cur_node);
         // ptn->syn_addr = insertAtFront(IP0->syn_addr, DataType->syn_addr);
@@ -261,17 +269,17 @@ ast_node *process_subtree(parse_tree_node *ptn)
         free(IP0);
         break;
     }
-    case 12: // 12: <iP0> -> COMMA ID COLON <dataType> <iP0>
+    case 12: // 12: <iP0> -> COMMA Id COLON <dataType> <iP0>
     {
         parse_tree_node *Comma = ptn->child;
-        parse_tree_node *ID = Comma->sibling;
-        parse_tree_node *Colon = ID->sibling;
+        parse_tree_node *Id = Comma->sibling;
+        parse_tree_node *Colon = Id->sibling;
         parse_tree_node *DataType = Colon->sibling;
         parse_tree_node *IP0 = DataType->sibling;
         process_subtree(DataType);
         process_subtree(IP0);
         ast_node *cur_node = createASTNode(FORMALPARAM_AST);
-        cur_node->left = ID;
+        cur_node->left = Id;
         cur_node->right = DataType->syn_addr;
         ptn->syn_addr = insertAtFront(IP0->syn_addr, cur_node);
         free(Comma);
@@ -285,33 +293,33 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->syn_addr = NULL;
         break;
     }
-    case 14: // 14: <output_plist> -> ID COLON <type> <oP0>
+    case 14: // 14: <output_plist> -> Id COLON <type> <oP0>
     {
-        parse_tree_node *ID = ptn->child;
-        parse_tree_node *Colon = ID->sibling;
+        parse_tree_node *Id = ptn->child;
+        parse_tree_node *Colon = Id->sibling;
         parse_tree_node *Type = Colon->sibling;
         parse_tree_node *OP0 = Type->sibling;
         process_subtree(Type);
         process_subtree(OP0);
         ast_node *cur_node = createASTNode(FORMALPARAM_AST);
-        cur_node->left = ID;
+        cur_node->left = Id;
         cur_node->right = Type->syn_addr;
         ptn->syn_addr = insertAtFront(OP0->syn_addr, cur_node);
         free(Colon);
         free(OP0);
         break;
     }
-    case 15: // 15: <oP0> -> COMMA ID COLON <type> <oP0>
+    case 15: // 15: <oP0> -> COMMA Id COLON <type> <oP0>
     {
         parse_tree_node *Comma = ptn->child;
-        parse_tree_node *ID = Comma->sibling;
-        parse_tree_node *Colon = ID->sibling;
+        parse_tree_node *Id = Comma->sibling;
+        parse_tree_node *Colon = Id->sibling;
         parse_tree_node *Type = Colon->sibling;
         parse_tree_node *OP0 = Type->sibling;
         process_subtree(Type);
         process_subtree(OP0);
         ast_node *cur_node = createASTNode(FORMALPARAM_AST);
-        cur_node->left = ID;
+        cur_node->left = Id;
         cur_node->right = Type->syn_addr;
         ptn->syn_addr = insertAtFront(OP0->syn_addr, cur_node);
         free(Comma);
@@ -450,7 +458,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         free(IterativeStmt);
         break;
     }
-    case 32: // 32: <ioStmt> -> GET_VALUE BO ID BC SEMICOL
+    case 32: // 32: <ioStmt> -> GET_VALUE BO Id BC SEMICOL
     {
         parse_tree_node *GetValue = ptn->child;
         parse_tree_node *Bo = GetValue->sibling;
@@ -498,7 +506,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         free(Bools);
         break;
     }
-    case 36: // 36: <var> -> ID <whichId>
+    case 36: // 36: <var> -> Id <whichId>
     {
         parse_tree_node *Id = ptn->child;
         parse_tree_node *WhichId = Id->sibling;
@@ -562,24 +570,24 @@ ast_node *process_subtree(parse_tree_node *ptn)
         free(ModReuseStmt);
         break;
     }
-    case 44: // 44: <assignmentStmt> -> ID <whichStmt>
+    case 44: // 44: <assignmentStmt> -> Id <whichStmt>
     {
-        parse_tree_node *ID = ptn->child;
-        parse_tree_node *WhichStmt = ID->sibling;
-        ptn->addr = ID;
+        parse_tree_node *Id = ptn->child;
+        parse_tree_node *WhichStmt = Id->sibling;
+        ptn->addr = Id;
         WhichStmt->inh_addr = ptn->addr;
         process_subtree(WhichStmt);
         ptn->syn_addr = WhichStmt->syn_addr;
         free(WhichStmt);
         break;
     }
-    case 45: // 45: <whichStmt> -> <lvalueIDStmt>
+    case 45: // 45: <whichStmt> -> <lvalueIdStmt>
     {
-        parse_tree_node *LvalueIDStmt = ptn->child;
-        LvalueIDStmt->inh_addr = ptn->inh_addr;
-        process_subtree(LvalueIDStmt);
-        ptn->syn_addr = LvalueIDStmt->syn_addr;
-        free(LvalueIDStmt);
+        parse_tree_node *LvalueIdStmt = ptn->child;
+        LvalueIdStmt->inh_addr = ptn->inh_addr;
+        process_subtree(LvalueIdStmt);
+        ptn->syn_addr = LvalueIdStmt->syn_addr;
+        free(LvalueIdStmt);
         break;
     }
     case 46: // 46: <whichStmt> -> <lvalueARRStmt>
@@ -591,7 +599,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         free(LvalueARRStmt);
         break;
     }
-    case 47: // 47: <lvalueIDStmt> -> ASSIGNOP <expression> SEMICOL
+    case 47: // 47: <lvalueIdStmt> -> ASSIGNOP <expression> SEMICOL
     {
         parse_tree_node *AssignOp = ptn->child;
         parse_tree_node *Expression = AssignOp->sibling;
@@ -803,10 +811,10 @@ ast_node *process_subtree(parse_tree_node *ptn)
         free(Id_num);
         break;
     }
-    case 63: // 63: <id_num> -> ID
+    case 63: // 63: <id_num> -> Id
     {
-        parse_tree_node *ID = ptn->child;
-        ptn->addr = ID;
+        parse_tree_node *Id = ptn->child;
+        ptn->addr = Id;
         break;
     }
     case 64: // 64: <id_num> -> NUM
@@ -823,7 +831,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         free(Bools);
         break;
     }
-    case 66: // 66: <moduleReuseStmt> -> SQBO <idList> SQBC ASSIGNOP USE MODULE ID WITH PARAMETERS <actual_para_list> SEMICOL
+    case 66: // 66: <moduleReuseStmt> -> SQBO <idList> SQBC ASSIGNOP USE MODULE Id WITH PARAMETERS <actual_para_list> SEMICOL
     {
         parse_tree_node *Sqbo = ptn->child;
         parse_tree_node *IdList = Sqbo->sibling;
@@ -831,8 +839,8 @@ ast_node *process_subtree(parse_tree_node *ptn)
         parse_tree_node *Assignop = Sqbc->sibling;
         parse_tree_node *Use = Assignop->sibling;
         parse_tree_node *Module = Use->sibling;
-        parse_tree_node *ID = Module->sibling;
-        parse_tree_node *With = ID->sibling;
+        parse_tree_node *Id = Module->sibling;
+        parse_tree_node *With = Id->sibling;
         parse_tree_node *Parameters = With->sibling;
         parse_tree_node *Actual_para_list = Parameters->sibling;
         parse_tree_node *Semicol = Actual_para_list->sibling;
@@ -841,7 +849,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         process_subtree(Actual_para_list);
         ptn->addr->left = IdList->syn_addr;
         ast_node *temp = createASTNode(USE_AST);
-        temp->left = ID;
+        temp->left = Id;
         temp->right = Actual_para_list->syn_addr;
         ptn->addr->right = temp;
         free(Sqbo);
@@ -856,19 +864,19 @@ ast_node *process_subtree(parse_tree_node *ptn)
         free(Semicol);
         break;
     }
-    case 67: // 67: <moduleReuseStmt> -> USE MODULE ID WITH PARAMETERS <actual_para_list> SEMICOL
+    case 67: // 67: <moduleReuseStmt> -> USE MODULE Id WITH PARAMETERS <actual_para_list> SEMICOL
     {
         parse_tree_node *Use = ptn->child;
         parse_tree_node *Module = Use->sibling;
-        parse_tree_node *ID = Module->sibling;
-        parse_tree_node *With = ID->sibling;
+        parse_tree_node *Id = Module->sibling;
+        parse_tree_node *With = Id->sibling;
         parse_tree_node *Parameters = With->sibling;
         parse_tree_node *Actual_para_list = Parameters->sibling;
         parse_tree_node *Semicol = Actual_para_list->sibling;
         ptn->addr = createASTNode(USE_AST);
-        ptn->addr->left = ID;
+        ptn->addr->left = Id;
         process_subtree(Actual_para_list);
-        ptn->addr->right = Actual_para_list->syn_addr;
+        ptn->addr->aux_info = Actual_para_list->syn_addr;
         free(Use);
         free(Module);
         free(With);
@@ -884,6 +892,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         process_subtree(AP00);
         process_subtree(AP1);
         ptn->syn_addr = insertAtFront(AP1->syn_addr, AP00->addr);
+        // ptn->addr->aux_info = insertAtFront(AP1->addr->aux_info, AP00->addr);
         free(AP00);
         free(AP1);
         break;
@@ -896,6 +905,16 @@ ast_node *process_subtree(parse_tree_node *ptn)
         process_subtree(AP00);
         process_subtree(AP1);
         ptn->syn_addr = insertAtFront(AP1->syn_addr, AP00->addr);
+        // LinkedListASTNode *temp = createLinkedListASTNode(AP1->syn_addr);
+        // printf("ghaplaa 2 \n");
+        // fflush(stdout);
+        // LinkedListASTNode *temp = (LinkedListASTNode *) (AP1->addr->aux_info);
+        // temp = insertAtFront(temp, AP00->addr);
+        // printf("ghaplaa 2 mid \n");
+        // fflush(stdout);
+        // ptn->addr->aux_info = temp;
+        // printf("ghaplaa 2 over \n");
+        // fflush(stdout);
         free(Comma);
         free(AP00);
         free(AP1);
@@ -904,6 +923,12 @@ ast_node *process_subtree(parse_tree_node *ptn)
     case 70: // 70: <aP1> -> EPSILON
     {
         ptn->syn_addr = NULL;
+        // ptn->addr = createASTNode(PARSE_TREE_AST1);
+        // printf("ghaplaa \n");
+        // fflush(stdout);
+        // ptn->addr->aux_info = createLinkedListASTNode(ptn->addr);
+        // printf("ghaplaa here\n");
+        // fflush(stdout);
         break;
     }
     case 71: // 71: <aP00> -> <sign> <aP0>
@@ -945,35 +970,37 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr = RNUM;
         break;
     }
-    case 75: // 75: <aP0> -> ID <N_11>
+    case 75: // 75: <aP0> -> Id <N_11>
     {
-        parse_tree_node *ID = ptn->child;
-        parse_tree_node *N_11 = ID->sibling;
+        parse_tree_node *Id = ptn->child;
+        parse_tree_node *N_11 = Id->sibling;
         process_subtree(N_11);
-        ptn->addr = ID;
+        ptn->addr = Id;
         if (N_11->addr != NULL)
         {
+            ptn->addr = createASTNode(ARR_ELEM_AST);
+            ptn->addr->left = Id;
             ptn->addr->right = N_11->addr;
         }
         free(N_11);
         break;
     }
-    case 76: // 76: <idList> -> ID <iL0>
+    case 76: // 76: <idList> -> Id <iL0>
     {
-        parse_tree_node *ID = ptn->child;
-        parse_tree_node *IL0 = ID->sibling;
+        parse_tree_node *Id = ptn->child;
+        parse_tree_node *IL0 = Id->sibling;
         process_subtree(IL0);
-        ptn->syn_addr = insertAtFront(IL0->syn_addr, ID);
+        ptn->syn_addr = insertAtFront(IL0->syn_addr, Id);
         free(IL0);
         break;
     }
-    case 77: // 77: <iL0> -> COMMA ID <iL0>
+    case 77: // 77: <iL0> -> COMMA Id <iL0>
     {
         parse_tree_node *Comma = ptn->child;
-        parse_tree_node *ID = Comma->sibling;
-        parse_tree_node *IL0 = ID->sibling;
+        parse_tree_node *Id = Comma->sibling;
+        parse_tree_node *IL0 = Id->sibling;
         process_subtree(IL0);
-        ptn->syn_addr = insertAtFront(IL0->syn_addr, ID);
+        ptn->syn_addr = insertAtFront(IL0->syn_addr, Id);
         free(Comma);
         free(IL0);
         break;
@@ -1002,6 +1029,8 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->syn_addr = BE00->syn_addr;
         free(ArithmeticExpr);
         free(BE00);
+
+        printf("ghaplaa 1 over \n");
         break;
     }
     case 81: // 81: <booleanExpr> -> <bools> <BE0>
@@ -1050,12 +1079,24 @@ ast_node *process_subtree(parse_tree_node *ptn)
         parse_tree_node *BooleanExpr = LogicalOp->sibling;
         process_subtree(LogicalOp);
         ptn->addr = LogicalOp->addr;
+        printf("dsjkl\n");
+        fflush(stdout);
         process_subtree(BooleanExpr);
+        printf("dsjkl1\n");
+        fflush(stdout);
         ptn->addr->left = ptn->inh_addr;
+        printf("dsjkl2\n");
+        fflush(stdout);
         ptn->addr->right = BooleanExpr->syn_addr;
+        printf("dsjkl3\n");
+        fflush(stdout);
         ptn->syn_addr = ptn->addr;
+        printf("dsjkl4\n");
+        fflush(stdout);
         free(LogicalOp);
         free(BooleanExpr);
+        printf("dsjkl5\n");
+        fflush(stdout);
         break;
     }
     case 85: // 85: <BE0> -> EPSILON
@@ -1077,11 +1118,18 @@ ast_node *process_subtree(parse_tree_node *ptn)
         }
         else
         {
-            ptn->addr = Term->addr;
+            ptn->addr = Term->syn_addr;
         }
         AE0->inh_addr = ptn->addr;
         process_subtree(AE0);
         ptn->syn_addr = AE0->syn_addr;
+        printf("ok %d\n", ptn->addr->nodeType);
+        fflush(stdout);
+        if(ptn->addr->nodeType==32 || ptn->addr->nodeType==34)
+        {
+            parse_tree_node *temp = ptn->addr;
+            printf("%s\n", temp->leafNodeInfo.lexeme);
+        }
         free(Sign);
         free(Term);
         free(AE0);
@@ -1097,6 +1145,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         process_subtree(Term);
         ptn->addr->right = Term->addr;
         AE0->inh_addr = ptn->addr;
+        ptn->addr->left = ptn->inh_addr;
         process_subtree(AE0);
         ptn->syn_addr = AE0->syn_addr;
         free(Op1);
@@ -1209,13 +1258,18 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr = RNUM;
         break;
     }
-    case 101: // 101: <factor> -> ID <N_11>
+    case 101: // 101: <factor> -> Id <N_11> //TODO: sahi nahi hai
     {
-        parse_tree_node *ID = ptn->child;
-        parse_tree_node *N_11 = ID->sibling;
-        ptn->addr = ID;
+        parse_tree_node *Id = ptn->child;
+        parse_tree_node *N_11 = Id->sibling;
+        ptn->addr = Id;
         process_subtree(N_11);
-        ptn->addr->right = N_11->addr;
+        if (N_11->addr != NULL)
+        {
+            ptn->addr = createASTNode(ARR_ELEM_AST);
+            ptn->addr->left = Id;
+            ptn->addr->right = N_11->addr;
+        }
         free(N_11);
         break;
     }
@@ -1226,6 +1280,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         parse_tree_node *SQBC = Element_index_with_expression->sibling;
         process_subtree(Element_index_with_expression);
         ptn->addr = Element_index_with_expression->syn_addr;
+
         free(SQBO);
         free(Element_index_with_expression);
         free(SQBC);
@@ -1311,12 +1366,12 @@ ast_node *process_subtree(parse_tree_node *ptn)
         free(SEMICOL);
         break;
     }
-    case 113: // 113: <conditionalStmt> -> SWITCH BO ID BC START <caseStmts> <default> END
+    case 113: // 113: <conditionalStmt> -> SWITCH BO Id BC START <caseStmts> <default> END
     {
         parse_tree_node *Switch = ptn->child;
         parse_tree_node *BO = Switch->sibling;
-        parse_tree_node *ID = BO->sibling;
-        parse_tree_node *BC = ID->sibling;
+        parse_tree_node *Id = BO->sibling;
+        parse_tree_node *BC = Id->sibling;
         parse_tree_node *START = BC->sibling;
         parse_tree_node *CaseStmts = START->sibling;
         parse_tree_node *Default = CaseStmts->sibling;
@@ -1324,11 +1379,11 @@ ast_node *process_subtree(parse_tree_node *ptn)
         process_subtree(CaseStmts);
         process_subtree(Default);
         ptn->addr = createASTNode(SWITCH_AST);
-        ptn->addr->left = ID;
+        ptn->addr->left = Id;
         ptn->addr->right = insertAtEnd(CaseStmts->addr, Default->addr);
         free(Switch);
         free(BO);
-        free(ID);
+        free(Id);
         free(BC);
         free(START);
         free(CaseStmts);
@@ -1413,12 +1468,12 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr = NULL;
         break;
     }
-    case 122: // 122: <iterativeStmt> -> FOR BO ID IN <forrange> BC START <statements> END
+    case 122: // 122: <iterativeStmt> -> FOR BO Id IN <forrange> BC START <statements> END
     {
         parse_tree_node *For = ptn->child;
         parse_tree_node *BO = For->sibling;
-        parse_tree_node *ID = BO->sibling;
-        parse_tree_node *IN = ID->sibling;
+        parse_tree_node *Id = BO->sibling;
+        parse_tree_node *IN = Id->sibling;
         parse_tree_node *Forrange = IN->sibling;
         parse_tree_node *BC = Forrange->sibling;
         parse_tree_node *START = BC->sibling;
@@ -1429,7 +1484,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr = createASTNode(FOR_AST);
         ptn->addr->left = Forrange->addr;
         ptn->addr->right = Statements->syn_addr;
-        ptn->addr->aux_info = ID;
+        ptn->addr->aux_info = Id;
         free(For);
         free(BO);
         free(IN);
@@ -1537,10 +1592,10 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr = NUM;
         break;
     }
-    case 128: // 128: <new_index> -> ID
+    case 128: // 128: <new_index> -> Id
     {
-        parse_tree_node *ID = ptn->child;
-        ptn->addr = ID;
+        parse_tree_node *Id = ptn->child;
+        ptn->addr = Id;
         break;
     }
         return NULL;
@@ -1677,10 +1732,29 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
         {
             print_ast_node(node->right, depth + 1, fp);
         }
-        else if (node->right->nodeType >= PLUS_AST && node->right->nodeType <= GE_AST)
+        else if (node->right->nodeType == PLUS_AST ||
+                 node->right->nodeType == MINUS_AST ||
+                 node->right->nodeType == MUL_AST ||
+                 node->right->nodeType == DIV_AST ||
+                 node->right->nodeType == AND_AST ||
+                 node->right->nodeType == OR_AST ||
+                 node->right->nodeType == LT_AST ||
+                 node->right->nodeType == LE_AST ||
+                 node->right->nodeType == GT_AST ||
+                 node->right->nodeType == GE_AST ||
+                 node->right->nodeType == EQ_AST ||
+                 node->right->nodeType == NE_AST)
         {
+            printf("reached here\n");
+            fflush(stdout);
             print_ast_node(node->right, depth + 1, fp);
         }
+        // else if(node->right->nodeType == FORMALPARAM_AST)
+        // {
+        //     // fprintf(fp, "FORMALPARAM_AST\n\n");
+        //     // fflush(fp);
+        //     print_ast_node(node->right, depth + 1, fp);
+        // }
         else
         {
             if(node->right == NULL)
@@ -1709,7 +1783,8 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
         fprintf(fp, "USE_AST\n\n");
         fflush(fp);
         print_parse_tree_node(node->left, depth + 1, fp);
-        print_ll_pt(node->right, depth + 1, fp);
+        LinkedListASTNode *ll = (LinkedListASTNode *)node->right;
+        print_ll(ll, depth + 1, fp);
         break;
     }
     case DECLARE_AST:
@@ -1910,6 +1985,13 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
         fflush(stdout);
         break;
     }
+    case PARSE_TREE_AST:
+    case PARSE_TREE_AST1:
+    case PARSE_TREE_AST2:
+    {
+        print_parse_tree_node(node, depth + 1, fp);
+        break;
+    }
     default:
     {
         fprintf(fp, "UNKNOWN_AST\n\n");
@@ -1936,7 +2018,9 @@ void print_ast(ast *a)
 void main()
 {
     bufferSize = 1024;
-    parseInputSourceCode("tests/t5.txt", "src/parser/parseTree.txt");
+    parseInputSourceCode("tests/t4.txt", "src/parser/parseTree.txt");
+    printf("parse tree created successfully.\n");
+    fflush(stdout);
     ast *AST = create_ast(&parseTree);
     printf("AST created successfully.\n");
     print_ast(AST);
