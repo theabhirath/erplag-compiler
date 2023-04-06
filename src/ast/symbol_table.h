@@ -32,9 +32,15 @@ struct var_entry
     union value val;
 };
 
+struct dynamicIndex
+{
+    int sign;
+    struct var_entry* index;
+};
+
 union indexType{
     int staticIndex;
-    struct var_entry* dynamicIndex;
+    struct dynamicIndex* dynamicIndex;
 };
 
 struct arr_entry
@@ -46,22 +52,24 @@ struct arr_entry
     union indexType end;
 };
 
-struct param_entry{
+typedef struct ST_LL{
     ST_ENTRY *data;
-    struct param_entry *next;
-};
+    struct ST_LL *next;
+} ST_LL;
 
 struct func_entry
 {
     int offset;
-    struct param_entry *inputs;
-    struct param_entry *outputs;
+    struct ST_LL *inputs;
+    struct ST_LL *outputs;
+    ast_node *body;
     struct symbol_table *symTable;
 };
 
 struct block_entry
 {
     int offset;
+    ast_node *body;
     struct symbol_table *symTable;
 };
 
@@ -80,12 +88,13 @@ typedef struct ST_ENTRY
     char *name;
 } ST_ENTRY;
 
-struct symbol_table
+typedef struct symbol_table
 {
-    ST_ENTRY data[SYMBOL_TABLE_SIZE];
+    char *name;
+    ST_LL *data[SYMBOL_TABLE_SIZE];
     struct symbol_table *parent;
-};
+} symbol_table;
 
-extern struct symbol_table global_sym_table;
+extern symbol_table symbolTable;
 
 #endif

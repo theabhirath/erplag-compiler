@@ -1,7 +1,10 @@
 #ifndef AST_H
 #define AST_H
 
+#include <stdio.h>
+
 #include "../lexer/lexerdef.h"
+#include "../parser/parserdef.h"
 
 enum TYPE{
     __NUM__,
@@ -69,5 +72,23 @@ typedef struct LinkedListASTNode{
     ast_node *data;
     struct LinkedListASTNode *next;
 } LinkedListASTNode;
+
+struct programAuxInfo{
+    LinkedListASTNode *ModDec;
+    LinkedListASTNode *OtherMod1;
+    ast_node *DriverMod;
+    LinkedListASTNode *OtherMod2;
+};
+
+struct moduleDefAuxInfo{
+    parse_tree_node *Id;
+    LinkedListASTNode *input_plist;
+    LinkedListASTNode *ret;
+    LinkedListASTNode *moduleDef;
+};
+
+void print_ll(LinkedListASTNode *head, int depth, FILE *fp);
+void print_parse_tree_node(parse_tree_node *node, int depth, FILE *fp);
+void print_ast_node(ast_node *node, int depth, FILE *fp);
 
 #endif

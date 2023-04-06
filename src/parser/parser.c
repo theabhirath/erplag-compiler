@@ -1062,7 +1062,7 @@ grammar createRuleList(char *grammarFile, hash_table_element *hashTable)
     return rules;
 }
 
-// 1037 - 8
+// hash function
 int hash(char *str)
 {
     int multiplier = 829;

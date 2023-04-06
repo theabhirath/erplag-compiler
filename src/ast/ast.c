@@ -51,17 +51,9 @@ ast_node *createASTNode(enum AST_NODE_TYPE nodeType)
     return node;
 }
 
-struct ProgramAuxInfo
+void *createProgram(LinkedListASTNode *ModDec, LinkedListASTNode *OtherMod1, ast_node *DriverMod, LinkedListASTNode *OtherMod2)
 {
-    ast_node *ModDec;
-    ast_node *OtherMod1;
-    ast_node *DriverMod;
-    ast_node *OtherMod2;
-};
-
-void *createProgram(ast_node *ModDec, ast_node *OtherMod1, ast_node *DriverMod, ast_node *OtherMod2)
-{
-    struct ProgramAuxInfo *aux_info = (struct ProgramAuxInfo *)malloc(sizeof(struct ProgramAuxInfo));
+    struct programAuxInfo *aux_info = (struct programAuxInfo *)malloc(sizeof(struct programAuxInfo));
     aux_info->ModDec = ModDec;
     aux_info->OtherMod1 = OtherMod1;
     aux_info->DriverMod = DriverMod;
@@ -69,32 +61,15 @@ void *createProgram(ast_node *ModDec, ast_node *OtherMod1, ast_node *DriverMod, 
     return aux_info;
 }
 
-struct ModuleDeclarationAuxInfo
-{
-    parse_tree_node *Id;
-    LinkedListASTNode *input_plist;
-    LinkedListASTNode *ret;
-    LinkedListASTNode *moduleDef;
-};
-
 void *createModule(parse_tree_node *Id, LinkedListASTNode *input_plist, LinkedListASTNode *ret, LinkedListASTNode *moduleDef)
 {
-    struct ModuleDeclarationAuxInfo *aux_info = (struct ModuleDeclarationAuxInfo *)malloc(sizeof(struct ModuleDeclarationAuxInfo));
+    struct moduleDefAuxInfo *aux_info = (struct moduleDefAuxInfo *)malloc(sizeof(struct moduleDefAuxInfo));
     aux_info->Id = Id;
     aux_info->input_plist = input_plist;
     aux_info->ret = ret;
     aux_info->moduleDef = moduleDef;
     return aux_info;
 }
-
-/*
-AST Node Type   |   Left Child    |   Right Child   |   Aux Info
-----------------------------------------------------------------
-PROGRAM_AST         |          NULL   |   NULL          |   ProgramAuxInfo
-MODULE_DECLARATION_AST | NULL          |   NULL          |   ModuleDeclarationAuxInfo
-DRIVER_MODULE_AST   |   NULL          |   NULL          |   LinkedListASTNode (of statements)
-
-*/
 
 ast_node *process_subtree(parse_tree_node *ptn)
 {
@@ -264,7 +239,6 @@ ast_node *process_subtree(parse_tree_node *ptn)
         cur_node->left = Id;
         cur_node->right = DataType->syn_addr;
         ptn->syn_addr = insertAtFront(IP0->syn_addr, cur_node);
-        // ptn->syn_addr = insertAtFront(IP0->syn_addr, DataType->syn_addr);
         free(Colon);
         free(IP0);
         break;
@@ -418,7 +392,6 @@ ast_node *process_subtree(parse_tree_node *ptn)
         parse_tree_node *IOStmt = ptn->child;
         process_subtree(IOStmt);
         ptn->addr = IOStmt->addr;
-        // ptn->syn_addr = IOStmt->syn_addr; // check
         free(IOStmt);
         break;
     }
@@ -427,7 +400,6 @@ ast_node *process_subtree(parse_tree_node *ptn)
         parse_tree_node *SimpleStmt = ptn->child;
         process_subtree(SimpleStmt);
         ptn->addr = SimpleStmt->addr;
-        // ptn->syn_addr = SimpleStmt->syn_addr;
         free(SimpleStmt);
         break;
     }
@@ -436,7 +408,6 @@ ast_node *process_subtree(parse_tree_node *ptn)
         parse_tree_node *DeclareStmt = ptn->child;
         process_subtree(DeclareStmt);
         ptn->addr = DeclareStmt->addr;
-        // ptn->syn_addr = DeclareStmt->syn_addr;
         free(DeclareStmt);
         break;
     }
@@ -445,7 +416,6 @@ ast_node *process_subtree(parse_tree_node *ptn)
         parse_tree_node *ConditionalStmt = ptn->child;
         process_subtree(ConditionalStmt);
         ptn->addr = ConditionalStmt->addr;
-        // ptn->syn_addr = ConditionalStmt->syn_addr;
         free(ConditionalStmt);
         break;
     }
@@ -454,7 +424,6 @@ ast_node *process_subtree(parse_tree_node *ptn)
         parse_tree_node *IterativeStmt = ptn->child;
         process_subtree(IterativeStmt);
         ptn->addr = IterativeStmt->addr;
-        // ptn->syn_addr = IterativeStmt->syn_addr;
         free(IterativeStmt);
         break;
     }
@@ -1645,7 +1614,6 @@ void print_parse_tree_node(parse_tree_node *node, int depth, FILE *fp)
 
 void print_ast_node(ast_node *node, int depth, FILE *fp)
 {
-
     if (node == NULL)
     {
         return;
@@ -1660,7 +1628,7 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     {
         fprintf(fp, "PROGRAM_AST\n\n");
         fflush(fp);
-        struct ProgramAuxInfo *pai = (struct ProgramAuxInfo *)node->aux_info;
+        struct programAuxInfo *pai = (struct programAuxInfo *)node->aux_info;
         print_ll(pai->ModDec, depth + 1, fp);
         print_ll(pai->OtherMod1, depth + 1, fp);
         print_ast_node(pai->DriverMod, depth + 1, fp);
@@ -1681,7 +1649,7 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     {
         fprintf(fp, "MODULE_DEF_AST\n\n");
         fflush(fp);
-        struct ModuleDeclarationAuxInfo *mdai = (struct ModuleDeclarationAuxInfo *)node->aux_info;
+        struct moduleDefAuxInfo* mdai = (struct moduleDefAuxInfo *)node->aux_info;
         print_ll(mdai->input_plist, depth + 1, fp);
         print_ll(mdai->ret, depth + 1, fp);
         print_ll(mdai->moduleDef, depth + 1, fp);
@@ -1725,7 +1693,7 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
             print_ast_node(node->left, depth + 1, fp);
         }
         else
-        {        
+        {
             print_parse_tree_node(node->left, depth + 1, fp);
         }
         if (node->right->nodeType == USE_AST)
