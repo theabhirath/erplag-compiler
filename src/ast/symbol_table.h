@@ -5,6 +5,8 @@
 
 #define SYMBOL_TABLE_SIZE 512
 
+typedef struct ST_ENTRY ST_ENTRY;
+
 typedef enum ST_ENTRY_TYPE
 {
     VAR_SYM,
@@ -96,5 +98,7 @@ typedef struct symbol_table
 } symbol_table;
 
 extern symbol_table symbolTable;
+
+void populateSymbolTables(ast *ASTree);
 
 #endif

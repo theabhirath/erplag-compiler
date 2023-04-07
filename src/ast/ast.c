@@ -5,6 +5,7 @@
 #include "../lexer/lexer.h"
 #include "../parser/parser.h"
 #include "ast.h"
+#include "symbol_table.h"
 
 LinkedListASTNode *insertAtFront(LinkedListASTNode *head, ast_node *data)
 {
@@ -1427,6 +1428,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         parse_tree_node *SEMICOL = BREAK->sibling;
         process_subtree(Statements);
         ptn->addr = createASTNode(DEFAULT_AST);
+        ptn->addr->left = NULL;
         ptn->addr->right = Statements->syn_addr;
         free(Default);
         free(COLON);
@@ -1443,14 +1445,14 @@ ast_node *process_subtree(parse_tree_node *ptn)
     case 122: // 122: <iterativeStmt> -> FOR BO Id IN <forrange> BC START <statements> END
     {
         parse_tree_node *For = ptn->child;
-        parse_tree_node *BO = For->sibling;
-        parse_tree_node *Id = BO->sibling;
-        parse_tree_node *IN = Id->sibling;
-        parse_tree_node *Forrange = IN->sibling;
-        parse_tree_node *BC = Forrange->sibling;
-        parse_tree_node *START = BC->sibling;
-        parse_tree_node *Statements = START->sibling;
-        parse_tree_node *END = Statements->sibling;
+        parse_tree_node *Bo = For->sibling;
+        parse_tree_node *Id = Bo->sibling;
+        parse_tree_node *In = Id->sibling;
+        parse_tree_node *Forrange = In->sibling;
+        parse_tree_node *Bc = Forrange->sibling;
+        parse_tree_node *Start = Bc->sibling;
+        parse_tree_node *Statements = Start->sibling;
+        parse_tree_node *End = Statements->sibling;
         process_subtree(Forrange);
         process_subtree(Statements);
         ptn->addr = createASTNode(FOR_AST);
@@ -1458,13 +1460,13 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr->right = Statements->syn_addr;
         ptn->addr->aux_info = Id;
         free(For);
-        free(BO);
-        free(IN);
+        free(Bo);
+        free(In);
         free(Forrange);
-        free(BC);
-        free(START);
+        free(Bc);
+        free(Start);
         free(Statements);
-        free(END);
+        free(End);
         break;
     }
     case 123: // 123: <iterativeStmt> -> WHILE BO <booleanExpr> BC START <statements> END
@@ -2003,4 +2005,10 @@ void main()
     ast *AST = create_ast(&parseTree);
     printf("AST created successfully.\n");
     print_ast(AST);
+    printf("AST printed successfully.\n");  
+    fflush(stdout);
+    // populate symbol tables
+    populateSymbolTables(AST);
+    printf("Nah. No way.\n");
+    fflush(stdout);
 }

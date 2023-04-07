@@ -14,7 +14,7 @@ symbol_table *createSymbolTable(symbol_table *parent, char *name)
 }
 
 // hash function for the symbol table
-int hash(char *name)
+int hashSymTable(char *name)
 {
     int multiplier = 769;
     int hash = 0;
@@ -28,7 +28,7 @@ int hash(char *name)
 // add a new entry to a given symbol table
 void addToSymbolTable(symbol_table *symTab, ST_ENTRY *st_entry)
 {
-    int hashVal = hash(st_entry->name);
+    int hashVal = hashSymTable(st_entry->name);
     ST_LL *newNode = (ST_LL *)malloc(sizeof(ST_LL));
     newNode->next = symTab->data[hashVal];
     newNode->data = st_entry;
@@ -38,7 +38,7 @@ void addToSymbolTable(symbol_table *symTab, ST_ENTRY *st_entry)
 // check if a given symbol table contains a given name
 ST_ENTRY *checkSymbolTable(symbol_table *symTab, char *name)
 {
-    int hashVal = hash(name);
+    int hashVal = hashSymTable(name);
     ST_LL *node = symTab->data[hashVal];
     while (node != NULL)
     {
@@ -238,8 +238,11 @@ void checkExpressionNames(ast_node *expr, symbol_table *symTable)
     }
 }
 
+// populate the symbol table for a block
 void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymTable)
 {
+    printf("Populating symbol table for block %s.\n", blockSymTable->name);
+    fflush(stdout);
     while (stmts != NULL)
     {
         parse_tree_node *Id;
@@ -293,10 +296,12 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
         // declare a variable
         case DECLARE_AST:
         {
+            printf("Adding variable to symbol table.\n");
+            fflush(stdout);
             LinkedListASTNode *var_list = stmt->left;
             while (var_list != NULL)
             {
-                ast_node *var_node = var_list->data;
+                ast_node *var_node = var_list->data; 
                 ST_ENTRY *var_st_entry = addVarToSymTable(blockSymTable, var_node, stmt->right);
                 var_list = var_list->next;
             }
@@ -307,28 +312,81 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
             // switching variable
             checkExpressionNames(stmt->left, blockSymTable);
             LinkedListASTNode *case_list = stmt->right;
-            // case counter
-            int i = 0;
             // case blocks
             while (case_list != NULL)
             {
                 LinkedListASTNode *stmt_list = case_list->data->right;
-                // create a new symbol table for each case block and 
+                // create a new symbol table for each case block and
                 // add it to the parent symbol table. set the name of the symbol table
                 // to the parent's name + case number
                 char *casestr = malloc(sizeof(char) * 64);
-                sprintf(casestr, "case_%d", i);
+                sprintf(casestr, "%p", case_list->data);
                 symbol_table *caseSymTable = createSymbolTable(blockSymTable, casestr);
                 // create an entry for the case symbol table in the parent symbol table
                 ST_ENTRY *caseSymTableEntry = malloc(sizeof(ST_ENTRY));
                 caseSymTableEntry->name = casestr;
                 caseSymTableEntry->entry_type = BLOCK_SYM;
+                caseSymTableEntry->data.block = (struct block_entry *)malloc(sizeof(struct block_entry));
                 caseSymTableEntry->data.block->body = stmt_list;
                 caseSymTableEntry->data.block->symTable = caseSymTable;
                 populateBlockSymbolTables(stmt_list, caseSymTable);
+                addToSymbolTable(blockSymTable, caseSymTableEntry);
                 case_list = case_list->next;
-                i++;
             }
+            break;
+        }
+        // for loop
+        case FOR_AST:
+        {
+            // loop variable
+            parse_tree_node *loopVar = stmt->aux_info;
+            // list of statements in the for loop
+            LinkedListASTNode *for_stmt_list = stmt->right;
+            char *forstr = malloc(sizeof(char) * 64);
+            sprintf(forstr, "%p", stmt);
+            symbol_table *forSymTable = createSymbolTable(blockSymTable, forstr);
+            // add the loop variable to the symbol table
+            ST_ENTRY *loopVarEntry = malloc(sizeof(ST_ENTRY));
+            loopVarEntry->name = loopVar->leafNodeInfo.lexeme;
+            loopVarEntry->entry_type = VAR_SYM;
+            loopVarEntry->data.var->type = __NUM__; // can only be an integer
+            addToSymbolTable(forSymTable, loopVarEntry);
+            // create an entry for the for symbol table in the parent symbol table
+            ST_ENTRY *forSymTableEntry = malloc(sizeof(ST_ENTRY));
+            forSymTableEntry->name = forstr;
+            forSymTableEntry->entry_type = BLOCK_SYM;
+            forSymTableEntry->data.block = (struct block_entry *)malloc(sizeof(struct block_entry));
+            forSymTableEntry->data.block->body = for_stmt_list;
+            forSymTableEntry->data.block->symTable = forSymTable;
+            populateBlockSymbolTables(for_stmt_list, forSymTable);
+            addToSymbolTable(blockSymTable, forSymTableEntry);
+            break;
+        }
+        // while loop
+        case WHILE_AST:
+        {
+            // condition in the while loop
+            checkExpressionNames(stmt->left, blockSymTable);
+            // list of statements in the while loop
+            LinkedListASTNode *while_stmt_list = stmt->right;
+            char *whilestr = malloc(sizeof(char) * 64);
+            sprintf(whilestr, "%p", stmt);
+            symbol_table *whileSymTable = createSymbolTable(blockSymTable, whilestr);
+            // create an entry for the while symbol table in the parent symbol table
+            ST_ENTRY *whileSymTableEntry = malloc(sizeof(ST_ENTRY));
+            whileSymTableEntry->name = whilestr;
+            whileSymTableEntry->entry_type = BLOCK_SYM;
+            whileSymTableEntry->data.block = (struct block_entry *)malloc(sizeof(struct block_entry));
+            whileSymTableEntry->data.block->body = while_stmt_list;
+            whileSymTableEntry->data.block->symTable = whileSymTable;
+            populateBlockSymbolTables(while_stmt_list, whileSymTable);
+            addToSymbolTable(blockSymTable, whileSymTableEntry);
+            break;
+        }
+        // TODO maybe remove this error if debugging works out
+        default:
+        {
+            printf("Block issues still haunt you.\n");
             break;
         }
         }
@@ -336,29 +394,8 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
     }
 }
 
-// traverse the ASTree and populate the symbol table
-void populateSymbolTables(ast *ASTree)
+void populateOtherModulesSymbolTables(LinkedListASTNode *node)
 {
-    // extract programAuxInfo from the AST
-    struct programAuxInfo *programAux = (struct programAuxInfo *)ASTree->root->aux_info;
-    ast_node *moduleDeclaration = programAux->ModDec;
-    ast_node *otherModules1 = programAux->OtherMod1;
-    ast_node *driverModule = programAux->DriverMod;
-    ast_node *otherModules2 = programAux->OtherMod2;
-    // traverse the linked list, adding module declarations to the symbol table
-    LinkedListASTNode *node = moduleDeclaration;
-    while (node != NULL)
-    {
-        parse_tree_node *Id = node->data->aux_info;
-        ST_ENTRY *moduledec_st_entry = (ST_ENTRY *)malloc(sizeof(ST_ENTRY));
-        moduledec_st_entry->name = Id->leafNodeInfo.lexeme;
-        moduledec_st_entry->entry_type = FUNC_SYM;
-        moduledec_st_entry->data.func = NULL;
-        addToSymbolTable(&symbolTable, moduledec_st_entry);
-        node = node->next;
-    }
-    // traverse the linked list, adding other modules to the symbol table
-    node = otherModules1;
     while (node != NULL)
     {
         // extract module info from the AST node
@@ -404,10 +441,52 @@ void populateSymbolTables(ast *ASTree)
         symTabEntryForModule->data.func->inputs = addParamListToFuncSymTable(funcSymTable, input_plist);
         symTabEntryForModule->data.func->outputs = addParamListToFuncSymTable(funcSymTable, ret);
         symTabEntryForModule->data.func->body = moduleDef;
-        // function body is a linked list of statements
-        // traverse the linked list, adding declarations to the symbol table
-        LinkedListASTNode *stmt = moduleDef;
-        // TODO call the block function
+        symTabEntryForModule->data.func->symTable = funcSymTable;
+        // function body is a block
+        LinkedListASTNode *stmts = moduleDef;
+        populateBlockSymbolTables(stmts, funcSymTable);
         node = node->next;
     }
+}
+
+// traverse the ASTree and populate the symbol table
+void populateSymbolTables(ast *ASTree)
+{
+    // extract programAuxInfo from the AST
+    struct programAuxInfo *programAux = (struct programAuxInfo *)ASTree->root->aux_info;
+    ast_node *moduleDeclaration = programAux->ModDec;
+    ast_node *otherModules1 = programAux->OtherMod1;
+    ast_node *driverModule = programAux->DriverMod;
+    ast_node *otherModules2 = programAux->OtherMod2;
+    // traverse the linked list, adding module declarations to the symbol table
+    LinkedListASTNode *node = moduleDeclaration;
+    while (node != NULL)
+    {
+        parse_tree_node *Id = node->data->aux_info;
+        ST_ENTRY *moduledec_st_entry = (ST_ENTRY *)malloc(sizeof(ST_ENTRY));
+        moduledec_st_entry->name = Id->leafNodeInfo.lexeme;
+        moduledec_st_entry->entry_type = FUNC_SYM;
+        moduledec_st_entry->data.func = NULL;
+        addToSymbolTable(&symbolTable, moduledec_st_entry);
+        node = node->next;
+    }
+    // traverse the linked list, adding other modules (1) to the symbol table
+    populateOtherModulesSymbolTables(otherModules1);
+    printf("Hello. It's me before driver\n");
+    fflush(stdout);
+    // driver module (aux_info is a linked list of statements)
+    symbol_table *driverSymTable = createSymbolTable(&symbolTable, "driver");
+    LinkedListASTNode *driverStmts = driverModule->aux_info;
+    ST_ENTRY *driverSymTableEntry = (ST_ENTRY *)malloc(sizeof(ST_ENTRY));
+    driverSymTableEntry->name = "driver";
+    driverSymTableEntry->entry_type = BLOCK_SYM;
+    driverSymTableEntry->data.block = (struct block_entry *)malloc(sizeof(struct block_entry));
+    driverSymTableEntry->data.block->body = driverStmts;
+    driverSymTableEntry->data.block->symTable = driverSymTable;
+    populateBlockSymbolTables(driverStmts, driverSymTable);
+    addToSymbolTable(&symbolTable, driverSymTableEntry);
+    printf("Hello. It's me after driver\n");
+    fflush(stdout);
+    // traverse the linked list, adding other modules (2) to the symbol table
+    populateOtherModulesSymbolTables(otherModules2);
 }
