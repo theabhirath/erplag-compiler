@@ -125,7 +125,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr = NULL;
         break;
     }
-    case 4: // 4: <moduleDeclaration> -> DECLARE MODULE Id SEMICOL
+    case 4: // 4: <moduleDeclaration> -> DECLARE MODULE ID SEMICOL
     {
         parse_tree_node *Declare = ptn->child;
         parse_tree_node *Module = Declare->sibling;
@@ -1384,10 +1384,10 @@ ast_node *process_subtree(parse_tree_node *ptn)
     {
         parse_tree_node *Case = ptn->child;
         parse_tree_node *Value = Case->sibling;
-        parse_tree_node *COLON = Value->sibling;
-        parse_tree_node *Statements = COLON->sibling;
-        parse_tree_node *BREAK = Statements->sibling;
-        parse_tree_node *SEMICOL = BREAK->sibling;
+        parse_tree_node *Colon = Value->sibling;
+        parse_tree_node *Statements = Colon->sibling;
+        parse_tree_node *Break = Statements->sibling;
+        parse_tree_node *Semicol = Break->sibling;
         process_subtree(Value);
         process_subtree(Statements);
         ptn->addr = createASTNode(CASE_AST);
@@ -1395,28 +1395,28 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr->right = Statements->syn_addr;
         free(Case);
         free(Value);
-        free(COLON);
+        free(Colon);
         free(Statements);
-        free(BREAK);
-        free(SEMICOL);
+        free(Break);
+        free(Semicol);
         break;
     }
     case 117: // 117: <value> -> NUM
     {
-        parse_tree_node *NUM = ptn->child;
-        ptn->addr = createASTNode(INTEGER_AST);
+        parse_tree_node *Num = ptn->child;
+        ptn->addr = Num;
         break;
     }
     case 118: // 118: <value> -> TRUE
     {
-        parse_tree_node *TRUE = ptn->child;
-        ptn->addr = createASTNode(TRUE_PTN_AST);
+        parse_tree_node *True = ptn->child;
+        ptn->addr = True;
         break;
     }
     case 119: // 119: <value> -> FALSE
     {
-        parse_tree_node *FALSE = ptn->child;
-        ptn->addr = createASTNode(FALSE_PTN_AST);
+        parse_tree_node *False = ptn->child;
+        ptn->addr = False;
         break;
     }
     case 120: // 120: <default> -> DEFAULT COLON <statements> BREAK SEMICOL

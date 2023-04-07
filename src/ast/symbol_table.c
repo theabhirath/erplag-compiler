@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "symbol_table.h"
 
 // create a new symbol table with the given parent and name
-symbol_table *create_symbol_table(symbol_table *parent, char *name)
+symbol_table *createSymbolTable(symbol_table *parent, char *name)
 {
     symbol_table *newTable = (symbol_table *)malloc(sizeof(symbol_table));
     newTable->parent = parent;
@@ -98,102 +99,110 @@ ST_LL *addToST_LL(ST_LL *head, ST_ENTRY *st_entry)
     return head;
 }
 
+ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_node *var_type)
+{
+    ST_ENTRY *st_entry = (ST_ENTRY *)malloc(sizeof(ST_ENTRY));
+    st_entry->name = var_name->leafNodeInfo.lexeme;
+    if (checkSymbolTable(symTab, st_entry->name) != NULL)
+    {
+        printf("Error: Variable %s found at line number %d has already been declared before.\n",
+               st_entry->name, var_name->leafNodeInfo.lineNumber);
+        exit(1);
+    }
+    st_entry->entry_type = VAR_SYM;
+    switch (var_type->nodeType)
+    {
+    case INTEGER_AST:
+        st_entry->data.var->type = __NUM__;
+        break;
+    case REAL_AST:
+        st_entry->data.var->type = __RNUM__;
+        break;
+    case BOOLEAN_AST:
+        st_entry->data.var->type = __BOOL__;
+        break;
+    case ARRAY_AST:
+        st_entry->entry_type = ARR_SYM;
+        // eltype
+        switch (var_type->right->nodeType)
+        {
+        case INTEGER_AST:
+            st_entry->data.arr->type = __NUM__;
+            break;
+        case REAL_AST:
+            st_entry->data.arr->type = __RNUM__;
+            break;
+        case BOOLEAN_AST:
+            st_entry->data.arr->type = __BOOL__;
+            break;
+        }
+        // static or dynamic array
+        ast_node *range = var_type->left;
+        int lindexSign = range->left->nodeType == MINUS_AST ? -1 : 1;
+        int rindexSign = range->right->nodeType == MINUS_AST ? -1 : 1;
+        parse_tree_node *lindex = lindexSign == -1 ? range->left->right : range->left;
+        parse_tree_node *rindex = rindexSign == -1 ? range->right->right : range->right;
+        if (lindex->leafNodeInfo.tokenID == NUM && rindex->leafNodeInfo.tokenID == NUM)
+        {
+            st_entry->data.arr->arrayType = STATIC;
+        }
+        else
+        {
+            st_entry->data.arr->arrayType = DYNAMIC;
+        }
+        if (lindex->leafNodeInfo.tokenID == NUM)
+        {
+            st_entry->data.arr->start.staticIndex = lindexSign * lindex->leafNodeInfo.val.intValue;
+        }
+        else
+        {
+            ST_ENTRY *lindexEntry = checkAllSymbolTables(&symbolTable, lindex->leafNodeInfo.lexeme);
+            // TODO check if this error is too harsh
+            if (lindexEntry == NULL)
+            {
+                printf("Error: Variable %s not declared at line number %d.\n",
+                       lindex->leafNodeInfo.lexeme, lindex->leafNodeInfo.lineNumber);
+                exit(1);
+            }
+            else
+            {
+                st_entry->data.arr->start.dynamicIndex->index = lindexEntry->data.var;
+                st_entry->data.arr->start.dynamicIndex->sign = lindexSign;
+            }
+        }
+        if (rindex->leafNodeInfo.tokenID == NUM)
+        {
+            st_entry->data.arr->end.staticIndex = rindexSign * rindex->leafNodeInfo.val.intValue;
+        }
+        else
+        {
+            ST_ENTRY *rindexEntry = checkAllSymbolTables(&symbolTable, rindex->leafNodeInfo.lexeme);
+            // TODO check if this error is too harsh
+            if (rindexEntry == NULL)
+            {
+                printf("Error: Variable %s not declared at line number %d.\n",
+                       rindex->leafNodeInfo.lexeme, rindex->leafNodeInfo.lineNumber);
+                exit(1);
+            }
+            else
+            {
+                st_entry->data.arr->end.dynamicIndex->index = rindexEntry->data.var;
+                st_entry->data.arr->end.dynamicIndex->sign = rindexSign;
+            }
+        }
+        break;
+    }
+    addToSymbolTable(symTab, st_entry);
+    return st_entry;
+}
+
 // add a list of parameters to a given symbol table
 ST_LL *addParamListToFuncSymTable(symbol_table *funcSymTable, LinkedListASTNode *plist)
 {
     ST_LL *params = NULL;
     while (plist != NULL)
     {
-        // add input parameters to the symbol table
-        parse_tree_node *ID = plist->data->left;
-        ST_ENTRY *input_st_entry = (ST_ENTRY *)malloc(sizeof(ST_ENTRY));
-        input_st_entry->name = ID->leafNodeInfo.lexeme;
-        switch (plist->data->right->nodeType)
-        {
-        case INTEGER_AST:
-            input_st_entry->entry_type = VAR_SYM;
-            input_st_entry->data.var->type = __NUM__;
-            break;
-        case REAL_AST:
-            input_st_entry->entry_type = VAR_SYM;
-            input_st_entry->data.var->type = __RNUM__;
-            break;
-        case BOOLEAN_AST:
-            input_st_entry->entry_type = VAR_SYM;
-            input_st_entry->data.var->type = __BOOL__;
-            break;
-        case ARRAY_AST:
-            input_st_entry->entry_type = ARR_SYM;
-            // eltype
-            switch (plist->data->right->right->nodeType)
-            {
-            case INTEGER_AST:
-                input_st_entry->data.arr->type = __NUM__;
-                break;
-            case REAL_AST:
-                input_st_entry->data.arr->type = __RNUM__;
-                break;
-            case BOOLEAN_AST:
-                input_st_entry->data.arr->type = __BOOL__;
-                break;
-            }
-            // static or dynamic array
-            ast_node *range = plist->data->right->left;
-            int lindexSign = range->left->nodeType == MINUS_AST ? -1 : 1;
-            int rindexSign = range->right->nodeType == MINUS_AST ? -1 : 1;
-            parse_tree_node *lindex = lindexSign == -1 ? range->left->right : range->left;
-            parse_tree_node *rindex = rindexSign == -1 ? range->right->right : range->right;
-            if (lindex->leafNodeInfo.tokenID == NUM && rindex->leafNodeInfo.tokenID == NUM)
-            {
-                input_st_entry->data.arr->arrayType = STATIC;
-            }
-            else
-            {
-                input_st_entry->data.arr->arrayType = DYNAMIC;
-            }
-            if (lindex->leafNodeInfo.tokenID == NUM)
-            {
-                input_st_entry->data.arr->start.staticIndex = lindexSign * lindex->leafNodeInfo.val.intValue;
-            }
-            else
-            {
-                ST_ENTRY *lindexEntry = checkAllSymbolTables(&symbolTable, lindex->leafNodeInfo.lexeme);
-                // TODO check if this error is too harsh
-                if (lindexEntry == NULL)
-                {
-                    printf("Error: Variable %s not declared at line number %d.\n",
-                           lindex->leafNodeInfo.lexeme, lindex->leafNodeInfo.lineNumber);
-                    exit(1);
-                }
-                else
-                {
-                    input_st_entry->data.arr->start.dynamicIndex->index = lindexEntry->data.var;
-                    input_st_entry->data.arr->start.dynamicIndex->sign = lindexSign;
-                }
-            }
-            if (rindex->leafNodeInfo.tokenID == NUM)
-            {
-                input_st_entry->data.arr->end.staticIndex = rindexSign * rindex->leafNodeInfo.val.intValue;
-            }
-            else
-            {
-                ST_ENTRY *rindexEntry = checkAllSymbolTables(&symbolTable, rindex->leafNodeInfo.lexeme);
-                // TODO check if this error is too harsh
-                if (rindexEntry == NULL)
-                {
-                    printf("Error: Variable %s not declared at line number %d.\n",
-                           rindex->leafNodeInfo.lexeme, rindex->leafNodeInfo.lineNumber);
-                    exit(1);
-                }
-                else
-                {
-                    input_st_entry->data.arr->end.dynamicIndex->index = rindexEntry->data.var;
-                    input_st_entry->data.arr->end.dynamicIndex->sign = rindexSign;
-                }
-            }
-            break;
-        }
-        addToSymbolTable(funcSymTable, input_st_entry);
+        ST_ENTRY *input_st_entry = addVarToSymTable(funcSymTable, plist->data->left, plist->data->right);
         params = addToST_LL(params, input_st_entry);
         plist = plist->next;
     }
@@ -203,27 +212,132 @@ ST_LL *addParamListToFuncSymTable(symbol_table *funcSymTable, LinkedListASTNode 
 // global symbol table
 symbol_table symbolTable = {NULL, "42"};
 
-void check_expression_names(ast_node *expr, symbol_table symTab)
+// check if all variables used in an expression are already in the symbol table
+void checkExpressionNames(ast_node *expr, symbol_table *symTable)
 {
-    if ((expr->nodeType >= PLUS_AST && expr->nodeType <= GE_AST) ||
-        expr->nodeType == ARR_ELEM_AST)
+    // null check
+    if (expr == NULL)
     {
-        check_expression_names(expr->left, symTab);
-        check_expression_names(expr->right, symTab);
+        return;
     }
+    // operators or array element
+    if ((expr->nodeType >= PLUS_AST && expr->nodeType <= GE_AST) || expr->nodeType == ARR_ELEM_AST)
+    {
+        checkExpressionNames(expr->left, symTable);
+        checkExpressionNames(expr->right, symTable);
+    }
+    // identifiers
     else if (expr->nodeType == ID)
     {
-        ST_ENTRY *entry = checkAllSymbolTables(&symTab, expr->leafNodeInfo.lexeme);
-        if (entry == NULL)
+        if (checkAllSymbolTables(symTable, expr->leafNodeInfo.lexeme) == NULL)
         {
             printf("Error: Declaration of variable %s used at line number %d not found.\n",
                    expr->leafNodeInfo.lexeme, expr->leafNodeInfo.lineNumber);
+            exit(1);
         }
     }
 }
 
+void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymTable)
+{
+    while (stmts != NULL)
+    {
+        parse_tree_node *Id;
+        ast_node *stmt = stmts->data;
+        // extract statement info from the AST node
+        switch (stmt->nodeType)
+        {
+        case GET_VALUE_AST:
+        case PRINT_AST:
+        {
+            Id = stmt->right;
+            if (checkAllSymbolTables(blockSymTable, Id->leafNodeInfo.lexeme) == NULL)
+            {
+                printf("Error: Variable %s not declared at line number %d\n", Id->leafNodeInfo.lexeme,
+                       Id->leafNodeInfo.lineNumber);
+            }
+            break;
+        }
+        case EQUALS_AST:
+        {
+            if (stmt->right->nodeType == USE_AST)
+            {
+                Id = stmt->right->left;
+                if (checkAllSymbolTables(blockSymTable, Id->leafNodeInfo.lexeme) == NULL)
+                {
+                    printf("Error: Variable %s not declared at line number %d\n", Id->leafNodeInfo.lexeme,
+                           Id->leafNodeInfo.lineNumber);
+                }
+                // check recursion and throw error if detected
+                if (checkRecursion(blockSymTable, Id->leafNodeInfo.lexeme))
+                {
+                    printf("Error: Recursion detected in module %s at line number %d. Please check the code and try again.\n",
+                           Id->leafNodeInfo.lexeme, Id->leafNodeInfo.lineNumber);
+                    exit(1);
+                }
+                // Check if actual output parameters are declared
+                LinkedListASTNode *list = stmt->left;
+                while (list != NULL)
+                {
+                    checkExpressionNames(list->data, blockSymTable);
+                }
+            }
+            // check an expression
+            else
+            {
+                checkExpressionNames(stmt->right, blockSymTable);
+                checkExpressionNames(stmt->left, blockSymTable);
+            }
+            break;
+        }
+        // declare a variable
+        case DECLARE_AST:
+        {
+            LinkedListASTNode *var_list = stmt->left;
+            while (var_list != NULL)
+            {
+                ast_node *var_node = var_list->data;
+                ST_ENTRY *var_st_entry = addVarToSymTable(blockSymTable, var_node, stmt->right);
+                var_list = var_list->next;
+            }
+        }
+        // switching
+        case SWITCH_AST:
+        {
+            // switching variable
+            checkExpressionNames(stmt->left, blockSymTable);
+            LinkedListASTNode *case_list = stmt->right;
+            // case counter
+            int i = 0;
+            // case blocks
+            while (case_list != NULL)
+            {
+                LinkedListASTNode *stmt_list = case_list->data->right;
+                // create a new symbol table for each case block and 
+                // add it to the parent symbol table. set the name of the symbol table
+                // to the parent's name + case number
+                char *casestr = malloc(sizeof(char) * 64);
+                sprintf(casestr, "case_%d", i);
+                symbol_table *caseSymTable = createSymbolTable(blockSymTable, casestr);
+                // create an entry for the case symbol table in the parent symbol table
+                ST_ENTRY *caseSymTableEntry = malloc(sizeof(ST_ENTRY));
+                caseSymTableEntry->name = casestr;
+                caseSymTableEntry->entry_type = BLOCK_SYM;
+                caseSymTableEntry->data.block->body = stmt_list;
+                caseSymTableEntry->data.block->symTable = caseSymTable;
+                populateBlockSymbolTables(stmt_list, caseSymTable);
+                case_list = case_list->next;
+                i++;
+            }
+            break;
+        }
+        }
+        stmts = stmts->next;
+    }
+}
+
 // traverse the ASTree and populate the symbol table
-void populate_symbol_tables(ast *ASTree)
+void populateSymbolTables(ast *ASTree)
 {
     // extract programAuxInfo from the AST
     struct programAuxInfo *programAux = (struct programAuxInfo *)ASTree->root->aux_info;
@@ -285,7 +399,7 @@ void populate_symbol_tables(ast *ASTree)
             symTabEntryForModule->data.func = NULL;
             addToSymbolTable(&symbolTable, symTabEntryForModule);
         }
-        symbol_table *funcSymTable = create_symbol_table(&symbolTable, symTabEntryForModule->name);
+        symbol_table *funcSymTable = createSymbolTable(&symbolTable, symTabEntryForModule->name);
         // populate the symbol table with the input parameters
         symTabEntryForModule->data.func->inputs = addParamListToFuncSymTable(funcSymTable, input_plist);
         symTabEntryForModule->data.func->outputs = addParamListToFuncSymTable(funcSymTable, ret);
@@ -293,73 +407,7 @@ void populate_symbol_tables(ast *ASTree)
         // function body is a linked list of statements
         // traverse the linked list, adding declarations to the symbol table
         LinkedListASTNode *stmt = moduleDef;
-        while (stmt != NULL)
-        {
-            // extract statement info from the AST node
-            switch (stmt->data->nodeType)
-            {
-            case GET_VALUE_AST:
-            case PRINT_AST:
-                parse_tree_node *Id = stmt->data->right;
-                if (checkAllSymbolTables(funcSymTable, Id->leafNodeInfo.lexeme) == NULL)
-                {
-                    printf("Error: Variable %s not declared at line number %d\n", Id->leafNodeInfo.lexeme,
-                           Id->leafNodeInfo.lineNumber);
-                }
-                break;
-            case EQUALS_AST:
-            {
-                if (stmt->data->right->nodeType == USE_AST)
-                {
-                    // Check if used module is declared
-                    parse_tree_node *Id = stmt->data->right->left;
-                    if (checkAllSymbolTables(funcSymTable, Id->leafNodeInfo.lexeme) == NULL)
-                    {
-                        printf("Error: Variable %s not declared at line number %d\n", Id->leafNodeInfo.lexeme,
-                               Id->leafNodeInfo.lineNumber);
-                    }
-                    // check recursion and throw error if detected
-                    if (checkRecursion(funcSymTable, Id->leafNodeInfo.lexeme))
-                    {
-                        printf("Error: Recursion detected in module %s at line number %d. Please check the code and try again.\n",
-                               Id->leafNodeInfo.lexeme, Id->leafNodeInfo.lineNumber);
-                        exit(1);
-                    }
-
-                    // Check if actual output parameters are declared
-                    LinkedListASTNode *list = stmt->data->left;
-                    while (list != NULL)
-                    {
-                        check_expression_names(list->data, funcSymTable);
-                    }
-                }
-                else
-                {
-                    check_expression_names(stmt->data->right, funcSymTable);
-                    check_expression_names(stmt->data->left, funcSymTable);
-                }
-                break;
-            }
-            case DECLARE_AST:
-            {
-                LinkedListASTNode *var_list = stmt->data->left;
-                while (vars != NULL)
-                {
-                    ast_node *var_node = vars->data;
-                    if (var_node->nodeType == ID)
-                    {
-                        parse_tree_node *Id = var_node;
-                        ST_ENTRY *var_st_entry = (ST_ENTRY *)malloc(sizeof(ST_ENTRY));
-                        var_st_entry->name = Id->leafNodeInfo.lexeme;
-                        var_st_entry->entry_type = VAR_SYM;
-                        
-                    }
-                }
-
-            }
-            }
-            stmt = stmt->next;
-        }
+        // TODO call the block function
         node = node->next;
     }
 }

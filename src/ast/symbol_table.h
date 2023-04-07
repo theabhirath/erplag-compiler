@@ -62,14 +62,14 @@ struct func_entry
     int offset;
     struct ST_LL *inputs;
     struct ST_LL *outputs;
-    ast_node *body;
+    LinkedListASTNode *body;
     struct symbol_table *symTable;
 };
 
 struct block_entry
 {
     int offset;
-    ast_node *body;
+    LinkedListASTNode *body;
     struct symbol_table *symTable;
 };
 

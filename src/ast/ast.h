@@ -53,7 +53,9 @@ enum AST_NODE_TYPE{
     PARSE_TREE_AST2 = RNUM,
     ARR_ELEM_AST,
     INTEGER_AST,
-    REAL_AST
+    REAL_AST,
+    NUM_AST,
+    RNUM_AST
 };
 
 typedef struct ast_node{
