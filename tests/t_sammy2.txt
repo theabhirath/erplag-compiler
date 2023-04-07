@@ -1,0 +1,27 @@
+<<<driver program>>>
+start
+    declare a,b:integer;
+    declare c:boolean;
+    a:=21;
+    b:=23;
+    c:=(b-a>3);
+    switch(c)
+    start
+        case true: b:=100;
+            break;
+        case false: b:= -100;
+            break;
+    end
+
+    switch(a)
+    start
+        case 21: b:=-23 * 32 -2 + (32 * 6 AND 2);
+            break;
+        case 22: b:=100;
+            break;
+        case 23: b:=7987978.1232344;
+            break;
+        default: b:=0;
+            break;
+    end
+end

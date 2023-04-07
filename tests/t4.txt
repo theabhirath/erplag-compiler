@@ -21,7 +21,7 @@ start
 	res_2_a:= -(a*b-c/5);
 	res_2__b:= ((res_2_a + a)*12+22.34E-2)/13;
 	b := a <=  b AND c >= a OR  true AND false;
-	res_1:= (true AND c==b)OR(b>p AND (a<=c));
+	res_1:= (true AND c==b)OR(b>p AND a>=c);
 	** check  rules 27 a to e and redefine to preserve the parentheses needs ** 
 	print(res_1);
 end

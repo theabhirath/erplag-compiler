@@ -1026,9 +1026,10 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr = RelationalOp->addr;
         process_subtree(ArithmeticExpr);
         ptn->addr->right = ArithmeticExpr->syn_addr;
-        process_subtree(BE0);
+        // process_subtree(BE0);
         ptn->addr->left = ptn->inh_addr;
         BE0->inh_addr = ptn->addr;
+        process_subtree(BE0);
         ptn->syn_addr = BE0->syn_addr;
         free(RelationalOp);
         free(ArithmeticExpr);
@@ -1053,12 +1054,13 @@ ast_node *process_subtree(parse_tree_node *ptn)
         printf("dsjkl\n");
         fflush(stdout);
         process_subtree(BooleanExpr);
+        ptn->addr->right = BooleanExpr->syn_addr;
         printf("dsjkl1\n");
         fflush(stdout);
         ptn->addr->left = ptn->inh_addr;
         printf("dsjkl2\n");
         fflush(stdout);
-        ptn->addr->right = BooleanExpr->syn_addr;
+        
         printf("dsjkl3\n");
         fflush(stdout);
         ptn->syn_addr = ptn->addr;
@@ -1368,7 +1370,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         parse_tree_node *CaseStmts = CaseStmt->sibling;
         process_subtree(CaseStmt);
         process_subtree(CaseStmts);
-        ptn->addr = insertAtFront(CaseStmt->addr, CaseStmts->addr);
+        ptn->addr = insertAtFront(CaseStmts->addr, CaseStmt->addr);
         free(CaseStmt);
         free(CaseStmts);
         break;
@@ -1402,19 +1404,19 @@ ast_node *process_subtree(parse_tree_node *ptn)
     case 117: // 117: <value> -> NUM
     {
         parse_tree_node *NUM = ptn->child;
-        ptn->addr = NUM;
+        ptn->addr = createASTNode(INTEGER_AST);
         break;
     }
     case 118: // 118: <value> -> TRUE
     {
         parse_tree_node *TRUE = ptn->child;
-        ptn->addr = TRUE;
+        ptn->addr = createASTNode(TRUE_PTN_AST);
         break;
     }
     case 119: // 119: <value> -> FALSE
     {
         parse_tree_node *FALSE = ptn->child;
-        ptn->addr = FALSE;
+        ptn->addr = createASTNode(FALSE_PTN_AST);
         break;
     }
     case 120: // 120: <default> -> DEFAULT COLON <statements> BREAK SEMICOL
@@ -1478,7 +1480,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         process_subtree(BooleanExpr);
         process_subtree(Statements);
         ptn->addr = createASTNode(WHILE_AST);
-        ptn->addr->left = BooleanExpr->addr;
+        ptn->addr->left = BooleanExpr->syn_addr;
         ptn->addr->right = Statements->syn_addr;
         free(While);
         free(BO);
@@ -1702,20 +1704,12 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
         {
             print_ast_node(node->right, depth + 1, fp);
         }
-        else if (node->right->nodeType == PLUS_AST ||
-                 node->right->nodeType == MINUS_AST ||
-                 node->right->nodeType == MUL_AST ||
-                 node->right->nodeType == DIV_AST ||
-                 node->right->nodeType == AND_AST ||
-                 node->right->nodeType == OR_AST ||
-                 node->right->nodeType == LT_AST ||
-                 node->right->nodeType == LE_AST ||
-                 node->right->nodeType == GT_AST ||
-                 node->right->nodeType == GE_AST ||
-                 node->right->nodeType == EQ_AST ||
-                 node->right->nodeType == NE_AST)
+        else if (node->right->nodeType >= PLUS_AST && node->right->nodeType <= GE_AST)
         {
             printf("reached here\n");
+            fflush(stdout);
+            //Print exact node type also
+            printf("%d\n", node->right->nodeType);
             fflush(stdout);
             print_ast_node(node->right, depth + 1, fp);
         }
@@ -1769,29 +1763,32 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     {
         fprintf(fp, "SWITCH_AST\n\n");
         fflush(fp);
-        print_ast_node(node->right, depth + 1, fp);
+        print_parse_tree_node(node->left, depth + 1, fp);
+        print_ll(node->right, depth + 1, fp);
         break;
     }
     case CASE_AST:
     {
         fprintf(fp, "CASE_AST\n\n");
         fflush(fp);
-        print_ast_node(node->right, depth + 1, fp);
+        print_ast_node(node->left, depth + 1, fp);
+        print_ll(node->right, depth + 1, fp);
         break;
     }
     case DEFAULT_AST:
     {
         fprintf(fp, "DEFAULT_AST\n\n");
         fflush(fp);
-        print_ast_node(node->right, depth + 1, fp);
+        print_ll(node->right, depth + 1, fp);
         break;
     }
     case FOR_AST:
     {
         fprintf(fp, "FOR_AST\n\n");
         fflush(fp);
+        print_ast_node(node->aux_info, depth + 1, fp);
         print_ast_node(node->left, depth + 1, fp);
-        print_ast_node(node->right, depth + 1, fp);
+        print_ll(node->right, depth + 1, fp);
         break;
     }
     case WHILE_AST:
@@ -1799,7 +1796,7 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
         fprintf(fp, "WHILE_AST\n\n");
         fflush(fp);
         print_ast_node(node->left, depth + 1, fp);
-        print_ast_node(node->right, depth + 1, fp);
+        print_ll(node->right, depth + 1, fp);
         break;
     }
     case PLUS_AST:
@@ -2000,7 +1997,7 @@ void print_ast(ast *a)
 void main()
 {
     bufferSize = 1024;
-    parseInputSourceCode("tests/t4.txt", "src/parser/parseTree.txt");
+    parseInputSourceCode("tests/t_sammy2.txt", "src/parser/parseTree.txt");
     printf("parse tree created successfully.\n");
     fflush(stdout);
     ast *AST = create_ast(&parseTree);
