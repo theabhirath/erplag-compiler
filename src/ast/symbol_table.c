@@ -203,6 +203,25 @@ ST_LL *addParamListToFuncSymTable(symbol_table *funcSymTable, LinkedListASTNode 
 // global symbol table
 symbol_table symbolTable = {NULL, "42"};
 
+void check_expression_names(ast_node *expr, symbol_table symTab)
+{
+    if ((expr->nodeType >= PLUS_AST && expr->nodeType <= GE_AST) ||
+        expr->nodeType == ARR_ELEM_AST)
+    {
+        check_expression_names(expr->left, symTab);
+        check_expression_names(expr->right, symTab);
+    }
+    else if (expr->nodeType == ID)
+    {
+        ST_ENTRY *entry = checkAllSymbolTables(&symTab, expr->leafNodeInfo.lexeme);
+        if (entry == NULL)
+        {
+            printf("Error: Declaration of variable %s used at line number %d not found.\n",
+                   expr->leafNodeInfo.lexeme, expr->leafNodeInfo.lineNumber);
+        }
+    }
+}
+
 // traverse the ASTree and populate the symbol table
 void populate_symbol_tables(ast *ASTree)
 {
@@ -289,30 +308,10 @@ void populate_symbol_tables(ast *ASTree)
                 }
                 break;
             case EQUALS_AST:
-                parse_tree_node *Id;
-                if (stmt->data->left->nodeType == ARR_ELEM_AST)
-                {
-                    Id = stmt->data->left->left;
-                    if (stmt->data->right->leafNodeInfo.tokenID == ID)
-                    {
-                        if (checkAllSymbolTables(funcSymTable, stmt->data->right->leafNodeInfo.lexeme) == NULL)
-                        {
-                            printf("Error: Variable %s not declared at line number %d\n",
-                                   stmt->data->right->leafNodeInfo.lexeme, stmt->data->right->leafNodeInfo.lineNumber);
-                        }
-                    }
-                }
-                else
-                {
-                    Id = stmt->data->left;
-                }
-                if (checkAllSymbolTables(funcSymTable, Id->leafNodeInfo.lexeme) == NULL)
-                {
-                    printf("Error: Variable %s not declared at line number %d\n", Id->leafNodeInfo.lexeme,
-                           Id->leafNodeInfo.lineNumber);
-                }
+            {
                 if (stmt->data->right->nodeType == USE_AST)
                 {
+                    // Check if used module is declared
                     parse_tree_node *Id = stmt->data->right->left;
                     if (checkAllSymbolTables(funcSymTable, Id->leafNodeInfo.lexeme) == NULL)
                     {
@@ -326,7 +325,38 @@ void populate_symbol_tables(ast *ASTree)
                                Id->leafNodeInfo.lexeme, Id->leafNodeInfo.lineNumber);
                         exit(1);
                     }
+
+                    // Check if actual output parameters are declared
+                    LinkedListASTNode *list = stmt->data->left;
+                    while (list != NULL)
+                    {
+                        check_expression_names(list->data, funcSymTable);
+                    }
                 }
+                else
+                {
+                    check_expression_names(stmt->data->right, funcSymTable);
+                    check_expression_names(stmt->data->left, funcSymTable);
+                }
+                break;
+            }
+            case DECLARE_AST:
+            {
+                LinkedListASTNode *var_list = stmt->data->left;
+                while (vars != NULL)
+                {
+                    ast_node *var_node = vars->data;
+                    if (var_node->nodeType == ID)
+                    {
+                        parse_tree_node *Id = var_node;
+                        ST_ENTRY *var_st_entry = (ST_ENTRY *)malloc(sizeof(ST_ENTRY));
+                        var_st_entry->name = Id->leafNodeInfo.lexeme;
+                        var_st_entry->entry_type = VAR_SYM;
+                        
+                    }
+                }
+
+            }
             }
             stmt = stmt->next;
         }
