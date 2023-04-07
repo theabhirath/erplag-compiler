@@ -24,4 +24,9 @@ start
         default: b:=0;
             break;
     end
+
+    for (ind in 1..10)
+    start
+        b:=b+1;
+    end
 end

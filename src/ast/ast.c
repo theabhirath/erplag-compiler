@@ -1356,7 +1356,6 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr->right = insertAtEnd(CaseStmts->addr, Default->addr);
         free(Switch);
         free(BO);
-        free(Id);
         free(BC);
         free(START);
         free(CaseStmts);
@@ -1504,26 +1503,24 @@ ast_node *process_subtree(parse_tree_node *ptn)
         if (Sign1->addr != NULL)
         {
             ptn->addr->left = Sign1->addr;
-            Sign1->addr->right = NUM1->addr;
+            Sign1->addr->right = NUM1;
         }
         else
         {
-            ptn->addr->left = NUM1->addr;
+            ptn->addr->left = NUM1;
         }
         if (Sign2->addr != NULL)
         {
             ptn->addr->right = Sign2->addr;
-            Sign2->addr->right = NUM2->addr;
+            Sign2->addr->right = NUM2;
         }
         else
         {
-            ptn->addr->right = NUM2->addr;
+            ptn->addr->right = NUM2;
         }
         free(Sign1);
-        free(NUM1);
         free(RANGEOP);
         free(Sign2);
-        free(NUM2);
         break;
     }
     case 125: // 125: <range_arr> -> <index_arr> RANGEOP <index_arr>
@@ -1670,6 +1667,8 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     {
         fprintf(fp, "RANGE_AST\n\n");
         fflush(fp);
+        print_ast_node(node->left, depth + 1, fp);
+        print_ast_node(node->right, depth + 1, fp);
         break;
     }
     case GET_VALUE_AST:
@@ -1763,7 +1762,7 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     {
         fprintf(fp, "SWITCH_AST\n\n");
         fflush(fp);
-        print_parse_tree_node(node->left, depth + 1, fp);
+        print_ast_node(node->left, depth + 1, fp);
         print_ll(node->right, depth + 1, fp);
         break;
     }
@@ -1974,6 +1973,7 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     default:
     {
         fprintf(fp, "UNKNOWN_AST\n\n");
+        printf("ENUM: %d\n", node->nodeType);
         fflush(fp);
         break;
     }
