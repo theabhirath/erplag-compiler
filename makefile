@@ -6,4 +6,4 @@ ast: src/ast/ast.c src/lexer/lexer.c src/lexer/reserved_words.c src/parser/parse
 	gcc -o ast src/ast/ast.c src/lexer/lexer.c src/lexer/reserved_words.c src/parser/parser.c src/parser/set.c src/parser/stack.c src/parser/linked_list.c
 
 clean:
-	rm -f driver ast
+	rm -f driver ast ast.txt

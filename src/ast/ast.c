@@ -1021,6 +1021,8 @@ ast_node *process_subtree(parse_tree_node *ptn)
         parse_tree_node *ArithmeticExpr = RelationalOp->sibling;
         parse_tree_node *BE0 = ArithmeticExpr->sibling;
         process_subtree(RelationalOp);
+        // printf("relop reached\n");
+        // fflush(stdout);
         ptn->addr = RelationalOp->addr;
         process_subtree(ArithmeticExpr);
         ptn->addr->right = ArithmeticExpr->syn_addr;
@@ -1918,6 +1920,18 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     case BOOLEAN_AST:
     {
         fprintf(fp, "BOOLEAN_AST\n\n");
+        fflush(fp);
+        break;
+    }
+    case TRUE_PTN_AST:
+    {
+        fprintf(fp, "TRUE_PTN_AST\n\n");
+        fflush(fp);
+        break;
+    }
+    case FALSE_PTN_AST:
+    {
+        fprintf(fp, "FALSE_PTN_AST\n\n");
         fflush(fp);
         break;
     }
