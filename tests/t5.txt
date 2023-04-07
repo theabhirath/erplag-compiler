@@ -44,7 +44,8 @@ end
 takes input [arr1:array[-10..25] of real,k:integer];
 start
 	declare tempvar:real;
-	declare i:integer;
+	declare i, p, q,a,b,c:integer;
+    declare A:array[1..15] of real;
 
 	i:=1;
 	while(i<=k)

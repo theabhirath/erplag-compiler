@@ -238,7 +238,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         process_subtree(IP0);
         ast_node *cur_node = createASTNode(FORMALPARAM_AST);
         cur_node->left = Id;
-        cur_node->right = DataType->syn_addr;
+        cur_node->right = DataType->addr;
         ptn->syn_addr = insertAtFront(IP0->syn_addr, cur_node);
         free(Colon);
         free(IP0);
@@ -255,7 +255,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         process_subtree(IP0);
         ast_node *cur_node = createASTNode(FORMALPARAM_AST);
         cur_node->left = Id;
-        cur_node->right = DataType->syn_addr;
+        cur_node->right = DataType->addr;
         ptn->syn_addr = insertAtFront(IP0->syn_addr, cur_node);
         free(Comma);
         free(Colon);
@@ -278,7 +278,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         process_subtree(OP0);
         ast_node *cur_node = createASTNode(FORMALPARAM_AST);
         cur_node->left = Id;
-        cur_node->right = Type->syn_addr;
+        cur_node->right = Type->addr;
         ptn->syn_addr = insertAtFront(OP0->syn_addr, cur_node);
         free(Colon);
         free(OP0);
@@ -295,7 +295,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         process_subtree(OP0);
         ast_node *cur_node = createASTNode(FORMALPARAM_AST);
         cur_node->left = Id;
-        cur_node->right = Type->syn_addr;
+        cur_node->right = Type->addr;
         ptn->syn_addr = insertAtFront(OP0->syn_addr, cur_node);
         free(Comma);
         free(Colon);
@@ -483,19 +483,20 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr = Id;
         WhichId->inh_addr = ptn->addr;
         process_subtree(WhichId);
+        ptn->syn_addr = WhichId->syn_addr;
         free(WhichId); // check
         break;
     }
     case 37: // 37: <var> -> NUM
     {
         parse_tree_node *Num = ptn->child;
-        ptn->addr = Num;
+        ptn->syn_addr = Num;
         break;
     }
     case 38: // 38: <var> -> RNUM
     {
         parse_tree_node *Rnum = ptn->child;
-        ptn->addr = Rnum;
+        ptn->syn_addr = Rnum;
         break;
     }
     case 39: // 39: <whichId> -> SQBO <wI0>
@@ -638,7 +639,6 @@ ast_node *process_subtree(parse_tree_node *ptn)
     case 51: //  <sign> -> MINUS
     {
         ptn->addr = createASTNode(MINUS_AST);
-        // make left child null: already done
         break;
     }
     case 52: // 52: <sign> -> EPSILON
@@ -1545,6 +1545,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         parse_tree_node *Sign = ptn->child;
         parse_tree_node *NewIndex = Sign->sibling;
         process_subtree(Sign);
+        process_subtree(NewIndex);
         if (Sign->addr != NULL)
         {
             ptn->addr = Sign->addr;
@@ -1560,8 +1561,8 @@ ast_node *process_subtree(parse_tree_node *ptn)
     }
     case 127: // 127: <new_index> -> NUM
     {
-        parse_tree_node *NUM = ptn->child;
-        ptn->addr = NUM;
+        parse_tree_node *Num = ptn->child;
+        ptn->addr = Num;
         break;
     }
     case 128: // 128: <new_index> -> Id
@@ -1570,8 +1571,8 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr = Id;
         break;
     }
-        return NULL;
     }
+    return NULL;
 }
 
 ast *create_ast(parse_tree *pt)
@@ -1683,6 +1684,7 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     {
         fprintf(fp, "PRINT_AST\n\n");
         fflush(fp);
+        print_ast_node(node->right, depth + 1, fp);
         break;
     }
     case EQUALS_AST:
@@ -1812,6 +1814,8 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     {
         fprintf(fp, "MINUS_AST\n\n");
         fflush(fp);
+        printf("Right: %d\n", node->right->nodeType);
+        fflush(stdout);
         print_ast_node(node->left, depth + 1, fp);
         print_ast_node(node->right, depth + 1, fp);
         break;
@@ -1945,6 +1949,7 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     {
         fprintf(fp, "FORMALPARAM_AST\n\n");
         fflush(fp);
+        print_ast_node(node->left, depth + 1, fp);
         print_ast_node(node->right, depth + 1, fp);
         break;
     }
@@ -1999,7 +2004,7 @@ void print_ast(ast *a)
 void main()
 {
     bufferSize = 1024;
-    parseInputSourceCode("tests/t_sammy2.txt", "src/parser/parseTree.txt");
+    parseInputSourceCode("tests/t5.txt", "src/parser/parseTree.txt");
     printf("parse tree created successfully.\n");
     fflush(stdout);
     ast *AST = create_ast(&parseTree);

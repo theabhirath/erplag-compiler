@@ -54,5 +54,6 @@ dkms.conf
 # vscode config
 .vscode/
 ast
+symtab
 ast.txt
 src/parser/parseTree.txt

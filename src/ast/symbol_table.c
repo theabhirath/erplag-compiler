@@ -10,6 +10,12 @@ symbol_table *createSymbolTable(symbol_table *parent, char *name)
     symbol_table *newTable = (symbol_table *)malloc(sizeof(symbol_table));
     newTable->parent = parent;
     newTable->name = name;
+    // zero out the data
+    for (int i = 0; i < SYMBOL_TABLE_SIZE; i++)
+    {
+        newTable->data[i] = NULL;
+    }
+    printf("Created symbol table %s.\n", name);
     return newTable;
 }
 
@@ -38,6 +44,7 @@ void addToSymbolTable(symbol_table *symTab, ST_ENTRY *st_entry)
 // check if a given symbol table contains a given name
 ST_ENTRY *checkSymbolTable(symbol_table *symTab, char *name)
 {
+    printf("Checking symbol table %s for %s\n", symTab->name, name);
     int hashVal = hashSymTable(name);
     ST_LL *node = symTab->data[hashVal];
     while (node != NULL)
@@ -48,15 +55,19 @@ ST_ENTRY *checkSymbolTable(symbol_table *symTab, char *name)
         }
         node = node->next;
     }
+    printf("Not found in symbol table %s\n", symTab->name);
     return NULL;
 }
 
 // check if a given symbol table or any of its parents contain a given name
 ST_ENTRY *checkAllSymbolTables(symbol_table *symTab, char *name)
 {
+    printf("Checking symbol tables above %s for %s\n", symTab->name, name);
+    fflush(stdout);
     ST_ENTRY *node = checkSymbolTable(symTab, name);
     if (node != NULL)
     {
+        printf("Found %s in symbol table %s\n", name, symTab->name);
         return node;
     }
     if (symTab->parent != NULL)
@@ -101,6 +112,7 @@ ST_LL *addToST_LL(ST_LL *head, ST_ENTRY *st_entry)
 
 ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_node *var_type)
 {
+    printf("Adding variable %s to symbol table %s\n", var_name->leafNodeInfo.lexeme, symTab->name);
     ST_ENTRY *st_entry = (ST_ENTRY *)malloc(sizeof(ST_ENTRY));
     st_entry->name = var_name->leafNodeInfo.lexeme;
     if (checkSymbolTable(symTab, st_entry->name) != NULL)
@@ -110,18 +122,23 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
         exit(1);
     }
     st_entry->entry_type = VAR_SYM;
+    print_ast_node(var_type, 0, stdout);
     switch (var_type->nodeType)
     {
     case INTEGER_AST:
+        st_entry->data.var = (struct var_entry *)malloc(sizeof(struct var_entry));
         st_entry->data.var->type = __NUM__;
         break;
     case REAL_AST:
+        st_entry->data.var = (struct var_entry *)malloc(sizeof(struct var_entry));
         st_entry->data.var->type = __RNUM__;
         break;
     case BOOLEAN_AST:
+        st_entry->data.var = (struct var_entry *)malloc(sizeof(struct var_entry));
         st_entry->data.var->type = __BOOL__;
         break;
     case ARRAY_AST:
+        st_entry->data.arr = (struct arr_entry *)malloc(sizeof(struct arr_entry));
         st_entry->entry_type = ARR_SYM;
         // eltype
         switch (var_type->right->nodeType)
@@ -142,6 +159,8 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
         int rindexSign = range->right->nodeType == MINUS_AST ? -1 : 1;
         parse_tree_node *lindex = lindexSign == -1 ? range->left->right : range->left;
         parse_tree_node *rindex = rindexSign == -1 ? range->right->right : range->right;
+        printf("lindex: %s, rindex: %s\n", lindex->leafNodeInfo.lexeme, rindex->leafNodeInfo.lexeme);
+        fflush(stdout);
         if (lindex->leafNodeInfo.tokenID == NUM && rindex->leafNodeInfo.tokenID == NUM)
         {
             st_entry->data.arr->arrayType = STATIC;
@@ -149,6 +168,8 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
         else
         {
             st_entry->data.arr->arrayType = DYNAMIC;
+            st_entry->data.arr->start.dynamicIndex = (struct dynamic_index *)malloc(sizeof(struct dynamicIndex));
+            st_entry->data.arr->end.dynamicIndex = (struct dynamic_index *)malloc(sizeof(struct dynamicIndex));
         }
         if (lindex->leafNodeInfo.tokenID == NUM)
         {
@@ -156,7 +177,7 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
         }
         else
         {
-            ST_ENTRY *lindexEntry = checkAllSymbolTables(&symbolTable, lindex->leafNodeInfo.lexeme);
+            ST_ENTRY *lindexEntry = checkAllSymbolTables(symTab, lindex->leafNodeInfo.lexeme);
             // TODO check if this error is too harsh
             if (lindexEntry == NULL)
             {
@@ -176,7 +197,7 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
         }
         else
         {
-            ST_ENTRY *rindexEntry = checkAllSymbolTables(&symbolTable, rindex->leafNodeInfo.lexeme);
+            ST_ENTRY *rindexEntry = checkAllSymbolTables(symTab, rindex->leafNodeInfo.lexeme);
             // TODO check if this error is too harsh
             if (rindexEntry == NULL)
             {
@@ -188,6 +209,8 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
             {
                 st_entry->data.arr->end.dynamicIndex->index = rindexEntry->data.var;
                 st_entry->data.arr->end.dynamicIndex->sign = rindexSign;
+                printf("DD\n");
+                fflush(stdout);
             }
         }
         break;
@@ -199,42 +222,56 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
 // add a list of parameters to a given symbol table
 ST_LL *addParamListToFuncSymTable(symbol_table *funcSymTable, LinkedListASTNode *plist)
 {
+    printf("Adding parameter list to function symbol table\n");
+    fflush(stdout);
     ST_LL *params = NULL;
     while (plist != NULL)
     {
         ST_ENTRY *input_st_entry = addVarToSymTable(funcSymTable, plist->data->left, plist->data->right);
+        printf("Added parameter %s to function symbol table\n", input_st_entry->name);
+        fflush(stdout);
         params = addToST_LL(params, input_st_entry);
+        printf("Added parameter %s to parameter list\n", input_st_entry->name);
+        fflush(stdout);
         plist = plist->next;
     }
     return params;
 }
 
 // global symbol table
-symbol_table symbolTable = {NULL, "42"};
+symbol_table symbolTable = {"42", NULL, NULL};
 
 // check if all variables used in an expression are already in the symbol table
 void checkExpressionNames(ast_node *expr, symbol_table *symTable)
 {
+    printf("Checking expression names\n");
     // null check
     if (expr == NULL)
     {
+        printf("Null expression\n");
+        fflush(stdout);
         return;
     }
     // operators or array element
     if ((expr->nodeType >= PLUS_AST && expr->nodeType <= GE_AST) || expr->nodeType == ARR_ELEM_AST)
     {
+        printf("Haan main operator hu\n");
+        fflush(stdout);
         checkExpressionNames(expr->left, symTable);
         checkExpressionNames(expr->right, symTable);
     }
     // identifiers
     else if (expr->nodeType == ID)
     {
-        if (checkAllSymbolTables(symTable, expr->leafNodeInfo.lexeme) == NULL)
+        parse_tree_node *pt = (parse_tree_node *)expr;
+        if (checkAllSymbolTables(symTable, pt->leafNodeInfo.lexeme) == NULL)
         {
             printf("Error: Declaration of variable %s used at line number %d not found.\n",
-                   expr->leafNodeInfo.lexeme, expr->leafNodeInfo.lineNumber);
+                   pt->leafNodeInfo.lexeme, pt->leafNodeInfo.lineNumber);
             exit(1);
         }
+        printf("Haan main ID hu\n");
+        fflush(stdout);
     }
 }
 
@@ -253,6 +290,7 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
         case GET_VALUE_AST:
         case PRINT_AST:
         {
+            printf("Haan main get_value/print hu\n");
             Id = stmt->right;
             if (checkAllSymbolTables(blockSymTable, Id->leafNodeInfo.lexeme) == NULL)
             {
@@ -283,6 +321,7 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
                 while (list != NULL)
                 {
                     checkExpressionNames(list->data, blockSymTable);
+                    list = list->next;
                 }
             }
             // check an expression
@@ -290,31 +329,45 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
             {
                 checkExpressionNames(stmt->right, blockSymTable);
                 checkExpressionNames(stmt->left, blockSymTable);
+                printf("We have completed equals ast\n");
+                fflush(stdout);
             }
             break;
         }
         // declare a variable
         case DECLARE_AST:
         {
-            printf("Adding variable to symbol table.\n");
-            fflush(stdout);
             LinkedListASTNode *var_list = stmt->left;
             while (var_list != NULL)
             {
-                ast_node *var_node = var_list->data; 
+                parse_tree_node *var_node = var_list->data; 
+                printf("Adding variable %s to symbol table.\n", var_node->leafNodeInfo.lexeme);
+                fflush(stdout);
                 ST_ENTRY *var_st_entry = addVarToSymTable(blockSymTable, var_node, stmt->right);
+                printf("Added variable %s to symbol table.\n", var_node->leafNodeInfo.lexeme);
+                fflush(stdout);
                 var_list = var_list->next;
             }
+            break;
         }
         // switching
         case SWITCH_AST:
         {
+            printf("We have a switch statement\n");
+            fflush(stdout);
             // switching variable
             checkExpressionNames(stmt->left, blockSymTable);
             LinkedListASTNode *case_list = stmt->right;
             // case blocks
             while (case_list != NULL)
             {
+                printf("We have a case block\n");
+                if (case_list->data == NULL)
+                {
+                    printf("We don't have a default block\n");
+                    fflush(stdout);
+                    break;
+                }
                 LinkedListASTNode *stmt_list = case_list->data->right;
                 // create a new symbol table for each case block and
                 // add it to the parent symbol table. set the name of the symbol table
@@ -332,7 +385,9 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
                 populateBlockSymbolTables(stmt_list, caseSymTable);
                 addToSymbolTable(blockSymTable, caseSymTableEntry);
                 case_list = case_list->next;
+                printf("We have completed case ast\n");
             }
+            printf("We have completed switch ast\n");
             break;
         }
         // for loop
@@ -340,6 +395,7 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
         {
             // loop variable
             parse_tree_node *loopVar = stmt->aux_info;
+            printf("We have a for loop with loop variable %s\n", loopVar->leafNodeInfo.lexeme);
             // list of statements in the for loop
             LinkedListASTNode *for_stmt_list = stmt->right;
             char *forstr = malloc(sizeof(char) * 64);
@@ -349,6 +405,7 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
             ST_ENTRY *loopVarEntry = malloc(sizeof(ST_ENTRY));
             loopVarEntry->name = loopVar->leafNodeInfo.lexeme;
             loopVarEntry->entry_type = VAR_SYM;
+            loopVarEntry->data.var = (struct var_entry *)malloc(sizeof(struct var_entry));
             loopVarEntry->data.var->type = __NUM__; // can only be an integer
             addToSymbolTable(forSymTable, loopVarEntry);
             // create an entry for the for symbol table in the parent symbol table
@@ -406,8 +463,10 @@ void populateOtherModulesSymbolTables(LinkedListASTNode *node)
         LinkedListASTNode *moduleDef = mdai->moduleDef;
         ST_ENTRY *symTabEntryForModule;
         // module already exists in the symbol table
-        if (symTabEntryForModule = checkSymbolTable(&symbolTable, Id->leafNodeInfo.lexeme) != NULL)
+        if ((symTabEntryForModule = checkSymbolTable(&symbolTable, Id->leafNodeInfo.lexeme)) != NULL)
         {
+            printf("Module %s already exists in the symbol table\n", Id->leafNodeInfo.lexeme);
+            fflush(stdout);
             // ensure type of symbol table entry is a function
             // TODO check if these errors are fine
             if (symTabEntryForModule->entry_type != FUNC_SYM)
@@ -425,6 +484,8 @@ void populateOtherModulesSymbolTables(LinkedListASTNode *node)
                        Id->leafNodeInfo.lexeme, Id->leafNodeInfo.lineNumber);
                 exit(1);
             }
+            printf("Module %s does not have a definition yet\n", Id->leafNodeInfo.lexeme);
+            fflush(stdout);
         }
         // module does not exist in the symbol table
         else
@@ -438,6 +499,7 @@ void populateOtherModulesSymbolTables(LinkedListASTNode *node)
         }
         symbol_table *funcSymTable = createSymbolTable(&symbolTable, symTabEntryForModule->name);
         // populate the symbol table with the input parameters
+        symTabEntryForModule->data.func = (struct func_entry *)malloc(sizeof(struct func_entry));
         symTabEntryForModule->data.func->inputs = addParamListToFuncSymTable(funcSymTable, input_plist);
         symTabEntryForModule->data.func->outputs = addParamListToFuncSymTable(funcSymTable, ret);
         symTabEntryForModule->data.func->body = moduleDef;

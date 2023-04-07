@@ -1,9 +1,10 @@
+declare module square;
 <<<driver program>>>
 start
 	declare v_1_2_3:integer;
 	get_value(v_1_2_3);
 	declare result:integer;
-	[result_]:=use module square with parameters v_1_2_3; 
+	[result]:=use module square with parameters v_1_2_3; 
         ** Modify rule for <actual_para_list>**
 	print(result);
 end
@@ -13,6 +14,6 @@ takes input [x:integer];
 returns [value:integer];
 start
 	declare result:array [-1..x] of integer;
-    result[0] := -x*(-x);
+    result[0] := -x*(-7);
     value := result;
 end
