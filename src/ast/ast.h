@@ -10,7 +10,6 @@ enum TYPE{
     __NUM__,
     __RNUM__,
     __BOOL__,
-    __ARRAY__,
     __ERROR__
 };
 

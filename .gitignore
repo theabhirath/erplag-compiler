@@ -56,4 +56,4 @@ dkms.conf
 ast
 symtab
 ast.txt
-src/parser/parseTree.txt
+parseTree.txt

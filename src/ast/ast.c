@@ -2004,7 +2004,7 @@ void print_ast(ast *a)
 void main()
 {
     bufferSize = 1024;
-    parseInputSourceCode("tests/t5.txt", "src/parser/parseTree.txt");
+    parseInputSourceCode("tests/stage2/t5.txt", "src/parser/parseTree.txt");
     printf("parse tree created successfully.\n");
     fflush(stdout);
     ast *AST = create_ast(&parseTree);

@@ -18,7 +18,8 @@ typedef enum ST_ENTRY_TYPE
 enum ARRAY_TYPE
 {
     STATIC,
-    DYNAMIC
+    DYNAMIC,
+    INDEX_ERROR
 };
 
 union value{
@@ -50,8 +51,8 @@ struct arr_entry
     enum TYPE type;
     int offset;
     enum ARRAY_TYPE arrayType;
-    union indexType start;
-    union indexType end;
+    union indexType left;
+    union indexType right;
 };
 
 typedef struct ST_LL{
@@ -101,5 +102,6 @@ typedef struct symbol_table
 extern symbol_table symbolTable;
 
 void populateSymbolTables(ast *ASTree);
+enum TYPE getType(ast_node *node, symbol_table *st);
 
 #endif
