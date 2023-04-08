@@ -15,6 +15,7 @@ symbol_table *createSymbolTable(symbol_table *parent, char *name)
     {
         newTable->data[i] = NULL;
     }
+    newTable->offset = 0;
     printf("Created symbol table %s.\n", name);
     return newTable;
 }
@@ -239,7 +240,7 @@ ST_LL *addParamListToFuncSymTable(symbol_table *funcSymTable, LinkedListASTNode 
 }
 
 // global symbol table
-symbol_table symbolTable = {"42", NULL, NULL};
+symbol_table symbolTable = {"42", NULL, NULL, 0};
 
 // check if all variables used in an expression are already in the symbol table
 void checkExpressionNames(ast_node *expr, symbol_table *symTable)

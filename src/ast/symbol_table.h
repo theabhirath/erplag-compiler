@@ -95,6 +95,7 @@ typedef struct symbol_table
     char *name;
     ST_LL *data[SYMBOL_TABLE_SIZE];
     struct symbol_table *parent;
+    int offset;
 } symbol_table;
 
 extern symbol_table symbolTable;
