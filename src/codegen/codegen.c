@@ -1,7 +1,6 @@
 #include "../ast/ast.h"
 #include "../ast/symbol_table.h"
 
-int labels = 0;
 typedef enum OPERATOR
 {
     OP_ASSIGN,
@@ -18,6 +17,11 @@ typedef enum OPERATOR
     OP_SET,
     OP_RESET,
     OP_CMP,
+    OP_LABEL,
+    OP_JL,
+    OP_JG,
+    OP_JLE,
+    OP_JGE,
 } OPERATOR;
 
 struct three_ac {
@@ -58,19 +62,26 @@ ST_ENTRY *get_temp_var(symbol_table *symtab, enum TYPE type)
     symtab->offset += 4;
     return temp;
 }
-ast_node *true_node = NULL;
-ast_node *false_node = NULL;
+ST_ENTRY *const_true;
+ST_ENTRY *const_false;
 
 void init_three_ac_list(three_ac_list *list)
 {
     list->head = NULL;
     list->tail = NULL;
-    true_node = malloc(sizeof(ast_node));
-    false_node = malloc(sizeof(ast_node));
-    true_node->nodeType = TRUE_PTN_AST;
-    true_node->type = __BOOL__;
-    false_node->nodeType = FALSE_PTN_AST;
-    false_node->type = __BOOL__;
+
+    const_true = malloc(sizeof(ST_ENTRY));
+    const_true->entry_type = VAR_SYM;
+    const_true.data.var->type = __BOOL__;
+    const_true->offset = 0;
+    const_true->data.var->value = 1;
+
+    const_false = malloc(sizeof(ST_ENTRY));
+    const_false->entry_type = VAR_SYM;
+    const_false.data.var->type = __BOOL__;
+    const_false->offset = 0;
+    const_false->data.var->value = 0;
+
 }
 
 enum TYPE getType(ast_node *node, symbol_table *st)
@@ -116,6 +127,7 @@ enum TYPE getType(ast_node *node, symbol_table *st)
 
 char *get_label()
 {
+    static int labels = 0;
     char *label = malloc(sizeof(char) * 10);
     sprintf(label, "label%d", labels);
     labels++;
@@ -238,11 +250,12 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
 
         */
-        case EQ_AST:
+        case EQ_AST: case NEQ_AST: case LT_AST: case GT_AST: case LTE_AST: case GTE_AST:
         {
             three_ac *temp1 = generate_opcode(node->left, st, list);
             three_ac *temp2 = generate_opcode(node->right, st, list);
-            three_ac *first = malloc(sizeof(three_ac));
+
+            three_ac *first = temp;
             first->label = NULL;
             first->op = OP_CMP;
             first->arg1 = temp1->result;
@@ -252,11 +265,32 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
             three_ac *second = malloc(sizeof(three_ac));
             second->label = NULL;
-            second->op = OP_JZ;
+            switch(node->nodeType)
+            {
+                case EQ_AST:
+                    second->op = OP_JZ;
+                    break;
+                case NEQ_AST:
+                    second->op = OP_JNZ;
+                    break;
+                case LT_AST:
+                    second->op = OP_JL;
+                    break;
+                case GT_AST:
+                    second->op = OP_JG;
+                    break;
+                case LTE_AST:
+                    second->op = OP_JLE;
+                    break;
+                case GTE_AST:
+                    second->op = OP_JGE;
+                    break;
+            }
             second->target_label = get_label();
             add_to_three_ac_list(list, second);
 
             three_ac *third = malloc(sizeof(three_ac));
+            third->label = NULL;
             third->Op = OP_RESET;
             third->arg1 = get_temp_var(st, TYPE_INT);
             third->arg2 = NULL;
@@ -264,6 +298,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             add_to_three_ac_list(list, third);
 
             three_ac *fourth = malloc(sizeof(three_ac));
+            fourth->label = NULL;
             fourth->Op = OP_JMP;
             fourth->target_label = get_label();
             add_to_three_ac_list(list, fourth);
@@ -271,8 +306,87 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             three_ac *fifth = malloc(sizeof(three_ac));
             fifth->label = second->target_label;
             fifth->Op = OP_SET;
+            fifth->arg1 = third->arg1;
+            fifth->arg2 = NULL;
+            fifth->result = third->arg1;
+            add_to_three_ac_list(list, fifth);
 
-            
+            three_ac *sixth = malloc(sizeof(three_ac));
+            sixth->label = fourth->target_label;
+            sixth->Op = OP_LABEL;
+            add_to_three_ac_list(list, sixth);
+            return third->arg1;
         }
+        /*
+            Code:
+            while (condition)
+            start
+                body
+            end
+
+            assembly:
+            label0:
+                cmp condition, 0
+                jz label1
+                body
+                jmp label0
+            label1:
+
+        */
+        case WHILE_AST:
+        {
+            three_ac *first = malloc(sizeof(three_ac));
+            first->label = get_label();
+            first->op = OP_LABEL;
+            add_to_three_ac_list(list, first);
+
+            three_ac *second = malloc(sizeof(three_ac));
+            second->label = NULL;
+            second->op = OP_CMP;
+            second->arg1 = generate_opcode(node->left, st, list)->result;
+            second->arg2 = const_false;
+            add_to_three_ac_list(list, second);
+
+            three_ac *third = malloc(sizeof(three_ac));
+            third->label = NULL;
+            third->op = OP_JZ;
+            third->target_label = get_label();
+            add_to_three_ac_list(list, third);
+
+            generate_opcode(node->right, st, list);
+
+            three_ac *fourth = malloc(sizeof(three_ac));
+            fourth->label = NULL;
+            fourth->op = OP_JMP;
+            fourth->target_label = first->label;
+            add_to_three_ac_list(list, fourth);
+
+            three_ac *fifth = malloc(sizeof(three_ac));
+            fifth->label = third->target_label;
+            fifth->op = OP_LABEL;
+            add_to_three_ac_list(list, fifth);
+            break;
+        }
+        /*
+            code:
+                for (ind in st .. en)
+                    body
+            
+            assembly:
+            label0:
+                cmp ind, en
+                jz label1
+                body
+                inc ind
+                jmp label0
+        */
+       case FOR_AST:
+       {
+            char *name = malloc(sizeof(char) * 10);
+            sprintf(name, "%p", node);
+            ST_ENTRY *st_entry = checkSymbolTable(st, name);
+            symbol_table *new_st = st_entry->data
+       }
+
     }
 }
