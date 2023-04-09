@@ -48,7 +48,7 @@ union indexType{
 
 struct arr_entry
 {
-    enum TYPE type;
+    enum TYPE eltype;
     int offset;
     enum ARRAY_TYPE arrayType;
     union indexType left;

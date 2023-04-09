@@ -146,13 +146,13 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
         switch (var_type->right->nodeType)
         {
         case INTEGER_AST:
-            st_entry->data.arr->type = __NUM__;
+            st_entry->data.arr->eltype = __NUM__;
             break;
         case REAL_AST:
-            st_entry->data.arr->type = __RNUM__;
+            st_entry->data.arr->eltype = __RNUM__;
             break;
         case BOOLEAN_AST:
-            st_entry->data.arr->type = __BOOL__;
+            st_entry->data.arr->eltype = __BOOL__;
             break;
         }
         // static or dynamic array
@@ -169,11 +169,11 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
             int lindexVal = lindexSign * lindex->leafNodeInfo.val.intValue;
             int rindexVal = rindexSign * rindex->leafNodeInfo.val.intValue;
             // check if lindexVal < rindexVal
-            if  (lindexVal >= rindexVal)
+            if (lindexVal >= rindexVal)
             {
                 printf("Error: Array %s at line number %d has invalid range.\n",
                        st_entry->name, var_name->leafNodeInfo.lineNumber);
-                st_entry->data.arr->type = INDEX_ERROR;
+                st_entry->data.arr->eltype = INDEX_ERROR;
                 return st_entry;
             }
             else
@@ -183,6 +183,11 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
                 st_entry->data.arr->left.staticIndex = lindexVal;
                 st_entry->data.arr->right.staticIndex = rindexVal;
                 addToSymbolTable(symTab, st_entry);
+                printf("Added static array %s to symbol table %s\n", st_entry->name, symTab->name);
+                printf("left: %d, right: %d\n", st_entry->data.arr->left.staticIndex, st_entry->data.arr->right.staticIndex);
+                printf("eltype: %d\n", st_entry->data.arr->eltype);
+                printf("arrayType: %d\n", st_entry->data.arr->arrayType);
+                fflush(stdout);
                 return st_entry;
             }
         }
@@ -197,13 +202,13 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
                 {
                     printf("Error: Variable %s not declared at line number %d.\n",
                            lindex->leafNodeInfo.lexeme, lindex->leafNodeInfo.lineNumber);
-                    st_entry->data.arr->type = INDEX_ERROR;
+                    st_entry->data.arr->eltype = INDEX_ERROR;
                 }
                 else if (lindexEntry->entry_type != VAR_SYM || lindexEntry->data.var->type != __NUM__)
                 {
                     printf("Error: Variable %s at line number %d is not of type integer.\n",
                            lindex->leafNodeInfo.lexeme, lindex->leafNodeInfo.lineNumber);
-                    st_entry->data.arr->type = INDEX_ERROR;
+                    st_entry->data.arr->eltype = INDEX_ERROR;
                 }
             }
             if (rindex->leafNodeInfo.tokenID == ID)
@@ -212,13 +217,13 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
                 {
                     printf("Error: Variable %s not declared at line number %d.\n",
                            rindex->leafNodeInfo.lexeme, rindex->leafNodeInfo.lineNumber);
-                    st_entry->data.arr->type = INDEX_ERROR;
+                    st_entry->data.arr->eltype = INDEX_ERROR;
                 }
                 else if (rindexEntry->entry_type != VAR_SYM || rindexEntry->data.var->type != __NUM__)
                 {
                     printf("Error: Variable %s at line number %d is not of type integer.\n",
                            rindex->leafNodeInfo.lexeme, rindex->leafNodeInfo.lineNumber);
-                    st_entry->data.arr->type = INDEX_ERROR;
+                    st_entry->data.arr->eltype = INDEX_ERROR;
                 }
             }
             st_entry->data.arr->arrayType = DYNAMIC;
@@ -227,7 +232,7 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
         {
             printf("Array indices of array %s at line number %d are not valid.\n",
                    st_entry->name, var_name->leafNodeInfo.lineNumber);
-            st_entry->data.arr->type = INDEX_ERROR;
+            st_entry->data.arr->eltype = INDEX_ERROR;
         }
         // assign values to the indices
         if (lindex->leafNodeInfo.tokenID == NUM)
@@ -282,6 +287,45 @@ ST_LL *addParamListToFuncSymTable(symbol_table *funcSymTable, LinkedListASTNode 
 // global symbol table
 symbol_table symbolTable = {"42", NULL, NULL, 0};
 
+// match array types
+int matchArrayTypes(struct arr_entry *arr1, struct arr_entry *arr2)
+{
+    printf("Trying to match array types\n");
+    if (arr1->eltype != arr2->eltype || arr1->arrayType != arr2->arrayType ||
+        arr1->arrayType == INDEX_ERROR || arr2->arrayType == INDEX_ERROR)
+    {
+        printf("Array element or array types do not match, or there's an index error\n");
+        printf("arr1 eltype: %d, arr2 eltype: %d, arr1 arrayType: %d, arr2 arrayType: %d\n",
+               arr1->eltype, arr2->eltype, arr1->arrayType, arr2->arrayType);
+        return 1;
+    }
+    if (arr1->arrayType == STATIC)
+    {
+        if (arr1->left.staticIndex != arr2->left.staticIndex ||
+            arr1->right.staticIndex != arr2->right.staticIndex)
+        {
+            printf("Static array indices do not match\n");
+            printf("arr1 left: %d, arr1 right: %d, arr2 left: %d, arr2 right: %d\n",
+                   arr1->left.staticIndex, arr1->right.staticIndex, arr2->left.staticIndex, arr2->right.staticIndex);
+            return 1;
+        }
+    }
+    else
+    {
+        if (arr1->left.dynamicIndex->sign != arr2->left.dynamicIndex->sign ||
+            arr1->right.dynamicIndex->sign != arr2->right.dynamicIndex->sign)
+        {
+            return 1;
+        }
+        if (arr1->left.dynamicIndex->index->type != arr2->left.dynamicIndex->index->type ||
+            arr1->right.dynamicIndex->index->type != arr2->right.dynamicIndex->index->type)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 // get the type of an ast node given the symbol table
 enum TYPE getType(ast_node *node, symbol_table *st)
 {
@@ -310,11 +354,13 @@ enum TYPE getType(ast_node *node, symbol_table *st)
         return __BOOL__;
     case ID:
     {
-        ST_ENTRY *st_entry = checkAllSymbolTables(st, node->leafNodeInfo.lexeme);
-        if (st_entry->entry_type == VAR_SYM)
+        printf("Getting type of ID\n");
+        ST_ENTRY *st_entry = checkAllSymbolTables(st, ((parse_tree_node *)node)->leafNodeInfo.lexeme);
+        if (st_entry && st_entry->entry_type == VAR_SYM)
         {
             return st_entry->data.var->type;
         }
+        printf("Returning error\n");
         return __ERROR__;
     }
     default:
@@ -340,7 +386,9 @@ void checkExpressionNames(ast_node *expr, symbol_table *symTable)
         printf("Operator: %d\n", expr->nodeType);
         fflush(stdout);
         checkExpressionNames(expr->left, symTable);
+        printf("Left checked\n");
         checkExpressionNames(expr->right, symTable);
+        printf("Right checked\n");
         // type propagation and checking
         switch (expr->nodeType)
         {
@@ -359,6 +407,7 @@ void checkExpressionNames(ast_node *expr, symbol_table *symTable)
             {
                 expr->type = __ERROR__;
             }
+            printf("Plus/Mul type: %d\n", expr->type);
             break;
         }
         case MINUS_AST:
@@ -367,13 +416,14 @@ void checkExpressionNames(ast_node *expr, symbol_table *symTable)
             if (expr->left == NULL)
             {
                 printf("Left null\n");
-                if (expr->right->nodeType == NULL)
+                if (expr->right == NULL)
                 {
                     expr->type = __ERROR__;
                 }
                 else
                 {
                     expr->type = getType(expr->right, symTable);
+                    printf("Right type: %d\n", expr->type);
                 }
             }
             else if (getType(expr->left, symTable) == __NUM__ && getType(expr->right, symTable) == __NUM__)
@@ -438,8 +488,8 @@ void checkExpressionNames(ast_node *expr, symbol_table *symTable)
         case ARR_ELEM_AST:
         {
             // expression checking for the index and the array
-            checkExpressionNames(expr->right, symTable);
             checkExpressionNames(expr->left, symTable);
+            checkExpressionNames(expr->right, symTable);
             parse_tree_node *arr_id = (parse_tree_node *)expr->left;
             ST_ENTRY *arr_entry = checkAllSymbolTables(symTable, arr_id->leafNodeInfo.lexeme);
             if (arr_entry != NULL)
@@ -472,7 +522,8 @@ void checkExpressionNames(ast_node *expr, symbol_table *symTable)
                             return;
                         }
                     }
-                    expr->type = arr_entry->data.arr->type;
+                    expr->type = arr_entry->data.arr->eltype;
+                    printf("Array element type: %d\n", expr->type);
                 }
             }
             else
@@ -503,19 +554,43 @@ void checkExpressionNames(ast_node *expr, symbol_table *symTable)
 // type and expression checking for formal parameters of a function
 void checkFormalParams(LinkedListASTNode *param_list, ST_LL *formal_param_list, symbol_table *symTable)
 {
-    while (param_list != NULL)
+    while (param_list != NULL && formal_param_list != NULL)
     {
         checkExpressionNames(param_list->data, symTable);
-        // type checking for the input parameters
-        if (getType(param_list->data, symTable) != formal_param_list->data->data.var->type)
+        // two cases: formal_param_list is an array or a variable
+        if (formal_param_list->data->entry_type == ARR_SYM)
         {
-            printf("Error: Type mismatch at line number %d. Cannot pass %s to %s.\n",
-                   param_list->data->leafNodeInfo.lineNumber,
-                   getType(param_list->data, symTable),
-                   formal_param_list->data->data.var->type);
+            // type checking for the input parameters
+            ST_ENTRY *arr_entry = checkAllSymbolTables(symTable, ((parse_tree_node*)param_list->data)->leafNodeInfo.lexeme);
+            if (arr_entry && matchArrayTypes(arr_entry->data.arr, formal_param_list->data->data.arr))
+            {
+                printf("Error: Array type mismatch at line number %d.\n",
+                       ((parse_tree_node*)param_list->data)->leafNodeInfo.lineNumber);
+            }
+            else
+            {
+                printf("Type match for array param list arg.\n");
+            }
+        }
+        else
+        {
+            // type checking for the input parameters
+            if (getType(param_list->data, symTable) != formal_param_list->data->data.var->type)
+            {
+                printf("Error: Var Type mismatch at line number %d.\n",
+                       ((parse_tree_node*)param_list->data)->leafNodeInfo.lineNumber);
+            }
+            else
+            {
+                printf("Type match for param list arg.\n");
+            }
         }
         param_list = param_list->next;
         formal_param_list = formal_param_list->next;
+    }
+    if (param_list != NULL || formal_param_list != NULL)
+    {
+        printf("Error: Number of arguments passed do not match the number of parameters.\n");
     }
 }
 
@@ -571,6 +646,7 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
                 {
                     printf("Error: Recursion detected in module %s at line number %d. Please check the code and try again.\n",
                            Id->leafNodeInfo.lexeme, Id->leafNodeInfo.lineNumber);
+                    stmts = stmts->next;
                     continue;
                 }
                 // check if actual input parameters are declared and type checking
@@ -585,14 +661,14 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
             // check an expression
             else
             {
-                checkExpressionNames(stmt->right, blockSymTable);
                 checkExpressionNames(stmt->left, blockSymTable);
+                checkExpressionNames(stmt->right, blockSymTable);
+                printf("We have checked expression names on both sides of equal\n");
+                // TODO make sure both aren't error - also handle array equality
                 // check if the types match on both sides of the assignment
                 if (getType(stmt->left, blockSymTable) != getType(stmt->right, blockSymTable))
                 {
-                    printf("Error: Type mismatch at line number %d. Cannot assign %s to %s.\n",
-                           stmt->right->leafNodeInfo.lineNumber, getType(stmt->right, blockSymTable),
-                           getType(stmt->left, blockSymTable));
+                    printf("Error: Type mismatch at line number %d.\n", ((parse_tree_node *)stmt->left)->leafNodeInfo.lineNumber);
                 }
                 printf("We have completed equals ast\n");
                 fflush(stdout);
@@ -624,25 +700,30 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
             if (switchType != __NUM__ && switchType != __BOOL__)
             {
                 printf("Error: Switching variable at line number %d is not an integer or a boolean.\n",
-                       stmt->left->leafNodeInfo.lineNumber);
+                       ((parse_tree_node *)stmt->left)->leafNodeInfo.lineNumber);
             }
             LinkedListASTNode *case_list = stmt->right;
             // case blocks
             while (case_list != NULL)
             {
                 printf("We have a case block\n");
-                if (case_list->data == NULL)
+                fflush(stdout);
+                if (case_list->data->left == NULL)
                 {
+                    printf("In default block\n");
+                    fflush(stdout);
                     if (switchType != __BOOL__)
                     {
                         printf("Error: Switching variable at line number %d is not a boolean.\
-                               Expected default block.\n", stmt->left->leafNodeInfo.lineNumber);
+                               Expected default block.\n",
+                               stmt->left->leafNodeInfo.lineNumber);
                     }
-                    break;
                 }
-                // check if the case value is of the same type as the switching variable
-                switch(switchType)
+                else
                 {
+                    // check if the case value is of the same type as the switching variable
+                    switch (switchType)
+                    {
                     case __NUM__:
                         if (case_list->data->left->nodeType != NUM)
                         {
@@ -658,6 +739,7 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
                                    case_list->data->left->leafNodeInfo.lineNumber);
                         }
                         break;
+                    }
                 }
                 LinkedListASTNode *stmt_list = case_list->data->right;
                 // create a new symbol table for each case block and
@@ -781,7 +863,7 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
 }
 
 // populate symbol tables for other modules
-void populateOtherModulesSymbolTables(LinkedListASTNode *node)
+void populateOtherModuleSignatures(LinkedListASTNode *node)
 {
     while (node != NULL)
     {
@@ -803,6 +885,7 @@ void populateOtherModulesSymbolTables(LinkedListASTNode *node)
                 printf("Error: Name %s at line number %d does not seem to be a function or might be clashing\
                 with a variable of the same name. Please check the code and try again.\n",
                        Id->leafNodeInfo.lexeme, Id->leafNodeInfo.lineNumber);
+                node = node->next;
                 continue;
             }
             // module already has a definition
@@ -811,6 +894,7 @@ void populateOtherModulesSymbolTables(LinkedListASTNode *node)
                 printf("Error: Function %s at line number %d seems to already have been defined. Please check\
                 the code and try again.\n",
                        Id->leafNodeInfo.lexeme, Id->leafNodeInfo.lineNumber);
+                node = node->next;
                 continue;
             }
             printf("Module %s does not have a definition yet\n", Id->leafNodeInfo.lexeme);
@@ -845,8 +929,31 @@ void populateOtherModulesSymbolTables(LinkedListASTNode *node)
         symbol_table *blockSymTable = createSymbolTable(funcSymTable, blockSymTableEntry->name);
         blockSymTableEntry->data.block->symTable = blockSymTable;
         addToSymbolTable(funcSymTable, blockSymTableEntry);
-        LinkedListASTNode *stmts = moduleDef;
-        populateBlockSymbolTables(stmts, blockSymTable);
+        // LinkedListASTNode *stmts = moduleDef;
+        // populateBlockSymbolTables(stmts, blockSymTable);
+        node = node->next;
+    }
+}
+
+// populate symbol tables for all module bodies
+void populateOtherModuleBodies(LinkedListASTNode *node)
+{
+    while (node != NULL)
+    {
+        // extract module info from the AST node
+        struct moduleDefAuxInfo *mdai = (struct moduleDefAuxInfo *)node->data->aux_info;
+        parse_tree_node *Id = mdai->Id;
+        LinkedListASTNode *input_plist = mdai->input_plist;
+        LinkedListASTNode *ret = mdai->ret;
+        LinkedListASTNode *moduleDef = mdai->moduleDef;
+        ST_ENTRY *symTabEntryForModule = checkSymbolTable(&symbolTable, Id->leafNodeInfo.lexeme);
+        // module already exists in the symbol table; extract block symbol table
+        char *blockname = malloc(sizeof(char) * 64);
+        sprintf(blockname, "%s_block", symTabEntryForModule->name);
+        ST_ENTRY *blockSymTableEntry = checkSymbolTable(symTabEntryForModule->data.func->symTable, blockname);
+        symbol_table *blockSymTable = blockSymTableEntry->data.block->symTable;
+        // populate the symbol table with the block statements
+        populateBlockSymbolTables(blockSymTableEntry->data.block->body, blockSymTable);
         node = node->next;
     }
 }
@@ -873,7 +980,10 @@ void populateSymbolTables(ast *ASTree)
         node = node->next;
     }
     // traverse the linked list, adding other modules (1) to the symbol table
-    populateOtherModulesSymbolTables(otherModules1);
+    populateOtherModuleSignatures(otherModules1);
+    populateOtherModuleSignatures(otherModules2);
+    // populate OtherModule1 body
+    populateOtherModuleBodies(otherModules1);
     // driver module (aux_info is a linked list of statements)
     symbol_table *driverSymTable = createSymbolTable(&symbolTable, "driver");
     LinkedListASTNode *driverStmts = driverModule->aux_info;
@@ -885,6 +995,7 @@ void populateSymbolTables(ast *ASTree)
     driverSymTableEntry->data.block->symTable = driverSymTable;
     populateBlockSymbolTables(driverStmts, driverSymTable);
     addToSymbolTable(&symbolTable, driverSymTableEntry);
-    // traverse the linked list, adding other modules (2) to the symbol table
-    populateOtherModulesSymbolTables(otherModules2);
+    // populate OtherModule2 body
+    populateOtherModuleBodies(otherModules2);
+    
 }

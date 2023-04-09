@@ -664,36 +664,37 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
         temp = temp->next;
     }
 }
-int main()
-{
-    bufferSize = 1024;
-    parseInputSourceCode("tests/t2.txt", "src/parser/parseTree.txt");
-    printf("parse tree created successfully.\n");
-    fflush(stdout);
-    ast *AST = create_ast(&parseTree);
-    printf("AST created successfully.\n");
-    print_ast(AST);
-    printf("AST printed successfully.\n");
-    fflush(stdout);
-    // populate symbol tables
-    populateSymbolTables(AST);
-    printf("Nah. No way.\n");
-    fflush(stdout);
 
-    // generate three address code
-    three_ac_list *list3Ad = malloc(sizeof(three_ac_list));
-    init_three_ac_list(list3Ad);
-    if (AST->root == NULL)
-        printf("AST->root is NULL\n");
-    else
-        printf("AST->root is NOT NULL\n");
-    fflush(stdout);
-    generate_opcode(AST->root, &symbolTable, list3Ad);
-    printf("3AC generated successfully.\n");
-    fflush(stdout);
-    FILE *fp1 = fopen("3AC.txt", "w");
-    print_three_ac_list(list3Ad, fp1);
-    printf("3AC printed successfully.\n");
-    fflush(stdout);
-    return 0;
-}
+// int main()
+// {
+//     bufferSize = 1024;
+//     parseInputSourceCode("tests/t2.txt", "src/parser/parseTree.txt");
+//     printf("parse tree created successfully.\n");
+//     fflush(stdout);
+//     ast *AST = create_ast(&parseTree);
+//     printf("AST created successfully.\n");
+//     print_ast(AST);
+//     printf("AST printed successfully.\n");
+//     fflush(stdout);
+//     // populate symbol tables
+//     populateSymbolTables(AST);
+//     printf("Nah. No way.\n");
+//     fflush(stdout);
+
+//     // generate three address code
+//     three_ac_list *list3Ad = malloc(sizeof(three_ac_list));
+//     init_three_ac_list(list3Ad);
+//     if (AST->root == NULL)
+//         printf("AST->root is NULL\n");
+//     else
+//         printf("AST->root is NOT NULL\n");
+//     fflush(stdout);
+//     generate_opcode(AST->root, &symbolTable, list3Ad);
+//     printf("3AC generated successfully.\n");
+//     fflush(stdout);
+//     FILE *fp1 = fopen("3AC.txt", "w");
+//     print_three_ac_list(list3Ad, fp1);
+//     printf("3AC printed successfully.\n");
+//     fflush(stdout);
+//     return 0;
+// }
