@@ -102,6 +102,8 @@ typedef struct symbol_table
 extern symbol_table symbolTable;
 
 void populateSymbolTables(ast *ASTree);
+ST_ENTRY *checkSymbolTable(symbol_table *symTab, char *name);
+ST_ENTRY *checkAllSymbolTables(symbol_table *symTab, char *name);
 enum TYPE getType(ast_node *node, symbol_table *st);
 
 #endif

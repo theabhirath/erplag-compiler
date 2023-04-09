@@ -1996,24 +1996,25 @@ void print_ast(ast *a)
     }
     FILE *fp = fopen("ast.txt", "w");
     fprintf(fp, "AST\n\n");
+    fflush(fp);
     ast_node *root0 = a->root;
     print_ast_node(root0, 0, fp);
     fclose(fp);
 }
 
-void main()
-{
-    bufferSize = 1024;
-    parseInputSourceCode("tests/stage2/t5.txt", "src/parser/parseTree.txt");
-    printf("parse tree created successfully.\n");
-    fflush(stdout);
-    ast *AST = create_ast(&parseTree);
-    printf("AST created successfully.\n");
-    print_ast(AST);
-    printf("AST printed successfully.\n");  
-    fflush(stdout);
-    // populate symbol tables
-    populateSymbolTables(AST);
-    printf("Nah. No way.\n");
-    fflush(stdout);
-}
+// void main()
+// {
+//     bufferSize = 1024;
+//     parseInputSourceCode("tests/t5.txt", "src/parser/parseTree.txt");
+//     printf("parse tree created successfully.\n");
+//     fflush(stdout);
+//     ast *AST = create_ast(&parseTree);
+//     printf("AST created successfully.\n");
+//     print_ast(AST);
+//     printf("AST printed successfully.\n");  
+//     fflush(stdout);
+//     // populate symbol tables
+//     populateSymbolTables(AST);
+//     printf("Nah. No way.\n");
+//     fflush(stdout);
+// }

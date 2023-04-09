@@ -1,14 +1,18 @@
 ** This is a small code for verifying syntactic correctness of an empty driver and an empty module **
 <<<driver program>>>
 start
-	
+while(true)
+      start
+		declare a :integer;
+            a := 5;
+      end
 end
-<<module empty>>
+**<<module empty>>
 takes input[a:boolean];
 start
 
 end
-
+**
 ** print the following message on the console
       " Input source code is syntactically correct.........."
 **
