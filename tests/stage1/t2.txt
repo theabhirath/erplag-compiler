@@ -6,6 +6,54 @@ while(true)
 		declare a :integer;
             a := 5;
       end
+declare x :integer;
+while(5<6)
+      start
+            x := 5;
+            x := x + 1;
+            x := x - 1;
+      end
+
+for(i in 10 .. 1)
+      start
+            declare a , b, c :integer;
+            a := 5;
+            b := 6;
+            c := a + b - 5;
+      end
+for (i in 1 .. 10)
+      start
+            declare a , b, c :integer;
+            a := 5;
+            b := 6;
+            c := a + b - 5;
+            declare bolle :boolean;
+            bolle := true AND false OR 3 < 5;
+            switch(bolle)
+            start
+            case true: declare a :integer;
+                  a := 5;
+                  break;
+            case false: declare a :integer;
+                        a := 5;
+                        break;
+            end
+      end
+      declare a :integer;
+      a := 2;
+      switch(a)
+      start
+      case 1: declare a :integer;
+            a := 5;
+            break;
+      case 2: declare a :integer;
+                  a := 5;
+                  break;
+      default: declare d :integer;
+                  d := 5;
+                  break;
+      end
+
 end
 **<<module empty>>
 takes input[a:boolean];

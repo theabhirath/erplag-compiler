@@ -95,5 +95,6 @@ void print_parse_tree_node(parse_tree_node *node, int depth, FILE *fp);
 void print_ast_node(ast_node *node, int depth, FILE *fp);
 void print_ast(ast *a);
 ast *create_ast(parse_tree *pt);
+char *getName(ast_node *node);
 
 #endif

@@ -708,14 +708,25 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
             {
                 printf("We have a case block\n");
                 fflush(stdout);
-                if (case_list->data->left == NULL)
+                if(case_list->data == NULL)
                 {
-                    printf("In default block\n");
-                    fflush(stdout);
+                    printf("Missing default block.\n");
                     if (switchType != __BOOL__)
                     {
                         printf("Error: Switching variable at line number %d is not a boolean.\
                                Expected default block.\n",
+                               stmt->left->leafNodeInfo.lineNumber);
+                    }
+                    break;
+                }
+                if (case_list->data->left == NULL)
+                {
+                    printf("In default block\n");
+                    fflush(stdout);
+                    if (switchType == __BOOL__)
+                    {
+                        printf("Error: Switching variable at line number %d is a boolean.\
+                               Default block not expected.\n",
                                stmt->left->leafNodeInfo.lineNumber);
                     }
                 }
@@ -793,19 +804,23 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
             startEntry->data.var = (struct var_entry *)malloc(sizeof(struct var_entry));
             startEntry->data.var->type = __NUM__;
             startEntry->data.var->val.numValue = startSign * start->leafNodeInfo.val.intValue;
-            addToSymbolTable(blockSymTable, startEntry);
+
             ST_ENTRY *endEntry = malloc(sizeof(ST_ENTRY));
             endEntry->name = "$end";
             endEntry->entry_type = VAR_SYM;
             endEntry->data.var = (struct var_entry *)malloc(sizeof(struct var_entry));
             endEntry->data.var->type = __NUM__;
             endEntry->data.var->val.numValue = endSign * end->leafNodeInfo.val.intValue;
-            addToSymbolTable(blockSymTable, endEntry);
+            
             // list of statements in the for loop
             LinkedListASTNode *for_stmt_list = stmt->right;
             char *forstr = malloc(sizeof(char) * 64);
             sprintf(forstr, "%p", stmt);
             symbol_table *forSymTable = createSymbolTable(blockSymTable, forstr);
+            // add the start and end values to the symbol table
+            addToSymbolTable(forSymTable, startEntry);
+            addToSymbolTable(forSymTable, endEntry);
+            
             // add the loop variable to the symbol table
             ST_ENTRY *loopVarEntry = malloc(sizeof(ST_ENTRY));
             loopVarEntry->name = loopVar->leafNodeInfo.lexeme;
