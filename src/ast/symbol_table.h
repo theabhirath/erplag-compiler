@@ -5,6 +5,11 @@
 
 #define SYMBOL_TABLE_SIZE 512
 
+#define __NUM_SIZE__ 1
+#define __RNUM_SIZE__ 1
+#define __BOOL_SIZE__ 1
+#define __DYNAMIC_ARRAY_SIZE__ 1
+
 typedef struct ST_ENTRY ST_ENTRY;
 
 typedef enum ST_ENTRY_TYPE

@@ -130,14 +130,20 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
     case INTEGER_AST:
         st_entry->data.var = (struct var_entry *)malloc(sizeof(struct var_entry));
         st_entry->data.var->type = __NUM__;
+        st_entry->data.var->offset = symTab->offset;
+        symTab->offset += __NUM_SIZE__;
         break;
     case REAL_AST:
         st_entry->data.var = (struct var_entry *)malloc(sizeof(struct var_entry));
         st_entry->data.var->type = __RNUM__;
+        st_entry->data.var->offset = symTab->offset;
+        symTab->offset += __RNUM_SIZE__;
         break;
     case BOOLEAN_AST:
         st_entry->data.var = (struct var_entry *)malloc(sizeof(struct var_entry));
         st_entry->data.var->type = __BOOL__;
+        st_entry->data.var->offset = symTab->offset;
+        symTab->offset += __BOOL_SIZE__;
         break;
     case ARRAY_AST:
         st_entry->data.arr = (struct arr_entry *)malloc(sizeof(struct arr_entry));
@@ -182,6 +188,8 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
                 st_entry->data.arr->arrayType = STATIC;
                 st_entry->data.arr->left.staticIndex = lindexVal;
                 st_entry->data.arr->right.staticIndex = rindexVal;
+                st_entry->data.arr->offset = symTab->offset;
+                symTab->offset += (rindexVal - lindexVal + 1) * (st_entry->data.arr->eltype == __NUM__ ? __NUM_SIZE__ : st_entry->data.arr->eltype == __RNUM__ ? __RNUM_SIZE__ : __BOOL_SIZE__);
                 addToSymbolTable(symTab, st_entry);
                 printf("Added static array %s to symbol table %s\n", st_entry->name, symTab->name);
                 printf("left: %d, right: %d\n", st_entry->data.arr->left.staticIndex, st_entry->data.arr->right.staticIndex);
@@ -255,6 +263,8 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
             st_entry->data.arr->right.dynamicIndex->index = rindexEntry->data.var;
             st_entry->data.arr->right.dynamicIndex->sign = rindexSign;
         }
+        st_entry->data.arr->offset = symTab->offset;
+        symTab->offset += __DYNAMIC_ARRAY_SIZE__;
         break;
     }
     addToSymbolTable(symTab, st_entry);
@@ -817,6 +827,11 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
             char *forstr = malloc(sizeof(char) * 64);
             sprintf(forstr, "%p", stmt);
             symbol_table *forSymTable = createSymbolTable(blockSymTable, forstr);
+            // set offsets
+            startEntry->data.var->offset = forSymTable->offset;
+            forSymTable->offset += __NUM_SIZE__;
+            endEntry->data.var->offset = forSymTable->offset;
+            forSymTable->offset += __NUM_SIZE__;
             // add the start and end values to the symbol table
             addToSymbolTable(forSymTable, startEntry);
             addToSymbolTable(forSymTable, endEntry);
@@ -827,6 +842,8 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
             loopVarEntry->entry_type = VAR_SYM;
             loopVarEntry->data.var = (struct var_entry *)malloc(sizeof(struct var_entry));
             loopVarEntry->data.var->type = __NUM__; // can only be an integer
+            loopVarEntry->data.var->offset = forSymTable->offset;
+            forSymTable->offset += __NUM_SIZE__;
             addToSymbolTable(forSymTable, loopVarEntry);
             // create an entry for the for symbol table in the parent symbol table
             ST_ENTRY *forSymTableEntry = malloc(sizeof(ST_ENTRY));

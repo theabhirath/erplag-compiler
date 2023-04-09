@@ -2,10 +2,10 @@
 #include "../ast/ast.h"
 #include "../ast/symbol_table.h"
 
-#define TEMP_1 "eax"
-#define TEMP_2 "ebx"
-#define TEMP_3 "ecx"
-#define TEMP_4 "edx"
+#define TEMP_1 "rax"
+#define TEMP_2 "rbx"
+#define TEMP_3 "rcx"
+#define TEMP_4 "rdx"
 
 typedef enum OPERATOR
 {
@@ -29,7 +29,8 @@ typedef enum OPERATOR
     OP_JLE,
     OP_JGE,
     OP_INC,
-    OP_DEC
+    OP_DEC,
+    INSTR
 } OPERATOR;
 
 void print_op(OPERATOR op)
@@ -99,6 +100,9 @@ void print_op(OPERATOR op)
     case OP_DEC:
         printf("OP_DEC\n");
         break;
+    case INSTR:
+        printf("INSTR\n");
+        break;
     default:
         printf("Unknown operator\n");
         break;
@@ -134,8 +138,6 @@ void add_to_three_ac_list(three_ac_list *list, three_ac *node)
         list->tail->next = node;
         list->tail = node;
     }
-
-    // print_three_ac_list(list, stdout);
 }
 
 ST_ENTRY *get_temp_var(symbol_table *symtab, enum TYPE type)
@@ -149,8 +151,9 @@ ST_ENTRY *get_temp_var(symbol_table *symtab, enum TYPE type)
     temp->data.var = malloc(sizeof(struct var_entry));
     temp->data.var->type = type;
     temp->data.var->offset = symtab->offset;
-    symtab->offset += 4;
+    symtab->offset += type == __NUM__ ? __NUM_SIZE__ : type == __RNUM__ ? __RNUM_SIZE__ : __BOOL_SIZE__;
     temp_vars++;
+    addToSymbolTable(symtab, temp);
     printf("Created temp var %s\n", temp->name);
     return temp;
 }
@@ -242,6 +245,10 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         ST_ENTRY *driver_st_entry = checkAllSymbolTables(st, "driver");
         symbol_table *driver_st = driver_st_entry->data.block->symTable;
         LinkedListASTNode *driver_list = driver_st_entry->data.block->body;
+        three_ac *temp1 = new_3ac();
+        temp1->op = OP_LABEL;
+        temp1->label = "main";
+        add_to_three_ac_list(list, temp1);
         while (driver_list != NULL)
         {
             printf("Statement \n");
@@ -374,7 +381,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         three_ac *temp2 = generate_opcode(node->right, st, list);
         printf("Obtained two operands: %s and %s\n", temp1->result->name, temp2->result->name);
         three_ac *first = temp;
-        first->label = NULL;
         first->op = OP_CMP;
         first->arg1 = temp1->result;
         first->arg2 = temp2->result;
@@ -426,17 +432,23 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
         three_ac *fifth = new_3ac();
         fifth->label = second->target_label;
-        fifth->op = OP_SET;
-        fifth->arg1 = third->arg1;
-        fifth->result = third->arg1;
+        fifth->op = OP_LABEL;
         add_to_three_ac_list(list, fifth);
-        printf("Added a set instruction");
+        printf("Added a label instruction");
 
         three_ac *sixth = new_3ac();
-        sixth->label = fourth->target_label;
-        sixth->op = OP_LABEL;
+        sixth->op = OP_SET;
+        sixth->arg1 = third->arg1;
+        sixth->result = third->arg1;
         add_to_three_ac_list(list, sixth);
+        printf("Added a set instruction");
+
+        three_ac *seventh = new_3ac();
+        seventh->label = fourth->target_label;
+        seventh->op = OP_LABEL;
+        add_to_three_ac_list(list, seventh);
         printf("Added a label instruction");
+
         return third;
     }
     /*
@@ -501,7 +513,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
         printf("Added body\n");
         three_ac *fourth = new_3ac();
-        fourth->label = NULL;
         fourth->op = OP_JMP;
         fourth->target_label = first->label;
         add_to_three_ac_list(list, fourth);
@@ -559,14 +570,12 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             add_to_three_ac_list(list, first);
 
             three_ac *second = new_3ac();
-            second->label = NULL;
             second->op = OP_CMP;
             second->arg1 = loop_var_ste;
             second->arg2 = end_ste;
             add_to_three_ac_list(list, second);
 
             three_ac *third = new_3ac();
-            third->label = NULL;
             third->op = OP_JLE;
             third->target_label = get_label();
             add_to_three_ac_list(list, third);
@@ -579,7 +588,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             }
 
             three_ac *fourth = new_3ac();
-            fourth->label = NULL;
             fourth->op = OP_INC;
             fourth->arg1 = loop_var_ste;
             fourth->arg2 = NULL;
@@ -587,7 +595,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             add_to_three_ac_list(list, fourth);
 
             three_ac *fifth = new_3ac();
-            fifth->label = NULL;
             fifth->op = OP_JMP;
             fifth->target_label = first->label;
             add_to_three_ac_list(list, fifth);
@@ -605,14 +612,12 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             add_to_three_ac_list(list, first);
 
             three_ac *second = new_3ac();
-            second->label = NULL;
             second->op = OP_CMP;
             second->arg1 = loop_var_ste;
             second->arg2 = end_ste;
             add_to_three_ac_list(list, second);
 
             three_ac *third = new_3ac();
-            third->label = NULL;
             third->op = OP_JGE;
             third->target_label = get_label();
             add_to_three_ac_list(list, third);
@@ -626,7 +631,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             printf("Added body\n");
 
             three_ac *fourth = new_3ac();
-            fourth->label = NULL;
             fourth->op = OP_DEC;
             fourth->arg1 = loop_var_ste;
             fourth->arg2 = NULL;
@@ -634,7 +638,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             add_to_three_ac_list(list, fourth);
 
             three_ac *fifth = new_3ac();
-            fifth->label = NULL;
             fifth->op = OP_JMP;
             fifth->target_label = first->label;
             add_to_three_ac_list(list, fifth);
@@ -702,8 +705,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
                 }
                 printf("Added default body\n");
 
-                three_ac *temp = new_3ac();
-                temp->label = NULL;
                 temp->op = OP_JMP;
                 temp->target_label = end_label;
                 add_to_three_ac_list(list, temp);
@@ -712,8 +713,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
                 break;
             }
 
-            three_ac *second = new_3ac();
-            second->label = NULL;
+            three_ac *second = temp;
             second->op = OP_CMP;
             second->arg1 = switch_var_ste;
             second->arg2 = generate_opcode(case_val, st, list)->result;
@@ -721,7 +721,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             printf("Added compare\n");
 
             three_ac *third = new_3ac();
-            third->label = NULL;
             third->op = OP_JNZ;
             next_label = get_label();
             third->target_label = next_label;
@@ -736,7 +735,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             }
 
             three_ac *fourth = new_3ac();
-            fourth->label = NULL;
             fourth->op = OP_JMP;
             fourth->target_label = end_label;
             add_to_three_ac_list(list, fourth);
@@ -750,6 +748,12 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
             case_list = case_list->next;
         }
+        three_ac *sixth = new_3ac();
+        sixth->label = end_label;
+        sixth->op = OP_LABEL;
+        add_to_three_ac_list(list, sixth);
+        printf("Added end label\n");
+
         break;
     }
 
@@ -859,10 +863,10 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             fprintf(fp, "mov %s, %s\n", temp->result->name, TEMP_1);
             break;
         case OP_SET:
-            fprintf(fp, "SET %s\n", temp->arg1->name);
+            fprintf(fp, "mov %s, 1\n", temp->arg1->name);
             break;
         case OP_RESET:
-            fprintf(fp, "RESET %s\n", temp->arg1->name);
+            fprintf(fp, "mov %s, 0\n", temp->arg1->name);
             break;
         default:
             printf("Unknown opcode %d\n", temp->op);
@@ -876,6 +880,25 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
     printf("Reached end of list\n");
     fflush(stdout);
 }
+
+void print_init(FILE *fp)
+{
+    fprintf(fp, "extern printf\n");
+    fprintf(fp, "extern scanf\n");
+    fprintf(fp, "global main\n");
+    fprintf(fp, "section .data\n");
+    fprintf(fp, "cnst_true dq 1\n");
+    fprintf(fp, "cnst_false dq 0\n");
+    fprintf(fp, "\n\n section .text\n");   
+}
+
+void print_fine(FILE *fp)
+{
+    fprintf(fp, "mov rax, 60\n");
+    fprintf(fp, "mov rdi, 0\n");
+    fprintf(fp, "syscall\n");
+}
+
 int main()
 {
     bufferSize = 1024;
@@ -903,10 +926,10 @@ int main()
     generate_opcode(AST->root, &symbolTable, list3Ad);
     printf("3AC generated successfully.\n");
     fflush(stdout);
-    FILE *fp1 = fopen("3AC.txt", "w");
-    fprintf(fp1, "start\n");
+    FILE *fp1 = fopen("code.asm", "w");
+    print_init(fp1);
     print_three_ac_list(list3Ad, fp1);
-    fprintf(fp1, "end\n");
+    print_fine(fp1);
     printf("3AC printed successfully.\n");
     fflush(stdout);
     return 0;
