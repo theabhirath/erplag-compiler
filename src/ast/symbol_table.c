@@ -769,6 +769,7 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
                 char *casestr = malloc(sizeof(char) * 64);
                 sprintf(casestr, "%p", case_list->data);
                 symbol_table *caseSymTable = createSymbolTable(blockSymTable, casestr);
+                caseSymTable->offset = 4;
                 // create an entry for the case symbol table in the parent symbol table
                 ST_ENTRY *caseSymTableEntry = malloc(sizeof(ST_ENTRY));
                 caseSymTableEntry->name = casestr;

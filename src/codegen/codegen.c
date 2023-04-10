@@ -6,6 +6,8 @@
 #define TEMP_2 "ebx"
 #define TEMP_3 "ecx"
 #define TEMP_4 "edx"
+#define FTEMP_1 "xmm0"
+#define FTEMP_2 "xmm1"
 
 typedef enum OPERATOR
 {
@@ -14,6 +16,7 @@ typedef enum OPERATOR
     OP_SUB,
     OP_MUL,
     OP_DIV,
+    OP_FADD,
     OP_AND,
     OP_OR,
     OP_JMP,
@@ -342,15 +345,30 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     case PLUS_AST:
     {
         printf("Generating code for plus \n");
-        temp->op = OP_ADD;
-        three_ac *temp1 = generate_opcode(node->left, st, list);
-        three_ac *temp2 = generate_opcode(node->right, st, list);
-        printf("Args %s %s \n", temp1->result->name, temp2->result->name);
-        fflush(stdout);
-        temp->arg1 = temp1->result;
-        temp->arg2 = temp2->result;
-        temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
-        add_to_three_ac_list(list, temp);
+        if(node->type == __NUM__)
+        {
+            temp->op = OP_ADD;
+            three_ac *temp1 = generate_opcode(node->left, st, list);
+            three_ac *temp2 = generate_opcode(node->right, st, list);
+            printf("Args %s %s \n", temp1->result->name, temp2->result->name);
+            fflush(stdout);
+            temp->arg1 = temp1->result;
+            temp->arg2 = temp2->result;
+            temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
+            add_to_three_ac_list(list, temp);
+        }
+        else
+        {
+            temp->op = OP_FADD;
+            three_ac *temp1 = generate_opcode(node->left, st, list);
+            three_ac *temp2 = generate_opcode(node->right, st, list);
+            printf("Args %s %s \n", temp1->result->name, temp2->result->name);
+            fflush(stdout);
+            temp->arg1 = temp1->result;
+            temp->arg2 = temp2->result;
+            temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
+            add_to_three_ac_list(list, temp);
+        }
         break;
     }
     case MINUS_AST:
@@ -772,7 +790,8 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     {
         parse_tree_node *switch_var = node->left;
         ST_ENTRY *switch_var_ste = checkAllSymbolTables(st, switch_var->leafNodeInfo.lexeme);
-
+        printf("switch var: %s\n", switch_var->leafNodeInfo.lexeme);
+        fflush(stdout);
         LinkedListASTNode *case_list = node->right;
 
         char *end_label = get_label();
@@ -824,17 +843,18 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
                 break;
             }
 
-            three_ac *second = temp;
+            three_ac *second = new_3ac();
             second->op = OP_CMP;
             second->arg1 = get_offset_with_width(switch_var_ste);
             second->arg2 = generate_opcode(case_val, st, list)->result;
             add_to_three_ac_list(list, second);
-            printf("Added compare\n");
+            printf("Added compare for case at 851\n");
 
             three_ac *third = new_3ac();
             third->op = OP_JNZ;
             next_label = get_label();
             third->target_label = next_label;
+            add_to_three_ac_list(list, third);
             printf("Added jnz\n");
 
             LinkedListASTNode *body = st_entry->data.block->body;
@@ -939,6 +959,14 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             fprintf(fp, "add %s, %s\n", TEMP_1, TEMP_2);
             fprintf(fp, "mov %s, %s\n", temp->result->name, TEMP_1);
             break;
+
+        case OP_FADD:
+            fprintf(fp, "mov %s, %s\n", TEMP_1, temp->arg1->name);
+            // fprintf(fp, "mov %s, %s\n", TEMP_2, temp->arg2->name);
+            // fprintf(fp, "fadd %s, %s\n", TEMP_1, TEMP_2);
+            // fprintf(fp, "mov %s, %s\n", temp->result->name, TEMP_1);
+            break;
+
         case OP_SUB:
 
             fprintf(fp, "mov %s, %s\n", TEMP_1, temp->arg1->name);
@@ -1019,7 +1047,7 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             break;
         case OP_NEGATE:
             fprintf(fp, "mov %s, %s\n", TEMP_1, temp->arg1->name);
-            fprintf(fp, "sub 0, %s\n", TEMP_1);
+            fprintf(fp, "neg %s\n", TEMP_1);
             fprintf(fp, "mov %s, %s\n", temp->result->name, TEMP_1);
             break;
         case OP_SET:
@@ -1072,6 +1100,8 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             {
                 if (temp->result->data.var->type == __NUM__)
                 {
+                    // save rsp in r13
+                    fprintf(fp, "mov r13, rsp\n");
                     // print prompt
                     // align the stack to 16 bytes
                     fprintf(fp, "sub rsp, 8\n");
@@ -1089,6 +1119,8 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
                     fprintf(fp, "sub rsi, %d\n", get_offset(temp->result));
                     fprintf(fp, "mov rax, 0\n");
                     fprintf(fp, "call scanf\n");
+                    // restore rsp
+                    fprintf(fp, "mov rsp, r13\n");
 
                 }
                 else if (temp->result->data.var->type == __RNUM__)
@@ -1110,6 +1142,8 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             {
                 if (temp->arg1->data.var->type == __NUM__)
                 {
+                    // save rsp in r13
+                    fprintf(fp, "mov r13, rsp\n");
                     // align the stack pointer to 16 bytes
                     fprintf(fp, "sub rsp, 8\n");
                     fprintf(fp, "and rsp, -16\n");
@@ -1119,6 +1153,8 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
                     fprintf(fp, "mov rax, 0\n");
                     fprintf(fp, "call printf\n");
 
+                    // restore rsp
+                    fprintf(fp, "mov rsp, r13\n");
 
                 }
                 else if (temp->arg1->data.var->type == __RNUM__)
@@ -1138,8 +1174,8 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
                 */
                 else if (temp->arg1->data.var->type == __BOOL__)
                 {
-                    // // save the stack pointer
-                    // fprintf(fp, "mov r8, rsp\n");
+                    // save the stack pointer in r13
+                    fprintf(fp, "mov r13, rsp\n");
                     // align the stack pointer to 16 bytes
                     fprintf(fp, "sub rsp, 8\n");
                     fprintf(fp, "and rsp, -16\n");
@@ -1157,8 +1193,8 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
                     fprintf(fp, "mov rax, 0\n");
                     fprintf(fp, "call printf\n");
 
-                    // // restore the stack pointer
-                    // fprintf(fp, "mov rsp, r8\n");
+                    // restore the stack pointer
+                    fprintf(fp, "mov rsp, r13\n");
 
                 }
                 else
@@ -1213,7 +1249,7 @@ void print_fine(FILE *fp)
 int main()
 {
     bufferSize = 1024;
-    parseInputSourceCode("tests/codegen/c1.txt", "src/parser/parseTree.txt");
+    parseInputSourceCode("tests/codegen/c8.txt", "src/parser/parseTree.txt");
     printf("parse tree created successfully.\n");
     fflush(stdout);
     ast *AST = create_ast(&parseTree);
