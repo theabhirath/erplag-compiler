@@ -30,6 +30,8 @@ typedef enum OPERATOR
     OP_JGE,
     OP_INC,
     OP_DEC,
+    OP_SCOPE_START,
+    OP_SCOPE_END,
     INSTR
 } OPERATOR;
 
@@ -102,6 +104,12 @@ void print_op(OPERATOR op)
         break;
     case INSTR:
         printf("INSTR\n");
+        break;
+    case OP_SCOPE_START:
+        printf("OP_SCOPE_START\n");
+        break;
+    case OP_SCOPE_END:
+        printf("OP_SCOPE_END\n");
         break;
     default:
         printf("Unknown operator\n");
@@ -203,6 +211,15 @@ three_ac *new_3ac()
     return temp;
 }
 
+ST_ENTRY *get_offset(ST_ENTRY *entry)
+{
+    ST_ENTRY *temp = malloc(sizeof(ST_ENTRY));
+    temp->entry_type = VAR_SYM;
+    temp->name = malloc(sizeof(char) * 64);
+    sprintf(temp->name, "qword[rbp-%d]", entry->data.var->offset);
+    return temp;
+}
+
 three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 {
     three_ac *temp = new_3ac();
@@ -212,7 +229,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     case ID:
     {
         printf("Generating code for ID \n");
-        temp->result = checkAllSymbolTables(st, getName(node));
+        temp->result = get_offset(checkAllSymbolTables(st, getName(node)));
         printf("Lexeme %s \n", temp->result->name);
         break;
     }
@@ -249,12 +266,18 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         temp1->op = OP_LABEL;
         temp1->label = "main";
         add_to_three_ac_list(list, temp1);
+        temp->op = OP_SCOPE_START;
+        add_to_three_ac_list(list, temp);
         while (driver_list != NULL)
         {
             printf("Statement \n");
             generate_opcode(driver_list->data, driver_st, list);
             driver_list = driver_list->next;
         }
+        temp = new_3ac();
+        temp->op = OP_SCOPE_END;
+        add_to_three_ac_list(list, temp);
+
         printf("Reached end of driver module \n");
         break;
     }
@@ -265,8 +288,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         three_ac *temp1 = generate_opcode(node->right, st, list);
         temp->arg1 = temp1->result;
         temp->arg2 = NULL;
-        parse_tree_node *res = node->left;
-        temp->result = checkAllSymbolTables(st, res->leafNodeInfo.lexeme);
+        temp->result = generate_opcode(node->left, st, list)->result;
         add_to_three_ac_list(list, temp);
         printf("Generated code for assignment \n");
         break;
@@ -281,7 +303,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         fflush(stdout);
         temp->arg1 = temp1->result;
         temp->arg2 = temp2->result;
-        temp->result = get_temp_var(st, getType(temp1->result, st));
+        temp->result = get_offset(get_temp_var(st, getType(temp1->result, st)));
         add_to_three_ac_list(list, temp);
         break;
     }
@@ -296,7 +318,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             printf("Args %s %s \n", temp1->result->name, temp2->result->name);
             temp->arg1 = temp1->result;
             temp->arg2 = temp2->result;
-            temp->result = get_temp_var(st, getType(temp1->result, st));
+            temp->result = get_offset(get_temp_var(st, getType(temp1->result, st)));
             add_to_three_ac_list(list, temp);
         }
         else
@@ -306,7 +328,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             three_ac *temp1 = generate_opcode(node->right, st, list);
             temp->arg1 = temp1->result;
             temp->arg2 = NULL;
-            temp->result = get_temp_var(st, getType(temp1->result, st));
+            temp->result = get_offset(get_temp_var(st, getType(temp1->result, st)));
             add_to_three_ac_list(list, temp);
         }
         break;
@@ -318,7 +340,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         three_ac *temp2 = generate_opcode(node->right, st, list);
         temp->arg1 = temp1->result;
         temp->arg2 = temp2->result;
-        temp->result = get_temp_var(st, getType(temp1->result, st));
+        temp->result = get_offset(get_temp_var(st, getType(temp1->result, st)));
         add_to_three_ac_list(list, temp);
         break;
     }
@@ -329,7 +351,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         three_ac *temp2 = generate_opcode(node->right, st, list);
         temp->arg1 = temp1->result;
         temp->arg2 = temp2->result;
-        temp->result = get_temp_var(st, getType(temp1->result, st));
+        temp->result = get_offset(get_temp_var(st, getType(temp1->result, st)));
         add_to_three_ac_list(list, temp);
         break;
     }
@@ -340,7 +362,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         three_ac *temp2 = generate_opcode(node->right, st, list);
         temp->arg1 = temp1->result;
         temp->arg2 = temp2->result;
-        temp->result = get_temp_var(st, getType(temp1->result, st));
+        temp->result = get_offset(get_temp_var(st, getType(temp1->result, st)));
         add_to_three_ac_list(list, temp);
         break;
     }
@@ -351,7 +373,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         three_ac *temp2 = generate_opcode(node->right, st, list);
         temp->arg1 = temp1->result;
         temp->arg2 = temp2->result;
-        temp->result = get_temp_var(st, getType(temp1->result, st));
+        temp->result = get_offset(get_temp_var(st, getType(temp1->result, st)));
         add_to_three_ac_list(list, temp);
         break;
     }
@@ -417,7 +439,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
         three_ac *third = new_3ac();
         third->op = OP_RESET;
-        third->arg1 = get_temp_var(st, __BOOL__);
+        third->arg1 = get_offset(get_temp_var(st, __BOOL__));
         printf("Created a temp variable %s\n", third->arg1->name);
         third->result = third->arg1;
         add_to_three_ac_list(list, third);
@@ -482,7 +504,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         if (node->left->nodeType == ID)
         {
             printf("Name: %s\n", getName(node->left));
-            second->arg1 = checkAllSymbolTables(getName(node->left), st);
+            second->arg1 = generate_opcode(node->left, st, list)->result;
         }
         else
         {
@@ -505,11 +527,20 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         sprintf(symName, "%p", node);
         ST_ENTRY *body_ste = checkAllSymbolTables(st, symName);
         printf("Body ste: %p\n", body_ste);
+
+        // Scope start
+        three_ac *scope_start = new_3ac();
+        scope_start->op = OP_SCOPE_START;
+        add_to_three_ac_list(list, scope_start);
         while (body != NULL)
         {
             generate_opcode(body->data, body_ste->data.block->symTable, list);
             body = body->next;
         }
+        // Scope end
+        three_ac *scope_end = new_3ac();
+        scope_end->op = OP_SCOPE_END;
+        add_to_three_ac_list(list, scope_end);
 
         printf("Added body\n");
         three_ac *fourth = new_3ac();
@@ -562,6 +593,10 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
         ST_ENTRY *loop_var_ste = checkSymbolTable(new_st, loop_var_ptn->leafNodeInfo.lexeme);
 
+        // scope start
+        three_ac *scope_start = new_3ac();
+        scope_start->op = OP_SCOPE_START;
+        add_to_three_ac_list(list, scope_start);
         if (start < end)
         {
             three_ac *first = temp;
@@ -571,8 +606,8 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
             three_ac *second = new_3ac();
             second->op = OP_CMP;
-            second->arg1 = loop_var_ste;
-            second->arg2 = end_ste;
+            second->arg1 = get_offset(loop_var_ste);
+            second->arg2 = get_offset(end_ste);
             add_to_three_ac_list(list, second);
 
             three_ac *third = new_3ac();
@@ -589,9 +624,9 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
             three_ac *fourth = new_3ac();
             fourth->op = OP_INC;
-            fourth->arg1 = loop_var_ste;
+            fourth->arg1 = second->arg1;
             fourth->arg2 = NULL;
-            fourth->result = loop_var_ste;
+            fourth->result = second->arg1;
             add_to_three_ac_list(list, fourth);
 
             three_ac *fifth = new_3ac();
@@ -613,8 +648,8 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
             three_ac *second = new_3ac();
             second->op = OP_CMP;
-            second->arg1 = loop_var_ste;
-            second->arg2 = end_ste;
+            second->arg1 = get_offset(loop_var_ste);
+            second->arg2 = get_offset(end_ste);
             add_to_three_ac_list(list, second);
 
             three_ac *third = new_3ac();
@@ -632,9 +667,9 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
             three_ac *fourth = new_3ac();
             fourth->op = OP_DEC;
-            fourth->arg1 = loop_var_ste;
+            fourth->arg1 = second->arg1;
             fourth->arg2 = NULL;
-            fourth->result = loop_var_ste;
+            fourth->result = second->arg1;
             add_to_three_ac_list(list, fourth);
 
             three_ac *fifth = new_3ac();
@@ -647,6 +682,11 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             sixth->op = OP_LABEL;
             add_to_three_ac_list(list, sixth);
         }
+        // scope end
+        three_ac *scope_end = new_3ac();
+        scope_end->op = OP_SCOPE_END;
+        add_to_three_ac_list(list, scope_end);
+
         break;
     }
         /*
@@ -698,11 +738,19 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             if (case_val == NULL)
             {
                 LinkedListASTNode *body = case_body;
+                // scope start
+                three_ac *scope_start = new_3ac();
+                scope_start->op = OP_SCOPE_START;
+                add_to_three_ac_list(list, scope_start);
                 while (body != NULL)
                 {
                     generate_opcode(body->data, case_st, list);
                     body = body->next;
                 }
+                // scope end
+                three_ac *scope_end = new_3ac();
+                scope_end->op = OP_SCOPE_END;
+                add_to_three_ac_list(list, scope_end);
                 printf("Added default body\n");
 
                 temp->op = OP_JMP;
@@ -715,7 +763,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
             three_ac *second = temp;
             second->op = OP_CMP;
-            second->arg1 = switch_var_ste;
+            second->arg1 = get_offset(switch_var_ste);
             second->arg2 = generate_opcode(case_val, st, list)->result;
             add_to_three_ac_list(list, second);
             printf("Added compare\n");
@@ -727,12 +775,20 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             printf("Added jnz\n");
 
             LinkedListASTNode *body = st_entry->data.block->body;
+            // scope start
+            three_ac *scope_start = new_3ac();
+            scope_start->op = OP_SCOPE_START;
+            add_to_three_ac_list(list, scope_start);
             while (body != NULL)
             {
                 generate_opcode(body->data, case_st, list);
                 body = body->next;
                 printf("Statement in case body generated\n");
             }
+            // scope end
+            three_ac *scope_end = new_3ac();
+            scope_end->op = OP_SCOPE_END;
+            add_to_three_ac_list(list, scope_end);
 
             three_ac *fourth = new_3ac();
             fourth->op = OP_JMP;
@@ -868,6 +924,14 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
         case OP_RESET:
             fprintf(fp, "mov %s, 0\n", temp->arg1->name);
             break;
+        case OP_SCOPE_START:
+            fprintf(fp, "push rbp\n");
+            fprintf(fp, "mov rbp, rsp\n");
+            break;
+        case OP_SCOPE_END:
+            fprintf(fp, "mov rsp, rbp\n");
+            fprintf(fp, "pop rbp\n");
+            break;
         default:
             printf("Unknown opcode %d\n", temp->op);
             break;
@@ -889,7 +953,7 @@ void print_init(FILE *fp)
     fprintf(fp, "section .data\n");
     fprintf(fp, "cnst_true dq 1\n");
     fprintf(fp, "cnst_false dq 0\n");
-    fprintf(fp, "\n\n section .text\n");   
+    fprintf(fp, "\n\nsection .text\n");   
 }
 
 void print_fine(FILE *fp)
