@@ -1117,7 +1117,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         process_subtree(Op1);
         ptn->addr = Op1->addr;
         process_subtree(Term);
-        ptn->addr->right = Term->addr;
+        ptn->addr->right = Term->syn_addr;
         AE0->inh_addr = ptn->addr;
         ptn->addr->left = ptn->inh_addr;
         process_subtree(AE0);

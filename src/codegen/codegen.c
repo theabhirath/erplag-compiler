@@ -2,10 +2,10 @@
 #include "../ast/ast.h"
 #include "../ast/symbol_table.h"
 
-#define TEMP_1 "rax"
-#define TEMP_2 "rbx"
-#define TEMP_3 "rcx"
-#define TEMP_4 "rdx"
+#define TEMP_1 "eax"
+#define TEMP_2 "ebx"
+#define TEMP_3 "ecx"
+#define TEMP_4 "edx"
 
 typedef enum OPERATOR
 {
@@ -32,7 +32,13 @@ typedef enum OPERATOR
     OP_DEC,
     OP_SCOPE_START,
     OP_SCOPE_END,
-    INSTR
+    OP_TEMP_DECL,
+    OP_FRAME_ALLOC,
+    SCAN,
+    PRINT_CONST,
+    PRINT_VAR,
+    INSTR,
+    OP_NOP
 } OPERATOR;
 
 void print_op(OPERATOR op)
@@ -111,6 +117,24 @@ void print_op(OPERATOR op)
     case OP_SCOPE_END:
         printf("OP_SCOPE_END\n");
         break;
+    case OP_TEMP_DECL:
+        printf("OP_TEMP_DECL\n");
+        break;
+    case OP_FRAME_ALLOC:
+        printf("OP_FRAME_ALLOC\n");
+        break;
+    case SCAN:
+        printf("SCAN\n");
+        break;
+    case PRINT_CONST:
+        printf("PRINT_CONST\n");
+        break;
+    case PRINT_VAR:
+        printf("PRINT_VAR\n");
+        break;
+    case OP_NOP:
+        printf("OP_NOP\n");
+        break;
     default:
         printf("Unknown operator\n");
         break;
@@ -148,7 +172,7 @@ void add_to_three_ac_list(three_ac_list *list, three_ac *node)
     }
 }
 
-ST_ENTRY *get_temp_var(symbol_table *symtab, enum TYPE type)
+ST_ENTRY *get_temp_var(symbol_table *symtab, enum TYPE type, three_ac_list *list)
 {
     printf("Creating temp var\n");
     static int temp_vars = 0;
@@ -159,10 +183,21 @@ ST_ENTRY *get_temp_var(symbol_table *symtab, enum TYPE type)
     temp->data.var = malloc(sizeof(struct var_entry));
     temp->data.var->type = type;
     temp->data.var->offset = symtab->offset;
-    symtab->offset += type == __NUM__ ? __NUM_SIZE__ : type == __RNUM__ ? __RNUM_SIZE__ : __BOOL_SIZE__;
+    symtab->offset += type == __NUM__ ? __NUM_SIZE__ : type == __RNUM__ ? __RNUM_SIZE__
+                                                                        : __BOOL_SIZE__;
     temp_vars++;
     addToSymbolTable(symtab, temp);
     printf("Created temp var %s\n", temp->name);
+
+    three_ac *node = malloc(sizeof(three_ac));
+    node->label = NULL;
+    node->op = OP_TEMP_DECL;
+    node->target_label = NULL;
+    node->arg1 = NULL;
+    node->arg2 = NULL;
+    node->result = temp;
+    node->next = NULL;
+    add_to_three_ac_list(list, node);
     return temp;
 }
 ST_ENTRY *const_true;
@@ -174,7 +209,7 @@ void init_three_ac_list(three_ac_list *list)
     list->tail = NULL;
 
     const_true = malloc(sizeof(ST_ENTRY));
-    const_true->name = "cnst_true";
+    const_true->name = "dword[cnst_true]";
     const_true->entry_type = VAR_SYM;
     const_true->data.var = malloc(sizeof(struct var_entry));
     const_true->data.var->type = __BOOL__;
@@ -182,7 +217,7 @@ void init_three_ac_list(three_ac_list *list)
     const_true->data.var->val.boolValue = 1;
 
     const_false = malloc(sizeof(ST_ENTRY));
-    const_false->name = "cnst_false";
+    const_false->name = "dword[cnst_false]";
     const_false->entry_type = VAR_SYM;
     const_false->data.var = malloc(sizeof(struct var_entry));
     const_false->data.var->type = __BOOL__;
@@ -211,13 +246,18 @@ three_ac *new_3ac()
     return temp;
 }
 
-ST_ENTRY *get_offset(ST_ENTRY *entry)
+ST_ENTRY *get_offset_with_width(ST_ENTRY *entry)
 {
     ST_ENTRY *temp = malloc(sizeof(ST_ENTRY));
     temp->entry_type = VAR_SYM;
     temp->name = malloc(sizeof(char) * 64);
-    sprintf(temp->name, "qword[rbp-%d]", entry->data.var->offset);
+    sprintf(temp->name, "dword[rbp-%d]", entry->data.var->offset);
     return temp;
+}
+
+int get_offset(ST_ENTRY *entry)
+{
+    return entry->data.var->offset;
 }
 
 three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
@@ -229,7 +269,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     case ID:
     {
         printf("Generating code for ID \n");
-        temp->result = get_offset(checkAllSymbolTables(st, getName(node)));
+        temp->result = get_offset_with_width(checkAllSymbolTables(st, getName(node)));
         printf("Lexeme %s \n", temp->result->name);
         break;
     }
@@ -237,6 +277,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     {
         printf("Generating code for NUM \n");
         temp->result = malloc(sizeof(ST_ENTRY));
+        temp->result->entry_type = VAR_SYM;
         temp->result->name = getName(node);
         printf("Lexeme %s \n", temp->result->name);
         break;
@@ -267,6 +308,11 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         temp1->label = "main";
         add_to_three_ac_list(list, temp1);
         temp->op = OP_SCOPE_START;
+        add_to_three_ac_list(list, temp);
+        // Frame alloc
+        temp = new_3ac();
+        temp->op = OP_FRAME_ALLOC;
+        temp->arg1 = driver_st_entry;
         add_to_three_ac_list(list, temp);
         while (driver_list != NULL)
         {
@@ -303,7 +349,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         fflush(stdout);
         temp->arg1 = temp1->result;
         temp->arg2 = temp2->result;
-        temp->result = get_offset(get_temp_var(st, getType(temp1->result, st)));
+        temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
         add_to_three_ac_list(list, temp);
         break;
     }
@@ -318,7 +364,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             printf("Args %s %s \n", temp1->result->name, temp2->result->name);
             temp->arg1 = temp1->result;
             temp->arg2 = temp2->result;
-            temp->result = get_offset(get_temp_var(st, getType(temp1->result, st)));
+            temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
             add_to_three_ac_list(list, temp);
         }
         else
@@ -328,7 +374,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             three_ac *temp1 = generate_opcode(node->right, st, list);
             temp->arg1 = temp1->result;
             temp->arg2 = NULL;
-            temp->result = get_offset(get_temp_var(st, getType(temp1->result, st)));
+            temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
             add_to_three_ac_list(list, temp);
         }
         break;
@@ -340,7 +386,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         three_ac *temp2 = generate_opcode(node->right, st, list);
         temp->arg1 = temp1->result;
         temp->arg2 = temp2->result;
-        temp->result = get_offset(get_temp_var(st, getType(temp1->result, st)));
+        temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
         add_to_three_ac_list(list, temp);
         break;
     }
@@ -351,7 +397,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         three_ac *temp2 = generate_opcode(node->right, st, list);
         temp->arg1 = temp1->result;
         temp->arg2 = temp2->result;
-        temp->result = get_offset(get_temp_var(st, getType(temp1->result, st)));
+        temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
         add_to_three_ac_list(list, temp);
         break;
     }
@@ -362,7 +408,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         three_ac *temp2 = generate_opcode(node->right, st, list);
         temp->arg1 = temp1->result;
         temp->arg2 = temp2->result;
-        temp->result = get_offset(get_temp_var(st, getType(temp1->result, st)));
+        temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
         add_to_three_ac_list(list, temp);
         break;
     }
@@ -373,7 +419,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         three_ac *temp2 = generate_opcode(node->right, st, list);
         temp->arg1 = temp1->result;
         temp->arg2 = temp2->result;
-        temp->result = get_offset(get_temp_var(st, getType(temp1->result, st)));
+        temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
         add_to_three_ac_list(list, temp);
         break;
     }
@@ -439,7 +485,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
         three_ac *third = new_3ac();
         third->op = OP_RESET;
-        third->arg1 = get_offset(get_temp_var(st, __BOOL__));
+        third->arg1 = get_offset_with_width(get_temp_var(st, __BOOL__, list));
         printf("Created a temp variable %s\n", third->arg1->name);
         third->result = third->arg1;
         add_to_three_ac_list(list, third);
@@ -532,6 +578,12 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         three_ac *scope_start = new_3ac();
         scope_start->op = OP_SCOPE_START;
         add_to_three_ac_list(list, scope_start);
+        // Frame allocation
+        three_ac *frame = new_3ac();
+        frame->op = OP_FRAME_ALLOC;
+        frame->arg1 = body_ste;
+        add_to_three_ac_list(list, frame);
+
         while (body != NULL)
         {
             generate_opcode(body->data, body_ste->data.block->symTable, list);
@@ -597,6 +649,11 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         three_ac *scope_start = new_3ac();
         scope_start->op = OP_SCOPE_START;
         add_to_three_ac_list(list, scope_start);
+        // frame allocation
+        three_ac *frame = new_3ac();
+        frame->op = OP_FRAME_ALLOC;
+        frame->arg1 = st_entry;
+        add_to_three_ac_list(list, frame);
         if (start < end)
         {
             three_ac *first = temp;
@@ -606,8 +663,8 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
             three_ac *second = new_3ac();
             second->op = OP_CMP;
-            second->arg1 = get_offset(loop_var_ste);
-            second->arg2 = get_offset(end_ste);
+            second->arg1 = get_offset_with_width(loop_var_ste);
+            second->arg2 = get_offset_with_width(end_ste);
             add_to_three_ac_list(list, second);
 
             three_ac *third = new_3ac();
@@ -648,8 +705,8 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
             three_ac *second = new_3ac();
             second->op = OP_CMP;
-            second->arg1 = get_offset(loop_var_ste);
-            second->arg2 = get_offset(end_ste);
+            second->arg1 = get_offset_with_width(loop_var_ste);
+            second->arg2 = get_offset_with_width(end_ste);
             add_to_three_ac_list(list, second);
 
             three_ac *third = new_3ac();
@@ -723,7 +780,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         while (case_list != NULL)
         {
             ast_node *case_node = case_list->data;
-            if(case_node == NULL)
+            if (case_node == NULL)
             {
                 break;
             }
@@ -734,7 +791,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             sprintf(st_name, "%p", case_node);
             ST_ENTRY *st_entry = checkSymbolTable(st, st_name);
             symbol_table *case_st = st_entry->data.block->symTable;
-    
+
             if (case_val == NULL)
             {
                 LinkedListASTNode *body = case_body;
@@ -742,6 +799,12 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
                 three_ac *scope_start = new_3ac();
                 scope_start->op = OP_SCOPE_START;
                 add_to_three_ac_list(list, scope_start);
+
+                // frame allocation
+                three_ac *frame_alloc = new_3ac();
+                frame_alloc->op = OP_FRAME_ALLOC;
+                frame_alloc->arg1 = st_entry;
+                add_to_three_ac_list(list, frame_alloc);
                 while (body != NULL)
                 {
                     generate_opcode(body->data, case_st, list);
@@ -763,7 +826,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
             three_ac *second = temp;
             second->op = OP_CMP;
-            second->arg1 = get_offset(switch_var_ste);
+            second->arg1 = get_offset_with_width(switch_var_ste);
             second->arg2 = generate_opcode(case_val, st, list)->result;
             add_to_three_ac_list(list, second);
             printf("Added compare\n");
@@ -779,6 +842,11 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             three_ac *scope_start = new_3ac();
             scope_start->op = OP_SCOPE_START;
             add_to_three_ac_list(list, scope_start);
+
+            // frame allocation
+            three_ac *frame_alloc = new_3ac();
+            frame_alloc->op = OP_FRAME_ALLOC;
+            frame_alloc->arg1 = st_entry;
             while (body != NULL)
             {
                 generate_opcode(body->data, case_st, list);
@@ -812,6 +880,43 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
         break;
     }
+    case GET_VALUE_AST:
+    {
+        printf("Generating code for get_value\n");
+
+        ST_ENTRY *ste = checkAllSymbolTables(st, getName(node->right));
+        temp->op = SCAN;
+        temp->result = ste;
+        add_to_three_ac_list(list, temp);
+        break;
+    }
+    case PRINT_AST:
+    {
+        switch (node->right->nodeType)
+        {
+        case ID:
+        {
+            ST_ENTRY *ste = checkAllSymbolTables(st, getName(node->right));
+            temp->op = PRINT_VAR;
+            temp->arg1 = ste;
+            break;
+        }
+        case ARR_ELEM_AST:
+        {
+            ST_ENTRY *ste = checkAllSymbolTables(st, getName(node->right->left));
+            temp->op = OP_NOP;
+            break;
+        }
+        default:
+        {
+            temp->op = PRINT;
+            temp->arg1 = generate_opcode(node->right, st, list)->result;
+            break;
+        }
+        }
+        add_to_three_ac_list(list, temp);
+        break;
+    }
 
     default:
         printf("Error: Unknown AST node type %d\n", node->nodeType);
@@ -819,7 +924,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     }
     return temp;
 }
-
 
 void print_three_ac_list(three_ac_list *list, FILE *fp)
 {
@@ -845,7 +949,7 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
         case OP_MUL:
             fprintf(fp, "mov %s, %s\n", TEMP_1, temp->arg1->name);
             fprintf(fp, "mov %s, %s\n", TEMP_2, temp->arg2->name);
-            fprintf(fp, "mul %s, %s\n", TEMP_1, TEMP_2);
+            fprintf(fp, "mul %s\n", TEMP_2);
             fprintf(fp, "mov %s, %s\n", temp->result->name, TEMP_1);
             break;
         case OP_DIV:
@@ -868,7 +972,7 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
         case OP_CMP:
             printf("In CMP\n");
             fflush(stdout);
-            if(temp->arg1 == NULL || temp->arg2 == NULL)
+            if (temp->arg1 == NULL || temp->arg2 == NULL)
             {
                 printf("arg1: %p\n", temp->arg1);
                 fflush(stdout);
@@ -932,6 +1036,137 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             fprintf(fp, "mov rsp, rbp\n");
             fprintf(fp, "pop rbp\n");
             break;
+        case OP_TEMP_DECL:
+            // Decrement the stack pointer by the size of the variable
+            // Size depends on the type of the variable
+            // if (temp->result->entry_type == VAR_SYM)
+            //     fprintf(fp, "sub rsp, %d\n", temp->result->data.var->type == __NUM__ ? __NUM_SIZE__ : temp->result->data.var->type == __BOOL__ ? __BOOL_SIZE__ : __RNUM_SIZE__);
+            // else if (temp->result->entry_type == ARR_SYM)
+            // {
+            //     if (temp->result->data.arr->arrayType == STATIC)
+            //     {
+            //         fprintf(fp, "sub rsp, %d\n", temp->result->data.arr->eltype == __NUM__ ? __NUM_SIZE__ * (temp->result->data.arr->right.staticIndex - temp->result->data.arr->left.staticIndex + 1) : temp->result->data.arr->eltype == __BOOL__ ? __BOOL_SIZE__ * (temp->result->data.arr->right.staticIndex - temp->result->data.arr->left.staticIndex + 1) : __RNUM_SIZE__ * (temp->result->data.arr->right.staticIndex - temp->result->data.arr->left.staticIndex + 1));
+            //     }
+            // }
+            break;
+        case OP_FRAME_ALLOC:
+            ST_ENTRY *temp1 = temp->arg1;
+            int offset = 0;
+            if (temp1->entry_type == FUNC_SYM)
+            {
+                offset = temp1->data.func->symTable->offset;
+            }
+            else if (temp1->entry_type == BLOCK_SYM)
+            {
+                offset = temp1->data.block->symTable->offset;
+            }
+            fprintf(fp, "sub rsp, %d\n", offset);
+            break;
+        case OP_NOP:
+            fprintf(fp, "nop\n");
+            break;
+        // TODO: Scan and Print
+        case SCAN:
+        {
+            if (temp->result->entry_type == VAR_SYM)
+            {
+                if (temp->result->data.var->type == __NUM__)
+                {
+                    // print prompt
+                    // align the stack to 16 bytes
+                    fprintf(fp, "sub rsp, 8\n");
+                    fprintf(fp, "and rsp, -16\n");
+                    // call printf
+                    fprintf(fp, "mov rdi, prompt_num\n");
+                    fprintf(fp, "mov rax, 0\n");
+                    fprintf(fp, "call printf\n");
+                    // align the stack to 16 bytes
+                    fprintf(fp, "sub rsp, 8\n");
+                    fprintf(fp, "and rsp, -16\n");
+                    // call scanf
+                    fprintf(fp, "mov rdi, scan_num\n");
+                    fprintf(fp, "mov rsi, rbp\n");
+                    fprintf(fp, "sub rsi, %d\n", get_offset(temp->result));
+                    fprintf(fp, "mov rax, 0\n");
+                    fprintf(fp, "call scanf\n");
+
+                }
+                else if (temp->result->data.var->type == __RNUM__)
+                {
+                }
+                else if (temp->result->data.var->type == __BOOL__)
+                {
+                }
+                else
+                {
+                }
+            }
+            break;
+        }
+        case PRINT_CONST:
+        case PRINT_VAR:
+        {
+            if (temp->arg1->entry_type == VAR_SYM)
+            {
+                if (temp->arg1->data.var->type == __NUM__)
+                {
+                    // align the stack pointer to 16 bytes
+                    fprintf(fp, "sub rsp, 8\n");
+                    fprintf(fp, "and rsp, -16\n");
+                    // call printf
+                    fprintf(fp, "mov rdi, print_num\n");
+                    fprintf(fp, "movsx rsi, %s\n", get_offset_with_width(temp->arg1)->name);
+                    fprintf(fp, "mov rax, 0\n");
+                    fprintf(fp, "call printf\n");
+
+
+                }
+                else if (temp->arg1->data.var->type == __RNUM__)
+                {
+                }
+                /*
+                    mov TEMP_1, get_offset_with_width(temp->arg1)
+                    dec TEMP_1
+                    jnz l1
+                    mov rdi, false_str
+                    jmp l2
+                l1:
+                    mov rdi, true_str
+                l2:
+                    mov rax, 0
+                    call printf
+                */
+                else if (temp->arg1->data.var->type == __BOOL__)
+                {
+                    // // save the stack pointer
+                    // fprintf(fp, "mov r8, rsp\n");
+                    // align the stack pointer to 16 bytes
+                    fprintf(fp, "sub rsp, 8\n");
+                    fprintf(fp, "and rsp, -16\n");
+                    // call printf
+                    fprintf(fp, "mov %s, %s\n", TEMP_1, get_offset_with_width(temp->arg1)->name);
+                    fprintf(fp, "sub %s, 1\n", TEMP_1);
+                    char *l1 = get_label();
+                    char *l2 = get_label();
+                    fprintf(fp, "jz %s\n", l1);
+                    fprintf(fp, "mov rdi, false_str\n");
+                    fprintf(fp, "jmp %s\n", l2);
+                    fprintf(fp, "%s:\n", l1);
+                    fprintf(fp, "mov rdi, true_str\n");
+                    fprintf(fp, "%s:\n", l2);
+                    fprintf(fp, "mov rax, 0\n");
+                    fprintf(fp, "call printf\n");
+
+                    // // restore the stack pointer
+                    // fprintf(fp, "mov rsp, r8\n");
+
+                }
+                else
+                {
+                }
+            }
+            break;
+        }
         default:
             printf("Unknown opcode %d\n", temp->op);
             break;
@@ -951,9 +1186,21 @@ void print_init(FILE *fp)
     fprintf(fp, "extern scanf\n");
     fprintf(fp, "global main\n");
     fprintf(fp, "section .data\n");
-    fprintf(fp, "cnst_true dq 1\n");
-    fprintf(fp, "cnst_false dq 0\n");
-    fprintf(fp, "\n\nsection .text\n");   
+    fprintf(fp, "cnst_true dd 1\n");
+    fprintf(fp, "cnst_false dd 0\n");
+    // Scanf format strings
+    fprintf(fp, "scan_num db \"%%d\", 0\n");
+    // Print format strings
+    fprintf(fp, "print_num db \"Output: %%d\", 10, 0\n");
+    // bools
+    fprintf(fp, "true_str db \"Output: true\", 10, 0\n");
+    fprintf(fp, "false_str db \"Output: false\", 10, 0\n");
+    // prompts
+    fprintf(fp, "prompt_num db \"Input: Enter an integer value\", 10, 0\n");
+    fprintf(fp, "prompt_rnum db \"Input: Enter a real value\", 10, 0\n");
+    fprintf(fp, "prompt_bool db \"Input: Enter a boolean value\", 10, 0\n");
+
+    fprintf(fp, "\n\nsection .text\n");
 }
 
 void print_fine(FILE *fp)
@@ -966,7 +1213,7 @@ void print_fine(FILE *fp)
 int main()
 {
     bufferSize = 1024;
-    parseInputSourceCode("tests/stage1/t2.txt", "src/parser/parseTree.txt");
+    parseInputSourceCode("tests/codegen/c1.txt", "src/parser/parseTree.txt");
     printf("parse tree created successfully.\n");
     fflush(stdout);
     ast *AST = create_ast(&parseTree);

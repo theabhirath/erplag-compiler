@@ -1025,6 +1025,7 @@ void populateSymbolTables(ast *ASTree)
     driverSymTableEntry->data.block = (struct block_entry *)malloc(sizeof(struct block_entry));
     driverSymTableEntry->data.block->body = driverStmts;
     driverSymTableEntry->data.block->symTable = driverSymTable;
+    driverSymTableEntry->data.block->offset = 4;
     populateBlockSymbolTables(driverStmts, driverSymTable);
     addToSymbolTable(&symbolTable, driverSymTableEntry);
     // populate OtherModule2 body

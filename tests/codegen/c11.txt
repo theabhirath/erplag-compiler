@@ -1,0 +1,130 @@
+**Code Generation test case 11: Computing expressions using integer, boolean and static array data types**
+**Static and dynamic subranges for arrays used in this test case**
+**indexing is using variable identifiers, numbers and expressions**
+**Single driver module with two levels of nesting **
+**Note: Implement get_value(A) using type information of A. Your code template should first inform user of the size, range indices and type of data and read accordingly to populate the memory locations allocated for elements of A**
+   
+<<<driver program>>>
+start
+	declare x, y, z, k:integer;
+	declare a, b, c, d:integer;
+	declare u, v: boolean;
+	declare A: array[10..15] of integer;			 **static subrange**
+	u:= true;
+	get_value(a);
+	get_value(b);
+	get_value(d);
+	declare B: array[-3..a] of integer;                      **dynamic subrange involves one identifier and one number**
+	declare C: array[-b..+d] of integer; 			 **dynamic subrange involves two signed identifiers**
+	get_value(x);
+	get_value(y);
+	get_value(A);						**At compile time, the offset of each element of A is computed** 
+	print(A);
+	get_value(B);						**At run time, the offset of each element of B is computed** 
+	print(B);
+	get_value(C);						**At run time, the offset of each element of C is computed** 
+	print(C);
+	y:= A[5*2+a]+B[12*b-d-3*a];				**dynamic bound checking required** 
+	z:= -(x+y*C[0]-C[5*a-7]);				**dynamic bound checking required**
+	print(y);
+	print(z);
+	for(k in 10..15)
+        start
+              declare A:integer;
+	      A:=12;
+              z:= A+B[k-12];  					**dynamic bound checking at every loop, nonlocal z changes**
+    	      y:= z-C[k*2-25+a*2];				**dynamic bound checking at every loop, nonlocal y changes**	
+              print(k);
+	      print(z);
+              print(y);	
+        end
+	print(y);	
+	print(z);
+	print(A);
+
+end
+
+** Expected output
+
+Read a, b, d, x and y as 2,1,4, 3 and 5 respectively.
+Read array A as 4, -7, 2, 11, -19, 20
+Read array B as 23, 47, -6, 8, 101, 2
+Read array C as 66, 21, -98, 3, -4, 0 
+
+and print values of A - i.e. all elements of A one after the other in each line
+
+Repeat for 6 times for executing for loop
+      
+
+On the console your output and input messages should appear in new line for each print as shown below
+
+Input: Enter an integer value
+2
+Input: Enter an integer value
+1
+Input: Enter an integer value
+4
+Input: Enter an integer value
+3
+Input: Enter an integer value
+5
+
+Input: Enter 6 array elements of integer type for range 10 to 15	[Array A: reading one element at each line]
+4
+-7
+2
+11
+-19
+20
+
+Output:  4 -7 2 11 -19 20						[Array A: printed all elements in one line separated by blanks]
+
+Input: Enter 6 array elements of integer type for range -3 to 2		[Array B: reading one element at each line]
+23 
+47
+-6
+8
+101
+2
+
+Output:  23 47 -6 8 101 2						[Array B: printed all elements in one line separated by blanks]
+
+Input: Enter 6 array elements of integer type for range -1 to 4		[Array C: reading one element at each line]
+66
+21
+-98
+3
+-4
+0
+
+Output:  66 21 -98 3 -4 0						[Array C: printed all elements in one line separated by blanks]
+							
+Output: 4						[value of y computed at line 30]
+Output: 91						[value of z computed at line 31]
+							[Loop below]
+Output: 10						[iteration 1 with k = 10, successful - no run time array bound errors]
+Output: 59
+Output: -7
+Output: 11						[iteration 2 with k = 11, successful - no run time array bound errors]
+Output: 6
+Output: 104
+Output: 12						[iteration 3 with k = 12, successful - no run time array bound errors]
+Output: 20
+Output: 24
+Output: 13						[iteration 4 with k = 13]
+Output: 113						[Dynamic bound checking done and error reported for access to C[5]] 
+Output: 24						[only previously stored value available]
+Output: 14						[iteration 5 with k = 14]
+Output: 14						[Dynamic bound checking done and error reported for access to C[7]] 
+Output: 24						[only previously stored value available]
+Output: 15						[iteration 6 with k = 15]
+Output: 14						[Dynamic bound checking done and error reported for access to B[3] and C[9]] 
+Output: 24						[only previously stored value available for y and z both]
+							[Loop ends]
+Output: 14
+Output: 24
+Output: 4 -7 2 11 -19 20
+
+Similarly run the generated assembly code for other input values and verify.
+
+**

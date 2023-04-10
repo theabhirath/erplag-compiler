@@ -7,12 +7,12 @@ ast: src/ast/ast.c src/lexer/lexer.c src/lexer/reserved_words.c src/parser/parse
 symtab: src/ast/symbol_table.c src/ast/ast.c src/lexer/lexer.c src/lexer/reserved_words.c src/parser/parser.c src/parser/set.c src/parser/stack.c src/parser/linked_list.c
 	gcc -o symtab src/ast/symbol_table.c src/ast/ast.c src/lexer/lexer.c src/lexer/reserved_words.c src/parser/parser.c src/parser/set.c src/parser/stack.c src/parser/linked_list.c
 
-code: src/codegen/codegen.c src/ast/symbol_table.c src/ast/ast.c src/lexer/lexer.c src/lexer/reserved_words.c src/parser/parser.c src/parser/set.c src/parser/stack.c src/parser/linked_list.c
-	gcc -o code src/codegen/codegen.c src/ast/symbol_table.c src/ast/ast.c src/lexer/lexer.c src/lexer/reserved_words.c src/parser/parser.c src/parser/set.c src/parser/stack.c src/parser/linked_list.c
+code.out: src/codegen/codegen.c src/ast/symbol_table.c src/ast/ast.c src/lexer/lexer.c src/lexer/reserved_words.c src/parser/parser.c src/parser/set.c src/parser/stack.c src/parser/linked_list.c
+	gcc -o code.out src/codegen/codegen.c src/ast/symbol_table.c src/ast/ast.c src/lexer/lexer.c src/lexer/reserved_words.c src/parser/parser.c src/parser/set.c src/parser/stack.c src/parser/linked_list.c
 
 runasm: code.asm
 	nasm -f elf64 code.asm
-	gcc -o code code.o
+	gcc -no-pie -o code code.o
 	./code
 
 clean:
