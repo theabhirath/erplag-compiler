@@ -15,9 +15,22 @@ symbol_table *createSymbolTable(symbol_table *parent, char *name)
     {
         newTable->data[i] = NULL;
     }
-    newTable->offset = 0;
+    newTable->offset = parent == NULL ? 0 : parent->offset;
     printf("Created symbol table %s.\n", name);
     return newTable;
+}
+
+// update offset
+void updateOffset(symbol_table *symTab, int offset)
+{
+    // Update offsets of all symbol tables
+    // above the current symbol table
+    symbol_table *curr = symTab;
+    while (curr != NULL)
+    {
+        curr->offset = offset;
+        curr = curr->parent;
+    }
 }
 
 // hash function for the symbol table
@@ -189,7 +202,8 @@ ST_ENTRY *addVarToSymTable(symbol_table *symTab, parse_tree_node *var_name, ast_
                 st_entry->data.arr->left.staticIndex = lindexVal;
                 st_entry->data.arr->right.staticIndex = rindexVal;
                 st_entry->data.arr->offset = symTab->offset;
-                symTab->offset += (rindexVal - lindexVal + 1) * (st_entry->data.arr->eltype == __NUM__ ? __NUM_SIZE__ : st_entry->data.arr->eltype == __RNUM__ ? __RNUM_SIZE__ : __BOOL_SIZE__);
+                symTab->offset += (rindexVal - lindexVal + 1) * (st_entry->data.arr->eltype == __NUM__ ? __NUM_SIZE__ : st_entry->data.arr->eltype == __RNUM__ ? __RNUM_SIZE__
+                                                                                                                                                               : __BOOL_SIZE__);
                 addToSymbolTable(symTab, st_entry);
                 printf("Added static array %s to symbol table %s\n", st_entry->name, symTab->name);
                 printf("left: %d, right: %d\n", st_entry->data.arr->left.staticIndex, st_entry->data.arr->right.staticIndex);
@@ -521,14 +535,28 @@ void checkExpressionNames(ast_node *expr, symbol_table *symTable)
                         return;
                     }
                     // bound checking for static arrays and static index
-                    if (arr_entry->data.arr->arrayType == STATIC && getType(expr->right, symTable) == __NUM__)
+                    // TODO: handle negative indices
+                    int indexCheck = 0;
+                    int indexVal;
+                    if (expr->right->nodeType == NUM || (expr->right->nodeType == MINUS_AST && expr->right->left == NULL && expr->right->right->nodeType == NUM))
                     {
-                        parse_tree_node *index = (parse_tree_node *)expr->right;
-                        if (index->leafNodeInfo.val.intValue > arr_entry->data.arr->right.staticIndex ||
-                            index->leafNodeInfo.val.intValue < arr_entry->data.arr->left.staticIndex)
+                        indexCheck = 1;
+                        if (expr->right->nodeType == NUM)
                         {
-                            printf("Error: Index of array %s used at line number %d is out of bounds.\n",
-                                   arr_id->leafNodeInfo.lexeme, arr_id->leafNodeInfo.lineNumber);
+                            indexVal = expr->right->leafNodeInfo.val.intValue;
+                        }
+                        else
+                        {
+                            indexVal = -1 * expr->right->right->leafNodeInfo.val.intValue;
+                        }
+                    }
+                    if (indexCheck && arr_entry->data.arr->arrayType == STATIC && getType(expr->right, symTable) == __NUM__)
+                    {
+                        if (indexVal > arr_entry->data.arr->right.staticIndex || indexVal < arr_entry->data.arr->left.staticIndex)
+                        {
+                            printf("Error: Index of array %s %d used at line number %d is out of the bounds %d to %d.\n",
+                                   arr_id->leafNodeInfo.lexeme, indexVal, arr_id->leafNodeInfo.lineNumber, arr_entry->data.arr->left.staticIndex,
+                                   arr_entry->data.arr->right.staticIndex);
                             return;
                         }
                     }
@@ -571,11 +599,11 @@ void checkFormalParams(LinkedListASTNode *param_list, ST_LL *formal_param_list, 
         if (formal_param_list->data->entry_type == ARR_SYM)
         {
             // type checking for the input parameters
-            ST_ENTRY *arr_entry = checkAllSymbolTables(symTable, ((parse_tree_node*)param_list->data)->leafNodeInfo.lexeme);
+            ST_ENTRY *arr_entry = checkAllSymbolTables(symTable, ((parse_tree_node *)param_list->data)->leafNodeInfo.lexeme);
             if (arr_entry && matchArrayTypes(arr_entry->data.arr, formal_param_list->data->data.arr))
             {
                 printf("Error: Array type mismatch at line number %d.\n",
-                       ((parse_tree_node*)param_list->data)->leafNodeInfo.lineNumber);
+                       ((parse_tree_node *)param_list->data)->leafNodeInfo.lineNumber);
             }
             else
             {
@@ -588,7 +616,7 @@ void checkFormalParams(LinkedListASTNode *param_list, ST_LL *formal_param_list, 
             if (getType(param_list->data, symTable) != formal_param_list->data->data.var->type)
             {
                 printf("Error: Var Type mismatch at line number %d.\n",
-                       ((parse_tree_node*)param_list->data)->leafNodeInfo.lineNumber);
+                       ((parse_tree_node *)param_list->data)->leafNodeInfo.lineNumber);
             }
             else
             {
@@ -718,7 +746,7 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
             {
                 printf("We have a case block\n");
                 fflush(stdout);
-                if(case_list->data == NULL)
+                if (case_list->data == NULL)
                 {
                     printf("Missing default block.\n");
                     if (switchType != __BOOL__)
@@ -769,7 +797,7 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
                 char *casestr = malloc(sizeof(char) * 64);
                 sprintf(casestr, "%p", case_list->data);
                 symbol_table *caseSymTable = createSymbolTable(blockSymTable, casestr);
-                caseSymTable->offset = 4;
+                updateOffset(caseSymTable, blockSymTable->offset + __NUM_SIZE__);
                 // create an entry for the case symbol table in the parent symbol table
                 ST_ENTRY *caseSymTableEntry = malloc(sizeof(ST_ENTRY));
                 caseSymTableEntry->name = casestr;
@@ -822,7 +850,7 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
             endEntry->data.var = (struct var_entry *)malloc(sizeof(struct var_entry));
             endEntry->data.var->type = __NUM__;
             endEntry->data.var->val.numValue = endSign * end->leafNodeInfo.val.intValue;
-            
+
             // list of statements in the for loop
             LinkedListASTNode *for_stmt_list = stmt->right;
             char *forstr = malloc(sizeof(char) * 64);
@@ -830,13 +858,13 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
             symbol_table *forSymTable = createSymbolTable(blockSymTable, forstr);
             // set offsets
             startEntry->data.var->offset = forSymTable->offset;
-            forSymTable->offset += __NUM_SIZE__;
+            updateOffset(forSymTable, forSymTable->offset + __NUM_SIZE__);
             endEntry->data.var->offset = forSymTable->offset;
-            forSymTable->offset += __NUM_SIZE__;
+            updateOffset(forSymTable, forSymTable->offset + __NUM_SIZE__);
             // add the start and end values to the symbol table
             addToSymbolTable(forSymTable, startEntry);
             addToSymbolTable(forSymTable, endEntry);
-            
+
             // add the loop variable to the symbol table
             ST_ENTRY *loopVarEntry = malloc(sizeof(ST_ENTRY));
             loopVarEntry->name = loopVar->leafNodeInfo.lexeme;
@@ -844,7 +872,7 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
             loopVarEntry->data.var = (struct var_entry *)malloc(sizeof(struct var_entry));
             loopVarEntry->data.var->type = __NUM__; // can only be an integer
             loopVarEntry->data.var->offset = forSymTable->offset;
-            forSymTable->offset += __NUM_SIZE__;
+            updateOffset(forSymTable, forSymTable->offset + __NUM_SIZE__);
             addToSymbolTable(forSymTable, loopVarEntry);
             // create an entry for the for symbol table in the parent symbol table
             ST_ENTRY *forSymTableEntry = malloc(sizeof(ST_ENTRY));
@@ -1031,5 +1059,4 @@ void populateSymbolTables(ast *ASTree)
     addToSymbolTable(&symbolTable, driverSymTableEntry);
     // populate OtherModule2 body
     populateOtherModuleBodies(otherModules2);
-    
 }

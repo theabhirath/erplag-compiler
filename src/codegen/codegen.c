@@ -6,6 +6,12 @@
 #define TEMP_2 "ebx"
 #define TEMP_3 "ecx"
 #define TEMP_4 "edx"
+
+#define BIG_TEMP_1 "rax"
+#define BIG_TEMP_2 "rbx"
+#define BIG_TEMP_3 "rcx"
+#define BIG_TEMP_4 "rdx"
+
 #define FTEMP_1 "xmm0"
 #define FTEMP_2 "xmm1"
 
@@ -35,13 +41,19 @@ typedef enum OPERATOR
     OP_DEC,
     OP_SCOPE_START,
     OP_SCOPE_END,
+    OP_FUNC_SCOPE_START,
+    OP_FUNC_SCOPE_END,
+    OP_FUNC_FRAME_ALLOC,
     OP_TEMP_DECL,
     OP_FRAME_ALLOC,
     SCAN,
     PRINT_CONST,
     PRINT_VAR,
     INSTR,
-    OP_NOP
+    OP_CONST,
+    OP_NOP,
+    OP_LOAD,
+    OP_SUB_RBP
 } OPERATOR;
 
 void print_op(OPERATOR op)
@@ -138,8 +150,23 @@ void print_op(OPERATOR op)
     case OP_NOP:
         printf("OP_NOP\n");
         break;
+    case OP_LOAD:
+        printf("OP_LOAD\n");
+        break;
+    case OP_CONST:
+        printf("OP_CONST\n");
+        break;
+    case OP_FUNC_SCOPE_START:
+        printf("OP_FUNC_SCOPE_START\n");
+        break;
+    case OP_FUNC_SCOPE_END:
+        printf("OP_FUNC_SCOPE_END\n");
+        break;
+    case OP_FUNC_FRAME_ALLOC:
+        printf("OP_FUNC_FRAME_ALLOC\n");
+        break;
     default:
-        printf("Unknown operator\n");
+        printf("Unknown operator %d\n", op);
         break;
     }
 }
@@ -249,12 +276,30 @@ three_ac *new_3ac()
     return temp;
 }
 
+ST_ENTRY *get_rbp()
+{
+    static ST_ENTRY *rbp = NULL;
+    if (rbp == NULL)
+    {
+        rbp = malloc(sizeof(ST_ENTRY));
+        rbp->name = "rbp";
+        rbp->entry_type = VAR_SYM;
+        rbp->data.var = malloc(sizeof(struct var_entry));
+        rbp->data.var->type = __NUM__;
+        rbp->data.var->offset = 0;
+    }
+    return rbp;
+}
+
 ST_ENTRY *get_offset_with_width(ST_ENTRY *entry)
 {
     ST_ENTRY *temp = malloc(sizeof(ST_ENTRY));
     temp->entry_type = VAR_SYM;
     temp->name = malloc(sizeof(char) * 64);
-    sprintf(temp->name, "dword[rbp-%d]", entry->data.var->offset);
+    if (entry->entry_type == VAR_SYM)
+        sprintf(temp->name, "dword[rbp-%d]", entry->data.var->offset);
+    else if (entry->entry_type == ARR_SYM)
+        sprintf(temp->name, "dword[rbp-%d]", entry->data.arr->offset);
     return temp;
 }
 
@@ -293,6 +338,86 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         printf("Lexeme %s \n", temp->result->name);
         break;
     }
+    /*
+        A[1], A[k]
+
+        offset = A.offset + (k - A.leftIndex) * size
+        rbp - offset
+    */
+    case ARR_ELEM_AST:
+    {
+        printf("Generating code for array element \n");
+        ST_ENTRY *arr_entry = checkAllSymbolTables(st, getName(node->left));
+        if (arr_entry->data.arr->arrayType == STATIC)
+        {
+            printf("Generating code for static array element \n");
+            int lindexVal = arr_entry->data.arr->left.staticIndex;
+            int rindexVal = arr_entry->data.arr->right.staticIndex;
+            int width = rindexVal - lindexVal + 1;
+            int offset = arr_entry->data.arr->offset;
+
+            printf("lindexVal %d rindexVal %d width %d offset %d \n", lindexVal, rindexVal, width, offset);
+
+            // Get the index
+            ST_ENTRY *index = generate_opcode(node->right, st, list)->result;
+            // Get the offset as (index - lindex) * size
+            ST_ENTRY *size = malloc(sizeof(ST_ENTRY));
+            size->entry_type = VAR_SYM;
+            size->name = malloc(sizeof(char) * 64);
+            sprintf(size->name, "%d", arr_entry->data.arr->eltype == __NUM__ ? __NUM_SIZE__ : arr_entry->data.arr->eltype == __RNUM__ ? __RNUM_SIZE__
+                                                                                                                                      : __BOOL_SIZE__);
+
+            ST_ENTRY *lindex = malloc(sizeof(ST_ENTRY));
+            lindex->entry_type = VAR_SYM;
+            lindex->name = malloc(sizeof(char) * 64);
+            sprintf(lindex->name, "%d", lindexVal);
+
+            three_ac *offset_3ac = new_3ac();
+            offset_3ac->op = OP_SUB;
+            offset_3ac->arg1 = index;
+            offset_3ac->arg2 = lindex;
+            offset_3ac->result = get_offset_with_width(get_temp_var(st, __NUM__, list));
+            add_to_three_ac_list(list, offset_3ac);
+            printf("offset_3ac->result %s \n", offset_3ac->result->name);
+
+            three_ac *mul = new_3ac();
+            mul->op = OP_MUL;
+            mul->arg1 = offset_3ac->result;
+            mul->arg2 = size;
+            mul->result = get_offset_with_width(get_temp_var(st, __NUM__, list));
+            add_to_three_ac_list(list, mul);
+            printf("mul->result %s \n", mul->result->name);
+
+            three_ac *add = new_3ac();
+            add->op = OP_ADD;
+            add->arg1 = mul->result;
+            add->arg2 = get_offset_with_width(arr_entry);
+            add->result = mul->result;
+            add_to_three_ac_list(list, add);
+            printf("add->result %s \n", add->result->name);
+
+            // rbp - offset
+            three_ac *rbp_minus = new_3ac();
+            rbp_minus->op = OP_SUB_RBP;
+            rbp_minus->arg1 = add->result;
+            get_temp_var(st, __NUM__, list);
+            rbp_minus->result = get_offset_with_width(get_temp_var(st, __NUM__, list)); // Keep space for 64 bit address
+            add_to_three_ac_list(list, rbp_minus);
+            printf("rbp_minus->result %s \n", rbp_minus->result->name);
+
+            temp->op = OP_LOAD;
+            temp->arg1 = rbp_minus->result;
+            temp->result = rbp_minus->result;
+            add_to_three_ac_list(list, temp);
+            printf("arr_elem->result %s \n", temp->result->name);
+
+            return temp;   
+        }
+        else
+        {
+            // TODO: Dynamic array
+        }
+    }
     case PROGRAM_AST:
     {
         printf("Generating code for program \n");
@@ -310,11 +435,11 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         temp1->op = OP_LABEL;
         temp1->label = "main";
         add_to_three_ac_list(list, temp1);
-        temp->op = OP_SCOPE_START;
+        temp->op = OP_FUNC_SCOPE_START;
         add_to_three_ac_list(list, temp);
         // Frame alloc
         temp = new_3ac();
-        temp->op = OP_FRAME_ALLOC;
+        temp->op = OP_FUNC_FRAME_ALLOC;
         temp->arg1 = driver_st_entry;
         add_to_three_ac_list(list, temp);
         while (driver_list != NULL)
@@ -324,7 +449,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             driver_list = driver_list->next;
         }
         temp = new_3ac();
-        temp->op = OP_SCOPE_END;
+        temp->op = OP_FUNC_SCOPE_END;
         add_to_three_ac_list(list, temp);
 
         printf("Reached end of driver module \n");
@@ -345,7 +470,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     case PLUS_AST:
     {
         printf("Generating code for plus \n");
-        if(node->type == __NUM__)
+        if (node->type == __NUM__)
         {
             temp->op = OP_ADD;
             three_ac *temp1 = generate_opcode(node->left, st, list);
@@ -968,11 +1093,16 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             break;
 
         case OP_SUB:
-
             fprintf(fp, "mov %s, %s\n", TEMP_1, temp->arg1->name);
             fprintf(fp, "mov %s, %s\n", TEMP_2, temp->arg2->name);
             fprintf(fp, "sub %s, %s\n", TEMP_1, TEMP_2);
             fprintf(fp, "mov %s, %s\n", temp->result->name, TEMP_1);
+            break;
+        case OP_SUB_RBP:
+            fprintf(fp, "movsx %s, %s\n", BIG_TEMP_1, temp->arg1->name);
+            fprintf(fp, "mov %s, %s\n", BIG_TEMP_2, "rbp");
+            fprintf(fp, "sub %s, %s\n", BIG_TEMP_2, BIG_TEMP_1);
+            fprintf(fp, "mov %s, %s\n", temp->result->name, BIG_TEMP_2);
             break;
         case OP_MUL:
             fprintf(fp, "mov %s, %s\n", TEMP_1, temp->arg1->name);
@@ -1056,11 +1186,16 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
         case OP_RESET:
             fprintf(fp, "mov %s, 0\n", temp->arg1->name);
             break;
-        case OP_SCOPE_START:
+        case OP_LOAD:
+            fprintf(fp, "mov %s, %s\n", BIG_TEMP_1, temp->arg1->name);
+            fprintf(fp, "mov %s, dword[%s]\n", TEMP_2, BIG_TEMP_1);
+            fprintf(fp, "mov %s, %s\n", temp->result->name, TEMP_2);
+            break;
+        case OP_FUNC_SCOPE_START:
             fprintf(fp, "push rbp\n");
             fprintf(fp, "mov rbp, rsp\n");
             break;
-        case OP_SCOPE_END:
+        case OP_FUNC_SCOPE_END:
             fprintf(fp, "mov rsp, rbp\n");
             fprintf(fp, "pop rbp\n");
             break;
@@ -1077,7 +1212,7 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             //     }
             // }
             break;
-        case OP_FRAME_ALLOC:
+        case OP_FUNC_FRAME_ALLOC:
             ST_ENTRY *temp1 = temp->arg1;
             int offset = 0;
             if (temp1->entry_type == FUNC_SYM)
@@ -1090,6 +1225,9 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             }
             fprintf(fp, "sub rsp, %d\n", offset);
             break;
+        case OP_SCOPE_START:
+        case OP_SCOPE_END:
+        case OP_FRAME_ALLOC:
         case OP_NOP:
             fprintf(fp, "nop\n");
             break;
@@ -1121,7 +1259,6 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
                     fprintf(fp, "call scanf\n");
                     // restore rsp
                     fprintf(fp, "mov rsp, r13\n");
-
                 }
                 else if (temp->result->data.var->type == __RNUM__)
                 {
@@ -1155,7 +1292,6 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
 
                     // restore rsp
                     fprintf(fp, "mov rsp, r13\n");
-
                 }
                 else if (temp->arg1->data.var->type == __RNUM__)
                 {
@@ -1195,7 +1331,6 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
 
                     // restore the stack pointer
                     fprintf(fp, "mov rsp, r13\n");
-
                 }
                 else
                 {
@@ -1246,10 +1381,15 @@ void print_fine(FILE *fp)
     fprintf(fp, "syscall\n");
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+    if (argc != 2)
+    {
+        printf("Usage: ./code.out <filename>\n");
+        return 0;
+    }
     bufferSize = 1024;
-    parseInputSourceCode("tests/codegen/c8.txt", "src/parser/parseTree.txt");
+    parseInputSourceCode(argv[1], "pt.out");
     printf("parse tree created successfully.\n");
     fflush(stdout);
     ast *AST = create_ast(&parseTree);

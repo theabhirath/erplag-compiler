@@ -597,6 +597,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->syn_addr = createASTNode(EQUALS_AST);
         process_subtree(ElementIndexWithExpression);
         process_subtree(Expression);
+
         ast_node *temp = createASTNode(ARR_ELEM_AST);
         printf("inherted addr: %p\n", ptn->inh_addr);
         parse_tree_node *temp1 = ptn->inh_addr;
@@ -607,6 +608,14 @@ ast_node *process_subtree(parse_tree_node *ptn)
         {
             printf("rule is wrong\n");
             fflush(stdout);
+        }
+        else{
+            printf("index node type: %d\n", temp->right->nodeType);
+            if (temp->right->nodeType == MINUS_AST)
+            {
+                parse_tree_node *temp2 = temp->right->right;
+                printf("Token: %s\n", temp2->leafNodeInfo.lexeme);
+            }
         }
         ptn->syn_addr->right = Expression->addr;
         ptn->syn_addr->left = temp;
@@ -1628,7 +1637,8 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
         return;
     }
     fprintf(fp, "%*s", depth, "");
-    // printf("%d\n", node->type);
+    printf("NodeType: %d\n", node->nodeType);
+    fflush(stdout);
     // printf("lmao\n");
     fflush(fp);
     switch (node->nodeType)
@@ -1717,7 +1727,7 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
             printf("reached here\n");
             fflush(stdout);
             //Print exact node type also
-            printf("%d\n", node->right->nodeType);
+            printf("Operator on RHS: %d\n", node->right->nodeType);
             fflush(stdout);
             print_ast_node(node->right, depth + 1, fp);
         }
@@ -1740,7 +1750,7 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
                 // node right nodeType 
                 printf("%d\n", node->right->nodeType);
                 fflush(stdout);
-                print_parse_tree_node(node->right, depth + 1, fp);
+                print_ast_node(node->right, depth + 1, fp);
                 // fprintf(fp, "%*s", depth, "");
                 // printf("%d\n", node->right->leafNodeInfo.val);
                 // printf("working\n");
@@ -1969,8 +1979,9 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
         }
         printf("before\n");
         fflush(stdout);
-        print_parse_tree_node(node->left, depth + 1, fp);
-        print_parse_tree_node(node->right, depth + 1, fp);
+        print_ast_node(node->left, depth + 1, fp);
+        printf("left done\n");
+        print_ast_node(node->right, depth + 1, fp);
         printf("after\n");
         fflush(stdout);
         break;
