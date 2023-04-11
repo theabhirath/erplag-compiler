@@ -5,9 +5,9 @@
 
 #define SYMBOL_TABLE_SIZE 512
 
-#define __NUM_SIZE__ 4
+#define __NUM_SIZE__ 2
 #define __RNUM_SIZE__ 4
-#define __BOOL_SIZE__ 4
+#define __BOOL_SIZE__ 1
 #define __DYNAMIC_ARRAY_SIZE__ 4
 
 typedef struct ST_ENTRY ST_ENTRY;
@@ -102,6 +102,8 @@ typedef struct symbol_table
     ST_LL *data[SYMBOL_TABLE_SIZE];
     struct symbol_table *parent;
     int offset;
+    int lineBegin;
+    int lineEnd;
 } symbol_table;
 
 extern symbol_table symbolTable;
@@ -110,5 +112,6 @@ void populateSymbolTables(ast *ASTree);
 ST_ENTRY *checkSymbolTable(symbol_table *symTab, char *name);
 ST_ENTRY *checkAllSymbolTables(symbol_table *symTab, char *name);
 enum TYPE getType(ast_node *node, symbol_table *st);
+void printSymbolTable(symbol_table *symTab, int level);
 
 #endif

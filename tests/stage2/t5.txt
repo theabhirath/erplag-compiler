@@ -4,16 +4,16 @@
 
 <<module var_demo_array>>
 takes input [x:integer, m:array [-12..20] of integer, p:real];
-returns [n:integer, k: boolean];
+returns [ n:integer, k: boolean];
 start
-	declare a,b,h:integer;
+	declare a,b,h:integer;	
 	get_value(b);
-	declare p: array[-12..20] of integer;
+	declare p: array[-12..20] of integer;	
 	a:= m[-5]+3;				   **Not an error: array index within bounds**
 	p:= m;					   **Not an error: type expressions of array variables p and m are same and assignment is a valid operation**
-	k:=true;
+	k:=true;	
 	p:= m + p;                                 **ERROR: array variables m and p cannot be added**
-	p[10]:= a*b-20*h;                          **Not an error: array index within bounds**
+	p[10]:= a*b-20*h;                          **Not an error: array index within bounds**			 
 	while(k AND x<=m[11] OR false)
 	start
 		declare p, u:integer;
@@ -25,7 +25,7 @@ start
         n:= a - p*b;				   **ERROR: types of p and b are different**
 	b:= b+3;
 	k:= a>b OR b>100;
-	print(k);
+	print(k);	
 end
 
 
@@ -42,29 +42,29 @@ start
 	declare D,C: array[10..30] of integer;
 	A:=B;
 	C:=a;
-	D:=C;
+	D:=C;					 
 	for (k in -15..+40)
 	start
 		x:=x+k*y;				    **ERROR: Type mismatch error**
 		declare u, v:real;
 		u := y+c*34.2;
-		v:= u-c*p-20.5E+2;
+		v:= u-c*p-20.5E+2;		 
 		switch(k)
 		start
 			case 10: declare A:real;
 				 declare Q: integer;
 				 declare B: array[10..30] of integer;
 				 declare E: array[4..10] of integer;
-				 B[9]:= k*20; 	              **ERROR: element of array B is out of bound**
+				 B[9]:= k*20; 	              **ERROR: element of array B is out of bound**         	
 				 B:=C;           	      **not an error**
-				 E:= Q;                       **ERROR: variables E and Q are of different types	**
+				 E:= Q;                       **ERROR: variables E and Q are of different types	**	 
 				 break;
-			case 20: c:= 12.90 + u*y - c;         **NOT AN ERROR - USES STATIC PARENT**
+			case 20: c:= 12.90 + u*y - c;         **NOT AN ERROR - USES STATIC PARENT**      
 				 get_value(Q);		      **ERROR: Q not declared**
-				 A[7]:= k+12 - D[12]*10+u;    **ERROR: Type mismatch error**
+				 A[7]:= k+12 - D[12]*10+u;    **ERROR: Type mismatch error**    
 				 break;
-			default: E[9]:= B[15]+Q;	      **not an error**
-				 break;
+			default: E[9]:= B[15]+Q;	      **not an error**	       
+				 break;			 	
 		end
 		x:=x + u*v- u<=v;                             **ERROR: Type mismatch error**
 	end
@@ -73,8 +73,10 @@ start
 
 	A[5]:= B[6]- 10;
 	m:= A[5]< C[18] + A[11];			      **ERROR: element of array A is out of bound** 
-	n:= 20*8-5;
+	n:= 20*8-5;	
 end
+
+
 
 <<<driver program>>>
 start
@@ -83,10 +85,10 @@ start
         A:=12;
 	declare p: real;
 	p:= 23.56;
-	get_value(v_1_2_3);
+	get_value(v_1_2_3);							 		
 	declare B, C: array [2..20] of integer;
-	[ v_1_2_3, u1]:=use module var_demo_array with parameters A,B,p;
-	[ v_1_2_3, k]:=use module var_demo_array with parameters A,B,p;
+	[ v_1_2_3, u1]:=use module var_demo_array with parameters A,B,p;		
+	[ v_1_2_3, k]:=use module var_demo_array with parameters A,B,p;	
 	declare a,b:integer;
 	a:= 5.89e-2;			        **ERROR: type mismatch error**
 	get_value(b);
@@ -96,13 +98,13 @@ start
 	value:= p+q*r-a*value; 			**ERROR: type mismatch error**
 	k:= true AND false OR q;		**ERROR: type mismatch error**
 	u1:= a<=b;
-	declare w: integer;
-	w:= 23+B[6];
+	declare w: integer;			 
+	w:= 23+B[6];                                  
 	b:= a*25+100*C[1];		        **ERROR:element of array C is out of bound** 
-	declare D: array[20..40] of integer;
+	declare D: array[20..40] of integer;			 
 	D:= value-q+r;				**ERROR: type mismatch error**
-	w:= w + 5;
+	w:= w + 5;		 
 	B:= C;
-	C:= D;				        **ERROR: type mismatch error**
+	C:= D;				        **ERROR: type mismatch error**        
 end
 

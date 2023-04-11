@@ -65,7 +65,7 @@ start
 	declare x,y, p: real;
 	declare k, y1: integer;
 	declare E: array[2..20] of integer;
-	declare Var3, var4: array[100..150] of boolean;
+	declare Var3, Var4: array[100..150] of boolean;
 	get_value(y);
 	get_value(x);
 	declare A,B: array[4..10] of integer;

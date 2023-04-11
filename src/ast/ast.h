@@ -65,6 +65,8 @@ typedef struct ast_node{
     tokenInfo leafNodeInfo;
     int isLeafNode;
     void *aux_info;
+    int beginLine;
+    int endLine;
 } ast_node;
 
 typedef struct ast {
