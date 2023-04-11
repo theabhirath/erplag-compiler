@@ -2,10 +2,15 @@
 #include "../ast/ast.h"
 #include "../ast/symbol_table.h"
 
-#define TEMP_1 "eax"
-#define TEMP_2 "ebx"
-#define TEMP_3 "ecx"
-#define TEMP_4 "edx"
+#define SMALL_TEMP_1 "al"
+#define SMALL_TEMP_2 "bl"
+#define SMALL_TEMP_3 "cl"
+#define SMALL_TEMP_4 "dl"
+
+#define TEMP_1 "ax"
+#define TEMP_2 "bx"
+#define TEMP_3 "cx"
+#define TEMP_4 "dx"
 
 #define BIG_TEMP_1 "rax"
 #define BIG_TEMP_2 "rbx"
@@ -256,7 +261,7 @@ void init_three_ac_list(three_ac_list *list)
     list->tail = NULL;
 
     const_true = malloc(sizeof(ST_ENTRY));
-    const_true->name = "dword[cnst_true]";
+    const_true->name = "byte[cnst_true]";
     const_true->entry_type = VAR_SYM;
     const_true->data.var = malloc(sizeof(struct var_entry));
     const_true->data.var->type = __BOOL__;
@@ -264,7 +269,7 @@ void init_three_ac_list(three_ac_list *list)
     const_true->data.var->val.boolValue = 1;
 
     const_false = malloc(sizeof(ST_ENTRY));
-    const_false->name = "dword[cnst_false]";
+    const_false->name = "byte[cnst_false]";
     const_false->entry_type = VAR_SYM;
     const_false->data.var = malloc(sizeof(struct var_entry));
     const_false->data.var->type = __BOOL__;
@@ -317,9 +322,9 @@ ST_ENTRY *get_offset_with_width(ST_ENTRY *entry)
     temp->data.var = malloc(sizeof(struct var_entry));
     temp->data.var->type = entry->data.var->type;
     if (entry->entry_type == VAR_SYM)
-        sprintf(temp->name, "dword[rbp-%d]", entry->data.var->offset);
+        sprintf(temp->name, "%s[rbp-%d]", entry->data.var->type == __NUM__ ? "word" : "byte", entry->data.var->offset);
     else if (entry->entry_type == ARR_SYM)
-        sprintf(temp->name, "dword[rbp-%d]", entry->data.arr->offset);
+        sprintf(temp->name, "%s[rbp-%d]", entry->data.arr->eltype == __NUM__ ? "word" : "byte", entry->data.arr->offset);
     return temp;
 }
 
@@ -363,6 +368,8 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         printf("Generating code for NUM \n");
         temp->result = malloc(sizeof(ST_ENTRY));
         temp->result->entry_type = VAR_SYM;
+        temp->result->data.var = malloc(sizeof(struct var_entry));
+        temp->result->data.var->type = __NUM__;
         temp->result->name = getName(node);
         printf("Lexeme %s \n", temp->result->name);
         break;
@@ -408,11 +415,15 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             lindex->entry_type = VAR_SYM;
             lindex->name = malloc(sizeof(char) * 64);
             sprintf(lindex->name, "%d", lindexVal);
+            lindex->data.var = malloc(sizeof(struct var_entry));
+            lindex->data.var->type = __NUM__;
 
             ST_ENTRY *rindex = malloc(sizeof(ST_ENTRY));
             rindex->entry_type = VAR_SYM;
             rindex->name = malloc(sizeof(char) * 64);
             sprintf(rindex->name, "%d", rindexVal);
+            rindex->data.var = malloc(sizeof(struct var_entry));
+            rindex->data.var->type = __NUM__;
 
             // Runtime bound checking
             three_ac *check = new_3ac();
@@ -549,6 +560,30 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     }
     case EQUALS_AST:
     {
+        if(node->right->nodeType == USE_AST)
+        {
+            // printf("Generating code for use \n");
+            // ST_ENTRY *func_st_entry = checkAllSymbolTables(st, getName(node->right->left));
+            // symbol_table *func_st = func_st_entry->data.func->symTable;
+            // ST_LL *formal_input_list = func_st_entry->data.func->inputs;
+            // ST_LL *formal_output_list = func_st_entry->data.func->outputs;
+            // LinkedListASTNode *actual_input_list = node->right->right;
+            // LinkedListASTNode *actual_output_list = node->left;
+            
+            // // Copy actual inputs to just below rsp
+            // int offset = 0;
+            // while (actual_input_list != NULL)
+            // {
+            //     three_ac *temp = new_3ac();
+            //     temp->op = OP_ASSIGN;
+            //     temp->arg1 = generate_opcode(actual_input_list->data, st, list)->result;
+            //     ST_ENTRY *arg = malloc(sizeof(ST_ENTRY));
+            //     arg->entry_type = VAR_SYM;
+            //     arg->name = malloc(sizeof(char) * 64);
+            // }
+            
+            break;
+        }
         if (node->left->nodeType == ID)
         {
             printf("Generating code for assignment \n");
@@ -589,7 +624,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             fflush(stdout);
             temp->arg1 = temp1->result;
             temp->arg2 = temp2->result;
-            temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
+            temp->result = get_offset_with_width(get_temp_var(st, temp1->result->data.var->type, list));
             add_to_three_ac_list(list, temp);
         }
         else
@@ -617,7 +652,11 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             printf("Args %s %s \n", temp1->result->name, temp2->result->name);
             temp->arg1 = temp1->result;
             temp->arg2 = temp2->result;
-            temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
+            printf("temp->arg1 %s type %d \n", temp->arg1->name, temp->arg1->data.var->type);
+            printf("temp->arg2 %s type %d \n", temp->arg2->name, temp->arg2->data.var->type);
+
+            temp->result = get_offset_with_width(get_temp_var(st, temp->arg1->data.var->type, list));
+            printf("Result %s \n", temp->result->name);
             add_to_three_ac_list(list, temp);
         }
         else
@@ -627,7 +666,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             three_ac *temp1 = generate_opcode(node->right, st, list);
             temp->arg1 = temp1->result;
             temp->arg2 = NULL;
-            temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
+            temp->result = get_offset_with_width(get_temp_var(st, temp->arg1->data.var->type, list));
             add_to_three_ac_list(list, temp);
         }
         break;
@@ -639,7 +678,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         three_ac *temp2 = generate_opcode(node->right, st, list);
         temp->arg1 = temp1->result;
         temp->arg2 = temp2->result;
-        temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
+        temp->result = get_offset_with_width(get_temp_var(st, temp1->result->data.var->type, list));
         add_to_three_ac_list(list, temp);
         break;
     }
@@ -650,7 +689,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         three_ac *temp2 = generate_opcode(node->right, st, list);
         temp->arg1 = temp1->result;
         temp->arg2 = temp2->result;
-        temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
+        temp->result = get_offset_with_width(get_temp_var(st, temp1->result->data.var->type, list));
         add_to_three_ac_list(list, temp);
         break;
     }
@@ -661,7 +700,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         three_ac *temp2 = generate_opcode(node->right, st, list);
         temp->arg1 = temp1->result;
         temp->arg2 = temp2->result;
-        temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
+        temp->result = get_offset_with_width(get_temp_var(st, __BOOL__, list));
         add_to_three_ac_list(list, temp);
         break;
     }
@@ -672,7 +711,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         three_ac *temp2 = generate_opcode(node->right, st, list);
         temp->arg1 = temp1->result;
         temp->arg2 = temp2->result;
-        temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
+        temp->result = get_offset_with_width(get_temp_var(st, __BOOL__, list));
         add_to_three_ac_list(list, temp);
         break;
     }
@@ -916,6 +955,8 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         start_ac->arg1 = malloc(sizeof(ST_ENTRY *));
         start_ac->arg1->name = malloc(sizeof(char) * 10);
         sprintf(start_ac->arg1->name, "%d", start);
+        start_ac->arg1->data.var = malloc(sizeof(struct var_entry));
+        start_ac->arg1->data.var->type = __NUM__;
         add_to_three_ac_list(list, start_ac);
 
         three_ac *end_ac = new_3ac();
@@ -924,6 +965,8 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         end_ac->arg1 = malloc(sizeof(ST_ENTRY *));
         end_ac->arg1->name = malloc(sizeof(char) * 10);
         sprintf(end_ac->arg1->name, "%d", end);
+        end_ac->arg1->data.var = malloc(sizeof(struct var_entry));
+        end_ac->arg1->data.var->type = __NUM__;
         add_to_three_ac_list(list, end_ac);
         // loop_variable = start
         three_ac *first = new_3ac();
@@ -1247,7 +1290,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
                 for (int i = lindex; i <= rindex; i++, offset += size_of_data)
                 {
                     ST_ENTRY *st_for_offset = get_offset_with_width(ste);
-                    sprintf(st_for_offset->name, "dword[rbp -%d]", offset);
+                    sprintf(st_for_offset->name, "word[rbp -%d]", offset);
 
                     // Print value
                     three_ac *print = new_3ac();
@@ -1331,14 +1374,27 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             break;
         case OP_AND:
         case OP_OR:
-            fprintf(fp, "mov %s, %s\n", TEMP_1, temp->arg1->name);
-            fprintf(fp, "mov %s, %s\n", TEMP_2, temp->arg2->name);
-            fprintf(fp, "%s %s, %s\n", temp->op == OP_AND ? "and" : "or", TEMP_1, TEMP_2);
-            fprintf(fp, "mov %s, %s\n", temp->result->name, TEMP_1);
+            fprintf(fp, "mov %s, %s\n", SMALL_TEMP_1, temp->arg1->name);
+            fprintf(fp, "mov %s, %s\n", SMALL_TEMP_2, temp->arg2->name);
+            fprintf(fp, "%s %s, %s\n", temp->op == OP_AND ? "and" : "or", SMALL_TEMP_1, SMALL_TEMP_2);
+            fprintf(fp, "mov %s, %s\n", temp->result->name, SMALL_TEMP_1);
             break;
         case OP_ASSIGN:
-            fprintf(fp, "mov %s, %s\n", TEMP_1, temp->arg1->name);
-            fprintf(fp, "mov %s, %s\n", temp->result->name, TEMP_1);
+            if (temp->arg1->data.var->type == __NUM__)
+            {
+                fprintf(fp, "mov %s, %s\n", TEMP_1, temp->arg1->name);
+                fprintf(fp, "mov %s, %s\n", temp->result->name, TEMP_1);
+            }
+            else if (temp->arg1->data.var->type == __BOOL__)
+            {
+                fprintf(fp, "mov %s, %s\n", SMALL_TEMP_1, temp->arg1->name);
+                fprintf(fp, "mov %s, %s\n", temp->result->name, SMALL_TEMP_1);
+            }
+            else if (temp->arg1->data.var->type == __RNUM__)
+            {
+                fprintf(fp, "mov %s, %s\n", BIG_TEMP_1, temp->arg1->name);
+                fprintf(fp, "mov %s, %s\n", temp->result->name, BIG_TEMP_1);
+            }
             break;
         case OP_CMP:
             printf("In CMP\n");
@@ -1354,9 +1410,9 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             fflush(stdout);
             printf("arg2: %s\n", temp->arg2->name);
             fflush(stdout);
-            fprintf(fp, "mov %s, %s\n", TEMP_1, temp->arg1->name);
-            fprintf(fp, "mov %s, %s\n", TEMP_2, temp->arg2->name);
-            fprintf(fp, "cmp %s, %s\n", TEMP_1, TEMP_2);
+            fprintf(fp, "mov %s, %s\n", temp->arg1->data.var->type == __NUM__ ? TEMP_1 : SMALL_TEMP_1, temp->arg1->name);
+            fprintf(fp, "mov %s, %s\n", temp->arg2->data.var->type == __NUM__ ? TEMP_2 : SMALL_TEMP_2, temp->arg2->name);
+            fprintf(fp, "cmp %s, %s\n", temp->arg1->data.var->type == __NUM__ ? TEMP_1 : SMALL_TEMP_1, temp->arg2->data.var->type == __NUM__ ? TEMP_2 : SMALL_TEMP_2);
             break;
         case OP_JNZ:
             fprintf(fp, "jnz %s\n", temp->target_label);
@@ -1401,7 +1457,7 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             break;
         case OP_LOAD:
             fprintf(fp, "mov %s, %s\n", BIG_TEMP_1, temp->arg1->name);
-            fprintf(fp, "mov %s, dword[%s]\n", TEMP_2, BIG_TEMP_1);
+            fprintf(fp, "mov %s, word[%s]\n", TEMP_2, BIG_TEMP_1);
             fprintf(fp, "mov %s, %s\n", temp->result->name, TEMP_2);
             break;
         case OP_STORE:
@@ -1409,7 +1465,7 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             fflush(fp);
             fprintf(fp, "mov %s, %s\n", TEMP_2, temp->arg1->name);
             fflush(fp);
-            fprintf(fp, "mov dword[%s], %s\n", BIG_TEMP_1, TEMP_2);
+            fprintf(fp, "mov word[%s], %s\n", BIG_TEMP_1, TEMP_2);
             fflush(fp);
             break;
         case OP_FUNC_SCOPE_START:
@@ -1587,8 +1643,8 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
                     fprintf(fp, "sub rsp, 8\n");
                     fprintf(fp, "and rsp, -16\n");
                     // call printf
-                    fprintf(fp, "mov %s, %s\n", TEMP_1, get_offset_with_width(temp->arg1)->name);
-                    fprintf(fp, "sub %s, 1\n", TEMP_1);
+                    fprintf(fp, "mov %s, %s\n", SMALL_TEMP_1, get_offset_with_width(temp->arg1)->name);
+                    fprintf(fp, "sub %s, 1\n", SMALL_TEMP_1);
                     char *l1 = get_label();
                     char *l2 = get_label();
                     fprintf(fp, "jz %s\n", l1);
@@ -1663,12 +1719,12 @@ void print_init(FILE *fp)
     fprintf(fp, "extern scanf\n");
     fprintf(fp, "global main\n");
     fprintf(fp, "section .data\n");
-    fprintf(fp, "cnst_true dd 1\n");
-    fprintf(fp, "cnst_false dd 0\n");
+    fprintf(fp, "cnst_true db 1\n");
+    fprintf(fp, "cnst_false db 0\n");
     // Scanf format strings
-    fprintf(fp, "scan_num db \"%%d\", 0\n");
+    fprintf(fp, "scan_num db \"%%hi\", 0\n");
     // Print format strings
-    fprintf(fp, "print_num db \"Output: %%d\", 10, 0\n");
+    fprintf(fp, "print_num db \"Output: %%hi\", 10, 0\n");
     // bools
     fprintf(fp, "true_str db \"Output: true\", 10, 0\n");
     fprintf(fp, "false_str db \"Output: false\", 10, 0\n");
@@ -1677,11 +1733,11 @@ void print_init(FILE *fp)
     fprintf(fp, "prompt_rnum db \"Input: Enter a real value\", 10, 0\n");
     fprintf(fp, "prompt_bool db \"Input: Enter a boolean value\", 10, 0\n");
 
-    fprintf(fp, "prompt_arr db \"Input: Enter %%d array elements of %%s type for range %%d to %%d\", 10, 0\n");
+    fprintf(fp, "prompt_arr db \"Input: Enter %%hi array elements of %%s type for range %%hi to %%hi\", 10, 0\n");
     // arrays
     fprintf(fp, "print_out db \"Output: \", 0\n");
     fprintf(fp, "print_newline db 10, 0\n");
-    fprintf(fp, "print_single_num db \"%%d \", 0\n");
+    fprintf(fp, "print_single_num db \"%%hi \", 0\n");
     fprintf(fp, "print_single_rnum db \"%%f \", 0\n");
     fprintf(fp, "print_single_bool db \"%%s \", 0\n");
     // types

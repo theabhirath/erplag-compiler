@@ -11,6 +11,19 @@ start
 	get_value(A);
 	print(x);
 	print(A);
+	x := -2 * 3;
+	y := 2 * 3;
+	z := 2 * (-3);
+	a := -2 * (-3);
+	print(x);
+	print(y);
+	print(z);
+	print(a);
+	while(x>0)
+		start
+			x:=x-1;
+			print(x);
+		end
 end
 
 ** On the console

@@ -912,6 +912,11 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
             addToSymbolTable(blockSymTable, whileSymTableEntry);
             break;
         }
+        // TODO: Function call that returns nothing
+        case USE_AST:
+        {
+
+        }
         // TODO maybe remove this error if debugging works out
         default:
         {
@@ -1054,7 +1059,7 @@ void populateSymbolTables(ast *ASTree)
     driverSymTableEntry->data.block = (struct block_entry *)malloc(sizeof(struct block_entry));
     driverSymTableEntry->data.block->body = driverStmts;
     driverSymTableEntry->data.block->symTable = driverSymTable;
-    driverSymTableEntry->data.block->offset = 4;
+    driverSymTableEntry->data.block->offset = 0;
     populateBlockSymbolTables(driverStmts, driverSymTable);
     addToSymbolTable(&symbolTable, driverSymTableEntry);
     // populate OtherModule2 body
