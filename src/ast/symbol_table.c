@@ -1099,9 +1099,13 @@ char *getSymTabName(symbol_table *symTab)
     }
 }
 // Print the symbol table
-// variable name 	scope (module name) 	scope (line numbers) 	type of element 	is_array 	Static/dynamic 	array range 	width 	offset 	nesting level
 void printSymbolTable(symbol_table *symTab, int level)
 {
+    if (level == 0)
+    {
+        printf("Var\tscope\t\tscope\ttype of element\t\tis_array\tStatic/dynamic\tarray range\twidth\t\toffset\tnesting level\n");
+        printf("Name\t(mod name) (line numbers)\n");
+    }
     char *types[] = {"integer", "real", "boolean", "error"};
     int sizes[] = {__NUM_SIZE__, __RNUM_SIZE__, __BOOL_SIZE__, -1};
     char *arr_type_names[] = {"static", "dynamic", "error"};
@@ -1115,10 +1119,10 @@ void printSymbolTable(symbol_table *symTab, int level)
             {
                 case VAR_SYM:
                     printf("%s\t", entry->name);
-                    printf("%s\t", getSymTabName(symTab));
+                    printf("%s\t\t", getSymTabName(symTab));
                     printf("%d-%d\t", symTab->lineBegin, symTab->lineEnd);
-                    printf("%s\t", types[entry->data.var->type]);
-                    printf("%s\t", "no");
+                    printf("%s\t\t\t", types[entry->data.var->type]);
+                    printf("%s\t\t", "no");
                     printf("%s\t\t", "**");
                     printf("%s\t\t", "**");
                     printf("%d\t\t", sizes[entry->data.var->type]);
@@ -1128,19 +1132,20 @@ void printSymbolTable(symbol_table *symTab, int level)
                     break;
                 case ARR_SYM:
                     printf("%s\t", entry->name);
-                    printf("%s\t", getSymTabName(symTab));
+                    printf("%s\t\t", getSymTabName(symTab));
                     printf("%d-%d\t", symTab->lineBegin, symTab->lineEnd);
-                    printf("%s\t", types[entry->data.arr->eltype]);
-                    printf("%s\t", "yes");
-                    printf("%s\t", arr_type_names[entry->data.arr->arrayType]);
+                    printf("%s\t\t\t", types[entry->data.arr->eltype]);
+                    printf("%s\t\t", "yes");
+                    printf("%s\t\t", arr_type_names[entry->data.arr->arrayType]);
                     if (entry->data.arr->arrayType == STATIC)
                     {
-                        printf("%d-%d\t", entry->data.arr->left.staticIndex, entry->data.arr->right.staticIndex);
+                        printf("%d-%d\t\t", entry->data.arr->left.staticIndex, entry->data.arr->right.staticIndex);
                         printf("%d\t\t", (entry->data.arr->right.staticIndex - entry->data.arr->left.staticIndex + 2) * sizes[entry->data.arr->eltype]);
                     }
                     else
                     {
-                        printf("%s\t", "**");
+                        printf("%s\t\t", "**");
+                        printf("%s\t\t", "**");
                     }
                     printf("%d\t\t", entry->data.arr->offset);
                     printf("%d\t\t", level);

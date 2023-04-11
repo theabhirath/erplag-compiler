@@ -1792,6 +1792,6 @@ int main(int argc, char *argv[])
     fflush(stdout);
     printSymbolTable(&symbolTable, 0);
 
-    // generate_code(AST, "code.asm");
+    generate_code(AST, "code.asm");
     return 0;
 }
