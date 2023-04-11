@@ -460,7 +460,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             continue_point->label = cont->target_label;
             add_to_three_ac_list(list, continue_point);
 
-
             three_ac *offset_3ac = new_3ac();
             offset_3ac->op = OP_SUB;
             offset_3ac->arg1 = index;
@@ -1702,6 +1701,19 @@ void print_fine(FILE *fp)
     fprintf(fp, "syscall\n");
 }
 
+void generate_code(ast *AST, char *filename)
+{
+    // generate three address code
+    three_ac_list *list3Ad = malloc(sizeof(three_ac_list));
+    init_three_ac_list(list3Ad);
+    generate_opcode(AST->root, &symbolTable, list3Ad);
+    printf("3AC generated successfully.\n");
+    fflush(stdout);
+    FILE *fp1 = fopen(filename, "w");
+    print_init(fp1);
+    print_three_ac_list(list3Ad, fp1);
+    print_fine(fp1);
+}
 int main(int argc, char *argv[])
 {
     if (argc != 2)
@@ -1723,22 +1735,6 @@ int main(int argc, char *argv[])
     printf("Nah. No way.\n");
     fflush(stdout);
 
-    // generate three address code
-    three_ac_list *list3Ad = malloc(sizeof(three_ac_list));
-    init_three_ac_list(list3Ad);
-    if (AST->root == NULL)
-        printf("AST->root is NULL\n");
-    else
-        printf("AST->root is NOT NULL\n");
-    fflush(stdout);
-    generate_opcode(AST->root, &symbolTable, list3Ad);
-    printf("3AC generated successfully.\n");
-    fflush(stdout);
-    FILE *fp1 = fopen("code.asm", "w");
-    print_init(fp1);
-    print_three_ac_list(list3Ad, fp1);
-    print_fine(fp1);
-    printf("3AC printed successfully.\n");
-    fflush(stdout);
+    generate_code(AST, "code.asm");
     return 0;
 }
