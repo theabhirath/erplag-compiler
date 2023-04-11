@@ -504,8 +504,9 @@ ast_node *process_subtree(parse_tree_node *ptn)
         parse_tree_node *SqBo = ptn->child;
         parse_tree_node *WI0 = SqBo->sibling;
         process_subtree(WI0);
-        ptn->inh_addr->right = WI0->addr;
-        ptn->syn_addr = ptn->inh_addr;
+        ptn->syn_addr = createASTNode(ARR_ELEM_AST);
+        ptn->syn_addr->left = ptn->inh_addr;
+        ptn->syn_addr->right = WI0->addr;
         free(SqBo);
         free(WI0);
         break;

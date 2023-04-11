@@ -47,13 +47,21 @@ typedef enum OPERATOR
     OP_TEMP_DECL,
     OP_FRAME_ALLOC,
     SCAN,
+    PROMPT_NUM,
+    PROMPT_ARR,
     PRINT_CONST,
     PRINT_VAR,
+    PRINT_ARR_ELEM,
+    PRINT_OUT,
+    PRINT_NL,
+    PRINT_ARR_ITER,
     INSTR,
     OP_CONST,
     OP_NOP,
     OP_LOAD,
-    OP_SUB_RBP
+    OP_STORE,
+    OP_SUB_RBP,
+    ARRAY_INDEX_OUT_OF_BOUNDS
 } OPERATOR;
 
 void print_op(OPERATOR op)
@@ -147,11 +155,17 @@ void print_op(OPERATOR op)
     case PRINT_VAR:
         printf("PRINT_VAR\n");
         break;
+    case PRINT_ARR_ELEM:
+        printf("PRINT_ARR_ELEM\n");
+        break;
     case OP_NOP:
         printf("OP_NOP\n");
         break;
     case OP_LOAD:
         printf("OP_LOAD\n");
+        break;
+    case OP_STORE:
+        printf("OP_STORE\n");
         break;
     case OP_CONST:
         printf("OP_CONST\n");
@@ -164,6 +178,9 @@ void print_op(OPERATOR op)
         break;
     case OP_FUNC_FRAME_ALLOC:
         printf("OP_FUNC_FRAME_ALLOC\n");
+        break;
+    case OP_SUB_RBP:
+        printf("OP_SUB_RBP\n");
         break;
     default:
         printf("Unknown operator %d\n", op);
@@ -267,6 +284,7 @@ char *get_label()
 three_ac *new_3ac()
 {
     three_ac *temp = malloc(sizeof(three_ac));
+    temp->op = OP_NOP;
     temp->label = NULL;
     temp->arg1 = NULL;
     temp->arg2 = NULL;
@@ -296,6 +314,8 @@ ST_ENTRY *get_offset_with_width(ST_ENTRY *entry)
     ST_ENTRY *temp = malloc(sizeof(ST_ENTRY));
     temp->entry_type = VAR_SYM;
     temp->name = malloc(sizeof(char) * 64);
+    temp->data.var = malloc(sizeof(struct var_entry));
+    temp->data.var->type = entry->data.var->type;
     if (entry->entry_type == VAR_SYM)
         sprintf(temp->name, "dword[rbp-%d]", entry->data.var->offset);
     else if (entry->entry_type == ARR_SYM)
@@ -303,9 +323,26 @@ ST_ENTRY *get_offset_with_width(ST_ENTRY *entry)
     return temp;
 }
 
+ST_ENTRY *get_big_offset_with_width(ST_ENTRY *entry)
+{
+    ST_ENTRY *temp = malloc(sizeof(ST_ENTRY));
+    temp->entry_type = VAR_SYM;
+    temp->name = malloc(sizeof(char) * 64);
+    if (entry->entry_type == VAR_SYM)
+        sprintf(temp->name, "qword[rbp-%d]", entry->data.var->offset);
+    else if (entry->entry_type == ARR_SYM)
+        sprintf(temp->name, "qword[rbp-%d]", entry->data.arr->offset);
+    return temp;
+}
+
 int get_offset(ST_ENTRY *entry)
 {
-    return entry->data.var->offset;
+    if (entry->entry_type == VAR_SYM)
+        return entry->data.var->offset;
+    else if (entry->entry_type == ARR_SYM)
+        return entry->data.arr->offset;
+    else
+        return 0;
 }
 
 three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
@@ -372,6 +409,58 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             lindex->name = malloc(sizeof(char) * 64);
             sprintf(lindex->name, "%d", lindexVal);
 
+            ST_ENTRY *rindex = malloc(sizeof(ST_ENTRY));
+            rindex->entry_type = VAR_SYM;
+            rindex->name = malloc(sizeof(char) * 64);
+            sprintf(rindex->name, "%d", rindexVal);
+
+            // Runtime bound checking
+            three_ac *check = new_3ac();
+            check->op = OP_CMP;
+            check->arg1 = index;
+            check->arg2 = lindex;
+            add_to_three_ac_list(list, check);
+
+            // If index < lindex, throw error
+            three_ac *lt = new_3ac();
+            lt->op = OP_JL;
+            lt->target_label = get_label();
+            add_to_three_ac_list(list, lt);
+
+            // If index > rindex, throw error
+            check = new_3ac();
+            check->op = OP_CMP;
+            check->arg1 = index;
+            check->arg2 = rindex;
+            add_to_three_ac_list(list, check);
+
+            three_ac *gt = new_3ac();
+            gt->op = OP_JG;
+            gt->target_label = lt->target_label;
+            add_to_three_ac_list(list, gt);
+
+            // continue
+            three_ac *cont = new_3ac();
+            cont->op = OP_JMP;
+            cont->target_label = get_label();
+            add_to_three_ac_list(list, cont);
+
+            // Error point
+            three_ac *error_point = new_3ac();
+            error_point->op = OP_LABEL;
+            error_point->label = lt->target_label;
+            add_to_three_ac_list(list, error_point);
+            // Throw error
+            three_ac *error = new_3ac();
+            error->op = ARRAY_INDEX_OUT_OF_BOUNDS;
+            add_to_three_ac_list(list, error);
+            // Continue point
+            three_ac *continue_point = new_3ac();
+            continue_point->op = OP_LABEL;
+            continue_point->label = cont->target_label;
+            add_to_three_ac_list(list, continue_point);
+
+
             three_ac *offset_3ac = new_3ac();
             offset_3ac->op = OP_SUB;
             offset_3ac->arg1 = index;
@@ -391,7 +480,11 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             three_ac *add = new_3ac();
             add->op = OP_ADD;
             add->arg1 = mul->result;
-            add->arg2 = get_offset_with_width(arr_entry);
+            ST_ENTRY *arr_offset = malloc(sizeof(ST_ENTRY));
+            arr_offset->entry_type = VAR_SYM;
+            arr_offset->name = malloc(sizeof(char) * 64);
+            sprintf(arr_offset->name, "%d", offset);
+            add->arg2 = arr_offset;
             add->result = mul->result;
             add_to_three_ac_list(list, add);
             printf("add->result %s \n", add->result->name);
@@ -401,17 +494,17 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             rbp_minus->op = OP_SUB_RBP;
             rbp_minus->arg1 = add->result;
             get_temp_var(st, __NUM__, list);
-            rbp_minus->result = get_offset_with_width(get_temp_var(st, __NUM__, list)); // Keep space for 64 bit address
+            rbp_minus->result = get_big_offset_with_width(get_temp_var(st, __NUM__, list)); // Keep space for 64 bit address
             add_to_three_ac_list(list, rbp_minus);
             printf("rbp_minus->result %s \n", rbp_minus->result->name);
 
             temp->op = OP_LOAD;
             temp->arg1 = rbp_minus->result;
-            temp->result = rbp_minus->result;
+            temp->result = get_offset_with_width(get_temp_var(st, __NUM__, list));
             add_to_three_ac_list(list, temp);
             printf("arr_elem->result %s \n", temp->result->name);
 
-            return temp;   
+            return temp;
         }
         else
         {
@@ -457,14 +550,32 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     }
     case EQUALS_AST:
     {
-        printf("Generating code for assignment \n");
-        temp->op = OP_ASSIGN;
-        three_ac *temp1 = generate_opcode(node->right, st, list);
-        temp->arg1 = temp1->result;
-        temp->arg2 = NULL;
-        temp->result = generate_opcode(node->left, st, list)->result;
-        add_to_three_ac_list(list, temp);
-        printf("Generated code for assignment \n");
+        if (node->left->nodeType == ID)
+        {
+            printf("Generating code for assignment \n");
+            temp->op = OP_ASSIGN;
+            three_ac *temp1 = generate_opcode(node->right, st, list);
+            temp->arg1 = temp1->result;
+            temp->arg2 = NULL;
+            temp->result = generate_opcode(node->left, st, list)->result;
+            add_to_three_ac_list(list, temp);
+            printf("Generated code for assignment \n");
+        }
+        else if (node->left->nodeType == ARR_ELEM_AST)
+        {
+
+            printf("Generating code for assignment to array element \n");
+            temp->op = OP_STORE;
+            three_ac *temp1 = generate_opcode(node->right, st, list);
+            temp->arg1 = temp1->result;
+            temp->arg2 = NULL;
+            temp->result = generate_opcode(node->left, st, list)->arg1;
+            add_to_three_ac_list(list, temp);
+        }
+        else
+        {
+            printf("Haven't handled this assignment case yet\n");
+        }
         break;
     }
     case PLUS_AST:
@@ -765,8 +876,9 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
                 body
 
         assembly:
+                mov ind, st
         label0: cmp ind, en
-                jle label1
+                jg label1
                 body
                 inc ind
                 jmp label0
@@ -774,6 +886,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     */
     case FOR_AST:
     {
+        printf("Generating code for for loop\n");
         char *name = malloc(sizeof(char) * 10);
         sprintf(name, "%p", node);
         ST_ENTRY *st_entry = checkSymbolTable(st, name);
@@ -797,23 +910,49 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         frame->op = OP_FRAME_ALLOC;
         frame->arg1 = st_entry;
         add_to_three_ac_list(list, frame);
+        // Set offset of start_ste and end_ste to their values
+        three_ac *start_ac = new_3ac();
+        start_ac->op = OP_ASSIGN;
+        start_ac->result = get_offset_with_width(start_ste);
+        start_ac->arg1 = malloc(sizeof(ST_ENTRY *));
+        start_ac->arg1->name = malloc(sizeof(char) * 10);
+        sprintf(start_ac->arg1->name, "%d", start);
+        add_to_three_ac_list(list, start_ac);
+
+        three_ac *end_ac = new_3ac();
+        end_ac->op = OP_ASSIGN;
+        end_ac->result = get_offset_with_width(end_ste);
+        end_ac->arg1 = malloc(sizeof(ST_ENTRY *));
+        end_ac->arg1->name = malloc(sizeof(char) * 10);
+        sprintf(end_ac->arg1->name, "%d", end);
+        add_to_three_ac_list(list, end_ac);
+        // loop_variable = start
+        three_ac *first = new_3ac();
+        first->op = OP_ASSIGN;
+        first->arg1 = get_offset_with_width(start_ste);
+        first->result = get_offset_with_width(loop_var_ste);
+        add_to_three_ac_list(list, first);
         if (start < end)
         {
+            printf("Start < end\n");
             three_ac *first = temp;
             first->label = get_label();
             first->op = OP_LABEL;
             add_to_three_ac_list(list, first);
+            printf("Added label\n");
 
             three_ac *second = new_3ac();
             second->op = OP_CMP;
             second->arg1 = get_offset_with_width(loop_var_ste);
             second->arg2 = get_offset_with_width(end_ste);
             add_to_three_ac_list(list, second);
+            printf("Added cmp\n");
 
             three_ac *third = new_3ac();
-            third->op = OP_JLE;
+            third->op = OP_JG;
             third->target_label = get_label();
             add_to_three_ac_list(list, third);
+            printf("Added jg\n");
 
             LinkedListASTNode *body = st_entry->data.block->body;
             while (body != NULL)
@@ -821,6 +960,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
                 generate_opcode(body->data, new_st, list);
                 body = body->next;
             }
+            printf("Added body\n");
 
             three_ac *fourth = new_3ac();
             fourth->op = OP_INC;
@@ -828,17 +968,21 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             fourth->arg2 = NULL;
             fourth->result = second->arg1;
             add_to_three_ac_list(list, fourth);
+            printf("Added inc\n");
 
             three_ac *fifth = new_3ac();
             fifth->op = OP_JMP;
             fifth->target_label = first->label;
             add_to_three_ac_list(list, fifth);
+            printf("Added jmp\n");
 
             three_ac *sixth = new_3ac();
             sixth->label = third->target_label;
             sixth->op = OP_LABEL;
             add_to_three_ac_list(list, sixth);
+            printf("Added label\n");
         }
+
         else
         {
             three_ac *first = temp;
@@ -1030,36 +1174,106 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         printf("Generating code for get_value\n");
 
         ST_ENTRY *ste = checkAllSymbolTables(st, getName(node->right));
-        temp->op = SCAN;
-        temp->result = ste;
-        add_to_three_ac_list(list, temp);
-        break;
+        if (ste->entry_type == VAR_SYM)
+        {
+            three_ac *prompt = new_3ac();
+            prompt->op = PROMPT_NUM;
+            add_to_three_ac_list(list, prompt);
+            temp->op = SCAN;
+            temp->result = ste;
+            add_to_three_ac_list(list, temp);
+            break;
+        }
+        else if (ste->entry_type == ARR_SYM)
+        {
+            if (ste->data.arr->arrayType != STATIC)
+            {
+                printf("Dynamic arrays not supported yet\n");
+                break;
+            }
+            temp->op = PROMPT_ARR;
+            temp->arg1 = ste;
+            add_to_three_ac_list(list, temp);
+
+            int lindex = ste->data.arr->left.staticIndex;
+            int rindex = ste->data.arr->right.staticIndex;
+            int size_of_data = ste->data.arr->eltype == __NUM__ ? __NUM_SIZE__ : __BOOL_SIZE__;
+            int offset = ste->data.arr->offset;
+            for (int i = lindex; i <= rindex; i++, offset += size_of_data)
+            {
+                ST_ENTRY *offset_ste = malloc(sizeof(ST_ENTRY));
+                offset_ste->entry_type = VAR_SYM;
+                offset_ste->data.var = malloc(sizeof(struct var_entry));
+                offset_ste->data.var->type = __NUM__;
+                offset_ste->data.var->val.numValue = offset;
+                three_ac *scan = new_3ac();
+                scan->op = SCAN;
+                scan->result = ste;
+                scan->arg1 = offset_ste;
+                add_to_three_ac_list(list, scan);
+            }
+            break;
+        }
     }
     case PRINT_AST:
     {
+        printf("Generating code for print\n");
         switch (node->right->nodeType)
         {
         case ID:
         {
             ST_ENTRY *ste = checkAllSymbolTables(st, getName(node->right));
-            temp->op = PRINT_VAR;
-            temp->arg1 = ste;
+            if (ste->entry_type == VAR_SYM)
+            {
+                temp->op = PRINT_VAR;
+                temp->arg1 = ste;
+                add_to_three_ac_list(list, temp);
+            }
+            else if (ste->entry_type == ARR_SYM)
+            {
+                if (ste->data.arr->arrayType != STATIC)
+                {
+                    printf("Error: Dynamic arrays not supported\n");
+                    break;
+                }
+                temp->op = PRINT_OUT;
+                add_to_three_ac_list(list, temp);
+
+                int lindex = ste->data.arr->left.staticIndex;
+                int rindex = ste->data.arr->right.staticIndex;
+                int offset = ste->data.arr->offset;
+                int size_of_data = ste->data.arr->eltype == __NUM__ ? __NUM_SIZE__ : __BOOL_SIZE__;
+                get_temp_var(st, __NUM__, list);
+                ST_ENTRY *big = get_big_offset_with_width(get_temp_var(st, __NUM__, list));
+                for (int i = lindex; i <= rindex; i++, offset += size_of_data)
+                {
+                    ST_ENTRY *st_for_offset = get_offset_with_width(ste);
+                    sprintf(st_for_offset->name, "dword[rbp -%d]", offset);
+
+                    // Print value
+                    three_ac *print = new_3ac();
+                    print->op = PRINT_ARR_ITER;
+                    print->arg1 = st_for_offset;
+                    add_to_three_ac_list(list, print);
+                }
+                three_ac *print_new_line = new_3ac();
+                print_new_line->op = PRINT_NL;
+                add_to_three_ac_list(list, print_new_line);
+            }
             break;
         }
         case ARR_ELEM_AST:
         {
-            ST_ENTRY *ste = checkAllSymbolTables(st, getName(node->right->left));
-            temp->op = OP_NOP;
+            temp->op = PRINT_ARR_ELEM;
+            temp->arg1 = generate_opcode(node->right, st, list)->result;
+            add_to_three_ac_list(list, temp);
             break;
         }
         default:
         {
-            temp->op = PRINT;
-            temp->arg1 = generate_opcode(node->right, st, list)->result;
             break;
         }
         }
-        add_to_three_ac_list(list, temp);
         break;
     }
 
@@ -1191,6 +1405,14 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             fprintf(fp, "mov %s, dword[%s]\n", TEMP_2, BIG_TEMP_1);
             fprintf(fp, "mov %s, %s\n", temp->result->name, TEMP_2);
             break;
+        case OP_STORE:
+            fprintf(fp, "mov %s, %s\n", BIG_TEMP_1, temp->result->name);
+            fflush(fp);
+            fprintf(fp, "mov %s, %s\n", TEMP_2, temp->arg1->name);
+            fflush(fp);
+            fprintf(fp, "mov dword[%s], %s\n", BIG_TEMP_1, TEMP_2);
+            fflush(fp);
+            break;
         case OP_FUNC_SCOPE_START:
             fprintf(fp, "push rbp\n");
             fprintf(fp, "mov rbp, rsp\n");
@@ -1232,29 +1454,70 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             fprintf(fp, "nop\n");
             break;
         // TODO: Scan and Print
+        case PROMPT_NUM:
+        {
+            // save rsp in r13
+            fprintf(fp, "mov r13, rsp\n");
+            // print prompt
+            // align the stack to 16 bytes
+            fprintf(fp, "sub rsp, 8\n");
+            fprintf(fp, "and rsp, -16\n");
+            // call printf
+            fprintf(fp, "mov rdi, prompt_num\n");
+            fprintf(fp, "mov rax, 0\n");
+            fprintf(fp, "call printf\n");
+            // restore rsp
+            fprintf(fp, "mov rsp, r13\n");
+            break;
+        }
+        case PROMPT_ARR:
+        {
+            // save rsp in r13
+            fprintf(fp, "mov r13, rsp\n");
+            // print prompt
+            // align the stack to 16 bytes
+            fprintf(fp, "sub rsp, 8\n");
+            fprintf(fp, "and rsp, -16\n");
+            // call printf
+            fprintf(fp, "mov rdi, prompt_arr\n");
+            // arguments go in rsi, rdx, rcx, r8, r9
+            // num of elements in rsi
+            fprintf(fp, "mov rsi, %d\n", temp->arg1->data.arr->right.staticIndex - temp->arg1->data.arr->left.staticIndex + 1);
+            // element type in rdx
+            fprintf(fp, "mov rdx, %s\n", temp->arg1->data.arr->eltype == __NUM__ ? "int_str" : temp->arg1->data.arr->eltype == __BOOL__ ? "bool_str"
+                                                                                                                                        : "real_str");
+            // low bound in rcx
+            fprintf(fp, "mov rcx, %d\n", temp->arg1->data.arr->left);
+            // high bound in r8
+            fprintf(fp, "mov r8, %d\n", temp->arg1->data.arr->right);
+            fprintf(fp, "mov rax, 0\n");
+            fprintf(fp, "call printf\n");
+            // restore rsp
+            fprintf(fp, "mov rsp, r13\n");
+            break;
+        }
         case SCAN:
         {
-            if (temp->result->entry_type == VAR_SYM)
+            if (temp->result->entry_type == VAR_SYM || temp->result->entry_type == ARR_SYM && temp->result->data.arr->arrayType == STATIC)
             {
-                if (temp->result->data.var->type == __NUM__)
+                if (temp->result->entry_type == VAR_SYM && temp->result->data.var->type == __NUM__ || temp->result->entry_type == ARR_SYM && temp->result->data.arr->eltype == __NUM__)
                 {
                     // save rsp in r13
                     fprintf(fp, "mov r13, rsp\n");
-                    // print prompt
-                    // align the stack to 16 bytes
-                    fprintf(fp, "sub rsp, 8\n");
-                    fprintf(fp, "and rsp, -16\n");
-                    // call printf
-                    fprintf(fp, "mov rdi, prompt_num\n");
-                    fprintf(fp, "mov rax, 0\n");
-                    fprintf(fp, "call printf\n");
                     // align the stack to 16 bytes
                     fprintf(fp, "sub rsp, 8\n");
                     fprintf(fp, "and rsp, -16\n");
                     // call scanf
                     fprintf(fp, "mov rdi, scan_num\n");
                     fprintf(fp, "mov rsi, rbp\n");
-                    fprintf(fp, "sub rsi, %d\n", get_offset(temp->result));
+                    if (temp->result->entry_type == ARR_SYM)
+                    {
+                        fprintf(fp, "sub rsi, %d\n", temp->arg1->data.var->val.numValue);
+                    }
+                    else
+                    {
+                        fprintf(fp, "sub rsi, %d\n", get_offset(temp->result));
+                    }
                     fprintf(fp, "mov rax, 0\n");
                     fprintf(fp, "call scanf\n");
                     // restore rsp
@@ -1274,9 +1537,12 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
         }
         case PRINT_CONST:
         case PRINT_VAR:
+        case PRINT_ARR_ITER:
+        case PRINT_ARR_ELEM:
         {
             if (temp->arg1->entry_type == VAR_SYM)
             {
+                printf("Entered print var for %s\n", temp->arg1->name);
                 if (temp->arg1->data.var->type == __NUM__)
                 {
                     // save rsp in r13
@@ -1285,8 +1551,14 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
                     fprintf(fp, "sub rsp, 8\n");
                     fprintf(fp, "and rsp, -16\n");
                     // call printf
-                    fprintf(fp, "mov rdi, print_num\n");
-                    fprintf(fp, "movsx rsi, %s\n", get_offset_with_width(temp->arg1)->name);
+                    if (temp->op == PRINT_ARR_ITER)
+                        fprintf(fp, "mov rdi, print_single_num\n");
+                    else
+                        fprintf(fp, "mov rdi, print_num\n");
+                    if (temp->op == PRINT_ARR_ELEM || temp->op == PRINT_ARR_ITER)
+                        fprintf(fp, "movsx rsi, %s\n", temp->arg1->name);
+                    else
+                        fprintf(fp, "movsx rsi, %s\n", get_offset_with_width(temp->arg1)->name);
                     fprintf(fp, "mov rax, 0\n");
                     fprintf(fp, "call printf\n");
 
@@ -1338,6 +1610,41 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             }
             break;
         }
+        case PRINT_OUT:
+        case PRINT_NL:
+        {
+            // save rsp in r13
+            fprintf(fp, "mov r13, rsp\n");
+            // align the stack pointer to 16 bytes
+            fprintf(fp, "sub rsp, 8\n");
+            fprintf(fp, "and rsp, -16\n");
+            // call printf
+            fprintf(fp, "mov rdi, %s\n", temp->op == PRINT_OUT ? "print_out" : "print_newline");
+            fprintf(fp, "mov rax, 0\n");
+            fprintf(fp, "call printf\n");
+            // restore rsp
+            fprintf(fp, "mov rsp, r13\n");
+            break;
+        }
+        case ARRAY_INDEX_OUT_OF_BOUNDS:
+        {
+            // save rsp in r13
+            fprintf(fp, "mov r13, rsp\n");
+            // align the stack pointer to 16 bytes
+            fprintf(fp, "sub rsp, 8\n");
+            fprintf(fp, "and rsp, -16\n");
+            // call printf
+            fprintf(fp, "mov rdi, array_index_out_of_bounds\n");
+            fprintf(fp, "mov rax, 0\n");
+            fprintf(fp, "call printf\n");
+            // restore rsp
+            fprintf(fp, "mov rsp, r13\n");
+            // exit
+            fprintf(fp, "mov rax, 60\n");
+            fprintf(fp, "mov rdi, 0\n");
+            fprintf(fp, "syscall\n");
+            break;
+        }
         default:
             printf("Unknown opcode %d\n", temp->op);
             break;
@@ -1370,6 +1677,20 @@ void print_init(FILE *fp)
     fprintf(fp, "prompt_num db \"Input: Enter an integer value\", 10, 0\n");
     fprintf(fp, "prompt_rnum db \"Input: Enter a real value\", 10, 0\n");
     fprintf(fp, "prompt_bool db \"Input: Enter a boolean value\", 10, 0\n");
+
+    fprintf(fp, "prompt_arr db \"Input: Enter %%d array elements of %%s type for range %%d to %%d\", 10, 0\n");
+    // arrays
+    fprintf(fp, "print_out db \"Output: \", 0\n");
+    fprintf(fp, "print_newline db 10, 0\n");
+    fprintf(fp, "print_single_num db \"%%d \", 0\n");
+    fprintf(fp, "print_single_rnum db \"%%f \", 0\n");
+    fprintf(fp, "print_single_bool db \"%%s \", 0\n");
+    // types
+    fprintf(fp, "int_str db \"integer\", 0\n");
+    fprintf(fp, "real_str db \"real\", 0\n");
+    fprintf(fp, "bool_str db \"boolean\", 0\n");
+    // runtime errors
+    fprintf(fp, "array_index_out_of_bounds db \"RUN TIME ERROR:  Array index out of bound\", 10, 0\n");
 
     fprintf(fp, "\n\nsection .text\n");
 }

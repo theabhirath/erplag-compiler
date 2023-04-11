@@ -647,7 +647,7 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
         case GET_VALUE_AST:
         case PRINT_AST:
         {
-            Id = stmt->right;
+            Id = stmt->right->nodeType == ID ? stmt->right : stmt->right->nodeType == ARR_ELEM_AST ? stmt->right->left : NULL;
             if (checkAllSymbolTables(blockSymTable, Id->leafNodeInfo.lexeme) == NULL)
             {
                 printf("Error: Variable %s not declared at line number %d\n", Id->leafNodeInfo.lexeme,

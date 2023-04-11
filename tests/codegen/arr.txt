@@ -7,14 +7,10 @@ start
 	declare x, y, z:integer;
 	declare a, b, c:integer;
 	declare A: array[-3..2] of integer;
-    A[-2] := 5;
-	a:= A[-2];  
-	print(a);
-	b:= 9;
 	get_value(x);
-	get_value(y);
-	z := x + y*b + (a-b)*y + a*2 - b*x;
-        print(z);
+	get_value(A);
+	print(x);
+	print(A);
 end
 
 ** On the console

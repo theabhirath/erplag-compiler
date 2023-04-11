@@ -11,6 +11,16 @@ false_str db "Output: false", 10, 0
 prompt_num db "Input: Enter an integer value", 10, 0
 prompt_rnum db "Input: Enter a real value", 10, 0
 prompt_bool db "Input: Enter a boolean value", 10, 0
+prompt_arr db "Input: Enter %d array elements of %s type for range %d to %d", 10, 0
+print_out db "Output: ", 0
+print_newline db 10, 0
+print_single_num db "%d ", 0
+print_single_rnum db "%f ", 0
+print_single_bool db "%s ", 0
+int_str db "integer", 0
+real_str db "real", 0
+bool_str db "boolean", 0
+array_index_out_of_bounds db "RUN TIME ERROR:  Array index out of bound", 10, 0
 
 
 section .text
@@ -19,91 +29,34 @@ main:
 push rbp
 mov rbp, rsp
 
-sub rsp, 124
+sub rsp, 44
 
+mov eax, 19
+mov dword[rbp-4], eax
 
-mov eax, 2
-neg eax
-mov dword[rbp-48], eax
+mov eax, 56
+mov dword[rbp-8], eax
 
+nop
 
-mov eax, dword[rbp-48]
-mov ebx, -3
-sub eax, ebx
-mov dword[rbp-52], eax
+nop
 
+mov eax, 3
+mov dword[rbp-20], eax
 
-mov eax, dword[rbp-52]
-mov ebx, 4
-mul ebx
-mov dword[rbp-56], eax
+mov eax, 6
+mov dword[rbp-24], eax
 
-mov eax, dword[rbp-56]
+mov eax, dword[rbp-20]
+mov dword[rbp-28], eax
+
+label0:
+
+mov eax, dword[rbp-28]
 mov ebx, dword[rbp-24]
-add eax, ebx
-mov dword[rbp-56], eax
+cmp eax, ebx
 
-
-
-movsx rax, dword[rbp-56]
-mov rbx, rbp
-sub rbx, rax
-mov qword[rbp-64], rbx
-
-mov rax, qword[rbp-64]
-mov ebx, dword[rax]
-mov dword[rbp-64], ebx
-
-mov eax, 5
-mov dword[rbp-64], eax
-
-
-mov eax, 2
-neg eax
-mov dword[rbp-68], eax
-
-
-mov eax, dword[rbp-68]
-mov ebx, -3
-sub eax, ebx
-mov dword[rbp-72], eax
-
-
-mov eax, dword[rbp-72]
-mov ebx, 4
-mul ebx
-mov dword[rbp-76], eax
-
-mov eax, dword[rbp-76]
-mov ebx, dword[rbp-24]
-add eax, ebx
-mov dword[rbp-76], eax
-
-
-
-movsx rax, dword[rbp-76]
-mov rbx, rbp
-sub rbx, rax
-mov qword[rbp-84], rbx
-
-mov rax, qword[rbp-84]
-mov ebx, dword[rax]
-mov dword[rbp-84], ebx
-
-mov eax, dword[rbp-84]
-mov dword[rbp-12], eax
-
-mov r13, rsp
-sub rsp, 8
-and rsp, -16
-mov rdi, print_num
-movsx rsi, dword[rbp-12]
-mov rax, 0
-call printf
-mov rsp, r13
-
-mov eax, 9
-mov dword[rbp-16], eax
+jg label1
 
 mov r13, rsp
 sub rsp, 8
@@ -111,6 +64,9 @@ and rsp, -16
 mov rdi, prompt_num
 mov rax, 0
 call printf
+mov rsp, r13
+
+mov r13, rsp
 sub rsp, 8
 and rsp, -16
 mov rdi, scan_num
@@ -120,76 +76,77 @@ mov rax, 0
 call scanf
 mov rsp, r13
 
-mov r13, rsp
-sub rsp, 8
-and rsp, -16
-mov rdi, prompt_num
-mov rax, 0
-call printf
-sub rsp, 8
-and rsp, -16
-mov rdi, scan_num
-mov rsi, rbp
-sub rsi, 4
-mov rax, 0
-call scanf
-mov rsp, r13
+mov eax, dword[rbp-0]
+mov ebx, 1
+cmp eax, ebx
 
+jnz label3
 
-mov eax, dword[rbp-4]
-mov ebx, dword[rbp-16]
-mul ebx
-mov dword[rbp-88], eax
+nop
 
 
 mov eax, dword[rbp-0]
-mov ebx, dword[rbp-88]
-add eax, ebx
-mov dword[rbp-92], eax
-
-
-mov eax, dword[rbp-12]
-mov ebx, dword[rbp-16]
-sub eax, ebx
-mov dword[rbp-96], eax
-
-
-mov eax, dword[rbp-96]
-mov ebx, dword[rbp-4]
-mul ebx
-mov dword[rbp-100], eax
-
-
-mov eax, dword[rbp-92]
-mov ebx, dword[rbp-100]
-add eax, ebx
-mov dword[rbp-104], eax
-
-
-mov eax, dword[rbp-12]
 mov ebx, 2
 mul ebx
-mov dword[rbp-108], eax
+mov dword[rbp-36], eax
 
 
-mov eax, dword[rbp-104]
-mov ebx, dword[rbp-108]
-add eax, ebx
-mov dword[rbp-112], eax
-
-
-mov eax, dword[rbp-16]
-mov ebx, dword[rbp-0]
-mul ebx
-mov dword[rbp-116], eax
-
-
-mov eax, dword[rbp-112]
-mov ebx, dword[rbp-116]
+mov eax, dword[rbp-36]
+mov ebx, dword[rbp-4]
 sub eax, ebx
-mov dword[rbp-120], eax
+mov dword[rbp-40], eax
 
-mov eax, dword[rbp-120]
+
+mov eax, dword[rbp-40]
+mov ebx, dword[rbp-28]
+add eax, ebx
+mov dword[rbp-44], eax
+
+mov eax, dword[rbp-44]
+mov dword[rbp-4], eax
+
+mov r13, rsp
+sub rsp, 8
+and rsp, -16
+mov rdi, print_num
+movsx rsi, dword[rbp-4]
+mov rax, 0
+call printf
+mov rsp, r13
+
+nop
+
+jmp label2
+
+label3:
+
+mov eax, dword[rbp-0]
+mov ebx, 2
+cmp eax, ebx
+
+jnz label4
+
+nop
+
+
+mov eax, dword[rbp-0]
+mov ebx, 3
+mul ebx
+mov dword[rbp-40], eax
+
+
+mov eax, dword[rbp-40]
+mov ebx, dword[rbp-8]
+sub eax, ebx
+mov dword[rbp-44], eax
+
+
+mov eax, dword[rbp-44]
+mov ebx, dword[rbp-28]
+add eax, ebx
+mov dword[rbp-48], eax
+
+mov eax, dword[rbp-48]
 mov dword[rbp-8], eax
 
 mov r13, rsp
@@ -200,6 +157,57 @@ movsx rsi, dword[rbp-8]
 mov rax, 0
 call printf
 mov rsp, r13
+
+nop
+
+jmp label2
+
+label4:
+
+nop
+
+nop
+
+mov r13, rsp
+sub rsp, 8
+and rsp, -16
+mov rdi, print_num
+movsx rsi, dword[rbp-0]
+mov rax, 0
+call printf
+mov rsp, r13
+
+nop
+
+jmp label2
+
+label2:
+
+mov r13, rsp
+sub rsp, 8
+and rsp, -16
+mov rdi, print_num
+movsx rsi, dword[rbp-4]
+mov rax, 0
+call printf
+mov rsp, r13
+
+mov r13, rsp
+sub rsp, 8
+and rsp, -16
+mov rdi, print_num
+movsx rsi, dword[rbp-8]
+mov rax, 0
+call printf
+mov rsp, r13
+
+inc dword[rbp-28]
+
+jmp label0
+
+label1:
+
+nop
 
 mov rsp, rbp
 pop rbp
