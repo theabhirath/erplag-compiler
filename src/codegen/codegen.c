@@ -1790,7 +1790,8 @@ int main(int argc, char *argv[])
     populateSymbolTables(AST);
     printf("Nah. No way.\n");
     fflush(stdout);
+    printSymbolTable(&symbolTable, 0);
 
-    generate_code(AST, "code.asm");
+    // generate_code(AST, "code.asm");
     return 0;
 }

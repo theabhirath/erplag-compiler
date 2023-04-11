@@ -102,6 +102,8 @@ typedef struct symbol_table
     ST_LL *data[SYMBOL_TABLE_SIZE];
     struct symbol_table *parent;
     int offset;
+    int lineBegin;
+    int lineEnd;
 } symbol_table;
 
 extern symbol_table symbolTable;
@@ -110,5 +112,6 @@ void populateSymbolTables(ast *ASTree);
 ST_ENTRY *checkSymbolTable(symbol_table *symTab, char *name);
 ST_ENTRY *checkAllSymbolTables(symbol_table *symTab, char *name);
 enum TYPE getType(ast_node *node, symbol_table *st);
+void printSymbolTable(symbol_table *symTab, int level);
 
 #endif

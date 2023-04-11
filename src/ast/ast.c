@@ -168,6 +168,13 @@ ast_node *process_subtree(parse_tree_node *ptn)
         process_subtree(ModDef);
         ptn->addr = createASTNode(DRIVER_MODULE_AST);
         ptn->addr->aux_info = ModDef->addr;
+        if (ModDef->addr != NULL)
+        {
+            LinkedListASTNode *body = ModDef->addr;
+            ast_node *front = body->data;
+            ptn->addr->beginLine = front->beginLine;
+            ptn->addr->endLine = front->endLine;
+        }
         free(DriverDef);
         free(Driver);
         free(Program);
@@ -366,6 +373,12 @@ ast_node *process_subtree(parse_tree_node *ptn)
         parse_tree_node *End = Statements->sibling;
         process_subtree(Statements);
         ptn->addr = Statements->syn_addr;
+        if (ptn->addr)
+        {
+            ast_node *front_node = ((LinkedListASTNode *)ptn->addr)->data;
+            front_node->beginLine = getLineNumber(Start);
+            front_node->endLine = getLineNumber(End);
+        }
         free(Start);
         free(End);
         free(Statements);
@@ -605,12 +618,13 @@ ast_node *process_subtree(parse_tree_node *ptn)
         printf("Token: %s\n", temp1->leafNodeInfo.lexeme);
         temp->left = ptn->inh_addr;
         temp->right = ElementIndexWithExpression->syn_addr;
-        if(ElementIndexWithExpression->syn_addr == NULL)
+        if (ElementIndexWithExpression->syn_addr == NULL)
         {
             printf("rule is wrong\n");
             fflush(stdout);
         }
-        else{
+        else
+        {
             printf("index node type: %d\n", temp->right->nodeType);
             if (temp->right->nodeType == MINUS_AST)
             {
@@ -1071,7 +1085,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr->left = ptn->inh_addr;
         printf("dsjkl2\n");
         fflush(stdout);
-        
+
         printf("dsjkl3\n");
         fflush(stdout);
         ptn->syn_addr = ptn->addr;
@@ -1109,7 +1123,7 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->syn_addr = AE0->syn_addr;
         printf("ok %d\n", ptn->addr->nodeType);
         fflush(stdout);
-        if(ptn->addr->nodeType==32 || ptn->addr->nodeType==34)
+        if (ptn->addr->nodeType == 32 || ptn->addr->nodeType == 34)
         {
             parse_tree_node *temp = ptn->addr;
             printf("%s\n", temp->leafNodeInfo.lexeme);
@@ -1401,6 +1415,8 @@ ast_node *process_subtree(parse_tree_node *ptn)
         process_subtree(Value);
         process_subtree(Statements);
         ptn->addr = createASTNode(CASE_AST);
+        ptn->addr->beginLine = getLineNumber(Colon);
+        ptn->addr->endLine = getLineNumber(Break);
         ptn->addr->left = Value->addr;
         ptn->addr->right = Statements->syn_addr;
         free(Case);
@@ -1432,18 +1448,20 @@ ast_node *process_subtree(parse_tree_node *ptn)
     case 120: // 120: <default> -> DEFAULT COLON <statements> BREAK SEMICOL
     {
         parse_tree_node *Default = ptn->child;
-        parse_tree_node *COLON = Default->sibling;
-        parse_tree_node *Statements = COLON->sibling;
-        parse_tree_node *BREAK = Statements->sibling;
-        parse_tree_node *SEMICOL = BREAK->sibling;
+        parse_tree_node *Colon = Default->sibling;
+        parse_tree_node *Statements = Colon->sibling;
+        parse_tree_node *Break = Statements->sibling;
+        parse_tree_node *SEMICOL = Break->sibling;
         process_subtree(Statements);
         ptn->addr = createASTNode(DEFAULT_AST);
+        ptn->addr->beginLine = getLineNumber(Colon);
+        ptn->addr->endLine = getLineNumber(Break);
         ptn->addr->left = NULL;
         ptn->addr->right = Statements->syn_addr;
         free(Default);
-        free(COLON);
+        free(Colon);
         free(Statements);
-        free(BREAK);
+        free(Break);
         free(SEMICOL);
         break;
     }
@@ -1469,6 +1487,8 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr->left = Forrange->addr;
         ptn->addr->right = Statements->syn_addr;
         ptn->addr->aux_info = Id;
+        ptn->addr->beginLine = getLineNumber(Start);
+        ptn->addr->endLine = getLineNumber(End);
         free(For);
         free(Bo);
         free(In);
@@ -1493,6 +1513,8 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->addr = createASTNode(WHILE_AST);
         ptn->addr->left = BooleanExpr->syn_addr;
         ptn->addr->right = Statements->syn_addr;
+        ptn->addr->beginLine = getLineNumber(START);
+        ptn->addr->endLine = getLineNumber(END);
         free(While);
         free(BO);
         free(BooleanExpr);
@@ -1598,6 +1620,10 @@ char *getName(ast_node *node)
     return ptn->leafNodeInfo.lexeme;
 }
 
+int getLineNumber(parse_tree_node *node)
+{
+    return node->leafNodeInfo.lineNumber;
+}
 void print_ll(LinkedListASTNode *head, int depth, FILE *fp)
 {
     LinkedListASTNode *temp = head;
@@ -1669,7 +1695,7 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     {
         fprintf(fp, "MODULE_DEF_AST\n\n");
         fflush(fp);
-        struct moduleDefAuxInfo* mdai = (struct moduleDefAuxInfo *)node->aux_info;
+        struct moduleDefAuxInfo *mdai = (struct moduleDefAuxInfo *)node->aux_info;
         print_ll(mdai->input_plist, depth + 1, fp);
         print_ll(mdai->ret, depth + 1, fp);
         print_ll(mdai->moduleDef, depth + 1, fp);
@@ -1727,7 +1753,7 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
         {
             printf("reached here\n");
             fflush(stdout);
-            //Print exact node type also
+            // Print exact node type also
             printf("Operator on RHS: %d\n", node->right->nodeType);
             fflush(stdout);
             print_ast_node(node->right, depth + 1, fp);
@@ -1740,7 +1766,7 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
         // }
         else
         {
-            if(node->right == NULL)
+            if (node->right == NULL)
             {
                 printf("NOT OK\n");
                 fflush(stdout);
@@ -1748,7 +1774,7 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
             else
             {
                 printf("OK\n");
-                // node right nodeType 
+                // node right nodeType
                 printf("%d\n", node->right->nodeType);
                 fflush(stdout);
                 print_ast_node(node->right, depth + 1, fp);
@@ -1973,7 +1999,7 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     {
         fprintf(fp, "ARR_ELEM_AST\n");
         fflush(fp);
-        if(node->left == NULL)
+        if (node->left == NULL)
         {
             printf("NULL\n");
             fflush(stdout);
@@ -2028,7 +2054,7 @@ void print_ast(ast *a)
 //     ast *AST = create_ast(&parseTree);
 //     printf("AST created successfully.\n");
 //     print_ast(AST);
-//     printf("AST printed successfully.\n");  
+//     printf("AST printed successfully.\n");
 //     fflush(stdout);
 //     // populate symbol tables
 //     populateSymbolTables(AST);

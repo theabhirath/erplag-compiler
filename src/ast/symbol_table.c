@@ -798,6 +798,8 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
                 sprintf(casestr, "%p", case_list->data);
                 symbol_table *caseSymTable = createSymbolTable(blockSymTable, casestr);
                 updateOffset(caseSymTable, blockSymTable->offset + __NUM_SIZE__);
+                caseSymTable->lineBegin = case_list->data->beginLine;
+                caseSymTable->lineEnd = case_list->data->endLine;
                 // create an entry for the case symbol table in the parent symbol table
                 ST_ENTRY *caseSymTableEntry = malloc(sizeof(ST_ENTRY));
                 caseSymTableEntry->name = casestr;
@@ -856,6 +858,8 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
             char *forstr = malloc(sizeof(char) * 64);
             sprintf(forstr, "%p", stmt);
             symbol_table *forSymTable = createSymbolTable(blockSymTable, forstr);
+            forSymTable->lineBegin = stmt->beginLine;
+            forSymTable->lineEnd = stmt->endLine;
             // set offsets
             startEntry->data.var->offset = forSymTable->offset;
             updateOffset(forSymTable, forSymTable->offset + __NUM_SIZE__);
@@ -901,6 +905,8 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
             char *whilestr = malloc(sizeof(char) * 64);
             sprintf(whilestr, "%p", stmt);
             symbol_table *whileSymTable = createSymbolTable(blockSymTable, whilestr);
+            whileSymTable->lineBegin = stmt->beginLine;
+            whileSymTable->lineEnd = stmt->endLine;
             // create an entry for the while symbol table in the parent symbol table
             ST_ENTRY *whileSymTableEntry = malloc(sizeof(ST_ENTRY));
             whileSymTableEntry->name = whilestr;
@@ -977,6 +983,17 @@ void populateOtherModuleSignatures(LinkedListASTNode *node)
             addToSymbolTable(&symbolTable, symTabEntryForModule);
         }
         symbol_table *funcSymTable = createSymbolTable(&symbolTable, symTabEntryForModule->name);
+        if(moduleDef != NULL)
+        {
+            ast_node *moduleDefAST = moduleDef->data;
+            funcSymTable->lineBegin = moduleDefAST->beginLine;
+            funcSymTable->lineEnd = moduleDefAST->endLine;
+        }
+        else
+        {
+            funcSymTable->lineBegin = getLineNumber(Id);
+            funcSymTable->lineEnd = getLineNumber(Id);
+        }
         // populate the symbol table with the input parameters
         symTabEntryForModule->data.func = (struct func_entry *)malloc(sizeof(struct func_entry));
         symTabEntryForModule->data.func->inputs = addParamListToFuncSymTable(funcSymTable, input_plist);
@@ -994,6 +1011,8 @@ void populateOtherModuleSignatures(LinkedListASTNode *node)
         // create a new symbol table for the block
         symbol_table *blockSymTable = createSymbolTable(funcSymTable, blockSymTableEntry->name);
         blockSymTableEntry->data.block->symTable = blockSymTable;
+        blockSymTable->lineBegin = funcSymTable->lineBegin;
+        blockSymTable->lineEnd = funcSymTable->lineEnd;
         addToSymbolTable(funcSymTable, blockSymTableEntry);
         // LinkedListASTNode *stmts = moduleDef;
         // populateBlockSymbolTables(stmts, blockSymTable);
@@ -1052,6 +1071,8 @@ void populateSymbolTables(ast *ASTree)
     populateOtherModuleBodies(otherModules1);
     // driver module (aux_info is a linked list of statements)
     symbol_table *driverSymTable = createSymbolTable(&symbolTable, "driver");
+    driverSymTable->lineBegin = driverModule->beginLine;
+    driverSymTable->lineEnd = driverModule->endLine;
     LinkedListASTNode *driverStmts = driverModule->aux_info;
     ST_ENTRY *driverSymTableEntry = (ST_ENTRY *)malloc(sizeof(ST_ENTRY));
     driverSymTableEntry->name = "driver";
@@ -1064,4 +1085,77 @@ void populateSymbolTables(ast *ASTree)
     addToSymbolTable(&symbolTable, driverSymTableEntry);
     // populate OtherModule2 body
     populateOtherModuleBodies(otherModules2);
+}
+
+char *getSymTabName(symbol_table *symTab)
+{
+    if(symTab->parent != &symbolTable)
+    {
+        return getSymTabName(symTab->parent);
+    }
+    else
+    {
+        return symTab->name;
+    }
+}
+// Print the symbol table
+// variable name 	scope (module name) 	scope (line numbers) 	type of element 	is_array 	Static/dynamic 	array range 	width 	offset 	nesting level
+void printSymbolTable(symbol_table *symTab, int level)
+{
+    char *types[] = {"integer", "real", "boolean", "error"};
+    int sizes[] = {__NUM_SIZE__, __RNUM_SIZE__, __BOOL_SIZE__, -1};
+    char *arr_type_names[] = {"static", "dynamic", "error"};
+    for (int i = 0; i < SYMBOL_TABLE_SIZE; i++)
+    {
+        ST_LL *list = symTab ->data[i];
+        while (list != NULL)
+        {
+            ST_ENTRY *entry = list->data;
+            switch (entry->entry_type)
+            {
+                case VAR_SYM:
+                    printf("%s\t", entry->name);
+                    printf("%s\t", getSymTabName(symTab));
+                    printf("%d-%d\t", symTab->lineBegin, symTab->lineEnd);
+                    printf("%s\t", types[entry->data.var->type]);
+                    printf("%s\t", "no");
+                    printf("%s\t\t", "**");
+                    printf("%s\t\t", "**");
+                    printf("%d\t\t", sizes[entry->data.var->type]);
+                    printf("%d\t\t", entry->data.var->offset);
+                    printf("%d\t\t", level);
+                    printf("\n");
+                    break;
+                case ARR_SYM:
+                    printf("%s\t", entry->name);
+                    printf("%s\t", getSymTabName(symTab));
+                    printf("%d-%d\t", symTab->lineBegin, symTab->lineEnd);
+                    printf("%s\t", types[entry->data.arr->eltype]);
+                    printf("%s\t", "yes");
+                    printf("%s\t", arr_type_names[entry->data.arr->arrayType]);
+                    if (entry->data.arr->arrayType == STATIC)
+                    {
+                        printf("%d-%d\t", entry->data.arr->left.staticIndex, entry->data.arr->right.staticIndex);
+                        printf("%d\t\t", (entry->data.arr->right.staticIndex - entry->data.arr->left.staticIndex + 2) * sizes[entry->data.arr->eltype]);
+                    }
+                    else
+                    {
+                        printf("%s\t", "**");
+                    }
+                    printf("%d\t\t", entry->data.arr->offset);
+                    printf("%d\t\t", level);
+                    printf("\n");
+                    break;
+                case FUNC_SYM:
+                    printSymbolTable(entry->data.func->symTable, level + 1);
+                    break;
+                case BLOCK_SYM:
+                    printSymbolTable(entry->data.block->symTable, level + 1);
+                    break;
+                default:
+                    break;
+            }
+            list = list -> next;
+        }
+    }
 }
