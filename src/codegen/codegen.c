@@ -223,6 +223,7 @@ void add_to_three_ac_list(three_ac_list *list, three_ac *node)
         list->tail = node;
     }
 }
+int type_size [] = {__NUM_SIZE__, __RNUM_SIZE__, __BOOL_SIZE__, __BOOL_SIZE__};
 
 ST_ENTRY *get_temp_var(symbol_table *symtab, enum TYPE type, three_ac_list *list)
 {
@@ -1673,6 +1674,10 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
                     fprintf(fp, "sub rsp, 8\n");
                     fprintf(fp, "and rsp, -16\n");
                     // call printf
+                    if (temp->op == PRINT_ARR_ITER)
+                        fprintf(fp, "mov rdi, print_single_bool\n");
+                    else
+                        fprintf(fp, "mov rdi, print_bool\n");
                     if (temp->op == PRINT_ARR_ITER || temp->op == PRINT_ARR_ELEM)
                         fprintf(fp, "mov %s, %s\n", SMALL_TEMP_1, temp->arg1->name);
                     else
@@ -1681,10 +1686,10 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
                     char *l1 = get_label();
                     char *l2 = get_label();
                     fprintf(fp, "jz %s\n", l1);
-                    fprintf(fp, "mov rdi, false_str\n");
+                    fprintf(fp, "mov rsi, false_str\n");
                     fprintf(fp, "jmp %s\n", l2);
                     fprintf(fp, "%s:\n", l1);
-                    fprintf(fp, "mov rdi, true_str\n");
+                    fprintf(fp, "mov rsi, true_str\n");
                     fprintf(fp, "%s:\n", l2);
                     fprintf(fp, "mov rax, 0\n");
                     fprintf(fp, "call printf\n");
@@ -1758,9 +1763,11 @@ void print_init(FILE *fp)
     fprintf(fp, "scan_num db \"%%hi\", 0\n");
     // Print format strings
     fprintf(fp, "print_num db \"Output: %%hi\", 10, 0\n");
+    fprintf(fp, "print_bool db \"Output: %%s\", 10, 0\n");
+    fprintf(fp, "print_rnum db \"Output: %%f\", 10, 0\n");
     // bools
-    fprintf(fp, "true_str db \"Output: true\", 10, 0\n");
-    fprintf(fp, "false_str db \"Output: false\", 10, 0\n");
+    fprintf(fp, "true_str db \"true \", 0\n");
+    fprintf(fp, "false_str db \"false \", 0\n");
     // prompts
     fprintf(fp, "prompt_num db \"Input: Enter an integer value\", 10, 0\n");
     fprintf(fp, "prompt_rnum db \"Input: Enter a real value\", 10, 0\n");
