@@ -757,15 +757,25 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->syn_addr = Arr_N5->syn_addr;
         break;
     }
-    case 59: // 59: <arr_N5> -> <op2> <arrFactor> <arr_N5>
+    case 59: // 59: <arr_N5> -> <op2> <sign> <arrFactor> <arr_N5>
     {
         parse_tree_node *Op2 = ptn->child;
-        parse_tree_node *ArrFactor = Op2->sibling;
+        parse_tree_node *Sign = Op2->sibling;
+        parse_tree_node *ArrFactor = Sign->sibling;
         parse_tree_node *Arr_N5 = ArrFactor->sibling;
         process_subtree(Op2);
         ptn->addr = Op2->addr;
-        process_subtree(ArrFactor);
-        ptn->addr->right = ArrFactor->syn_addr;
+        process_subtree(Sign);
+        if(Sign->addr != NULL)
+        {
+            process_subtree(ArrFactor);
+            Sign->addr->right = ArrFactor->syn_addr;
+            ptn->addr->right = Sign->addr;
+        }
+        else{
+            process_subtree(ArrFactor);
+            ptn->addr->right = ArrFactor->syn_addr;
+        }
         free(ArrFactor);
         free(Op2);
 
@@ -1169,15 +1179,29 @@ ast_node *process_subtree(parse_tree_node *ptn)
         free(T0);
         break;
     }
-    case 90: // 90: <T0> -> <op2> <factor> <T0>
+    case 90: // 90: <T0> -> <op2> <sign> <factor> <T0>
     {
         parse_tree_node *Op2 = ptn->child;
-        parse_tree_node *Factor = Op2->sibling;
+        parse_tree_node *Sign = Op2->sibling;
+        parse_tree_node *Factor = Sign->sibling;
         parse_tree_node *T0 = Factor->sibling;
         process_subtree(Op2);
         ptn->addr = Op2->addr;
-        process_subtree(Factor);
-        ptn->addr->right = Factor->addr;
+        process_subtree(Sign);
+        if(Sign->addr != NULL)
+        {
+            process_subtree(Factor);
+            Sign->addr->right = Factor->addr;
+            ptn->addr->right = Sign->addr;
+
+        }
+        else
+        {
+            process_subtree(Factor);
+            ptn->addr->right = Factor->addr;
+        } 
+        
+        //Don't touch below
         T0->inh_addr = ptn->addr;
         ptn->addr->left = ptn->inh_addr;
         process_subtree(T0);

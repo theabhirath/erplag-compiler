@@ -56,7 +56,7 @@
 <arr_N4>,<op1>,<arrTerm>,<arr_N4>
 <arr_N4>,EPSILON
 <arrTerm>,<arrFactor>,<arr_N5>
-<arr_N5>,<op2>,<arrFactor>,<arr_N5>
+<arr_N5>,<op2>,<sign>,<arrFactor>,<arr_N5>
 <arr_N5>,EPSILON
 <arrFactor>,BO,<arrExpr>,BC
 <arrFactor>,<id_num>
@@ -87,7 +87,7 @@
 <AE0>,<op1>,<term>,<AE0>
 <AE0>,EPSILON
 <term>,<factor>,<T0>
-<T0>,<op2>,<factor>,<T0>
+<T0>,<op2>,<sign>,<factor>,<T0>
 <T0>,EPSILON
 <op1>,PLUS
 <op1>,MINUS

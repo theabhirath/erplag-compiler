@@ -1532,7 +1532,7 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             // }
             break;
         case OP_FUNC_FRAME_ALLOC:
-            ST_ENTRY *temp1 = temp->arg1;
+        {    ST_ENTRY *temp1 = temp->arg1;
             int offset = 0;
             if (temp1->entry_type == FUNC_SYM)
             {
@@ -1543,7 +1543,7 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
                 offset = temp1->data.block->symTable->offset;
             }
             fprintf(fp, "sub rsp, %d\n", offset);
-            break;
+            break;}
         case OP_SCOPE_START:
         case OP_SCOPE_END:
         case OP_FRAME_ALLOC:
