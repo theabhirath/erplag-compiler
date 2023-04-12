@@ -1,0 +1,19 @@
+**Code Generation test case 1: Computing expressions using integer data type**
+
+**Single driver module with single level nesting **
+
+<<<driver program>>>
+start
+	declare A: array[-3..2] of boolean;
+    A[-3] := true;
+    A[-2] := false;
+    A[-1] := 1 < 2;
+    print(A[-1]);
+    A[0] := false;
+    A[1] := true;
+    A[2] := false;
+    print(A);
+end
+
+
+

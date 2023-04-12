@@ -510,7 +510,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
 
             temp->op = OP_LOAD;
             temp->arg1 = rbp_minus->result;
-            temp->result = get_offset_with_width(get_temp_var(st, __NUM__, list));
+            temp->result = get_offset_with_width(get_temp_var(st, arr_entry->data.arr->eltype, list));
             add_to_three_ac_list(list, temp);
             printf("arr_elem->result %s \n", temp->result->name);
 
@@ -560,7 +560,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     }
     case EQUALS_AST:
     {
-        if(node->right->nodeType == USE_AST)
+        if (node->right->nodeType == USE_AST)
         {
             // printf("Generating code for use \n");
             // ST_ENTRY *func_st_entry = checkAllSymbolTables(st, getName(node->right->left));
@@ -569,7 +569,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             // ST_LL *formal_output_list = func_st_entry->data.func->outputs;
             // LinkedListASTNode *actual_input_list = node->right->right;
             // LinkedListASTNode *actual_output_list = node->left;
-            
+
             // // Copy actual inputs to just below rsp
             // int offset = 0;
             // while (actual_input_list != NULL)
@@ -581,7 +581,7 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             //     arg->entry_type = VAR_SYM;
             //     arg->name = malloc(sizeof(char) * 64);
             // }
-            
+
             break;
         }
         if (node->left->nodeType == ID)
@@ -1284,13 +1284,18 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
                 int lindex = ste->data.arr->left.staticIndex;
                 int rindex = ste->data.arr->right.staticIndex;
                 int offset = ste->data.arr->offset;
+                printf("Offset of arr: %d\n", offset);
                 int size_of_data = ste->data.arr->eltype == __NUM__ ? __NUM_SIZE__ : __BOOL_SIZE__;
-                get_temp_var(st, __NUM__, list);
+                // Keep space for 4 words
                 ST_ENTRY *big = get_big_offset_with_width(get_temp_var(st, __NUM__, list));
+                get_temp_var(st, __NUM__, list);
+                get_temp_var(st, __NUM__, list);
+                get_temp_var(st, __NUM__, list);
                 for (int i = lindex; i <= rindex; i++, offset += size_of_data)
                 {
                     ST_ENTRY *st_for_offset = get_offset_with_width(ste);
-                    sprintf(st_for_offset->name, "word[rbp -%d]", offset);
+                    sprintf(st_for_offset->name, "%s[rbp -%d]", ste->data.arr->eltype == __NUM__ ? "word" : ste->data.arr->eltype == __BOOL__ ? "byte" : "dword", offset);
+                    printf("Name of st_for_offset: %s\n", st_for_offset->name);
 
                     // Print value
                     three_ac *print = new_3ac();
@@ -1456,18 +1461,55 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             fprintf(fp, "mov %s, 0\n", temp->arg1->name);
             break;
         case OP_LOAD:
-            fprintf(fp, "mov %s, %s\n", BIG_TEMP_1, temp->arg1->name);
-            fprintf(fp, "mov %s, word[%s]\n", TEMP_2, BIG_TEMP_1);
-            fprintf(fp, "mov %s, %s\n", temp->result->name, TEMP_2);
+        {
+            enum TYPE type = temp->result->data.var->type;
+            printf("type: %d\n", type);
+            if (type == __NUM__)
+            {
+                fprintf(fp, "mov %s, %s\n", BIG_TEMP_1, temp->arg1->name);
+                fprintf(fp, "mov %s, word[%s]\n", TEMP_2, BIG_TEMP_1);
+                fprintf(fp, "mov %s, %s\n", temp->result->name, TEMP_2);
+            }
+            else if (type == __BOOL__)
+            {
+                fprintf(fp, "mov %s, %s\n", BIG_TEMP_1, temp->arg1->name);
+                fprintf(fp, "mov %s, byte[%s]\n", SMALL_TEMP_2, BIG_TEMP_1);
+                fprintf(fp, "mov %s, %s\n", temp->result->name, SMALL_TEMP_2);
+            }
+            else if (type == __RNUM__)
+            {
+                fprintf(fp, "mov %s, %s\n", BIG_TEMP_1, temp->arg1->name);
+                fprintf(fp, "mov %s, dword[%s]\n", BIG_TEMP_2, BIG_TEMP_1);
+                fprintf(fp, "mov %s, %s\n", temp->result->name, BIG_TEMP_2);
+            }
             break;
+        }
         case OP_STORE:
-            fprintf(fp, "mov %s, %s\n", BIG_TEMP_1, temp->result->name);
-            fflush(fp);
-            fprintf(fp, "mov %s, %s\n", TEMP_2, temp->arg1->name);
-            fflush(fp);
-            fprintf(fp, "mov word[%s], %s\n", BIG_TEMP_1, TEMP_2);
-            fflush(fp);
+        {
+            enum TYPE type = temp->arg1->data.var->type;
+            if (type == __NUM__)
+            {
+                fprintf(fp, "mov %s, %s\n", BIG_TEMP_1, temp->result->name);
+                fflush(fp);
+                fprintf(fp, "mov %s, %s\n", TEMP_2, temp->arg1->name);
+                fflush(fp);
+                fprintf(fp, "mov word[%s], %s\n", BIG_TEMP_1, TEMP_2);
+                fflush(fp);
+            }
+            else if (type == __BOOL__)
+            {
+                fprintf(fp, "mov %s, %s\n", BIG_TEMP_1, temp->result->name);
+                fprintf(fp, "mov %s, %s\n", SMALL_TEMP_2, temp->arg1->name);
+                fprintf(fp, "mov byte[%s], %s\n", BIG_TEMP_1, SMALL_TEMP_2);
+            }
+            else if (type == __RNUM__)
+            {
+                fprintf(fp, "mov %s, %s\n", BIG_TEMP_1, temp->result->name);
+                fprintf(fp, "mov %s, %s\n", BIG_TEMP_2, temp->arg1->name);
+                fprintf(fp, "mov dword[%s], %s\n", BIG_TEMP_1, BIG_TEMP_2);
+            }
             break;
+        }
         case OP_FUNC_SCOPE_START:
             fprintf(fp, "push rbp\n");
             fprintf(fp, "mov rbp, rsp\n");
@@ -1623,18 +1665,6 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
                 else if (temp->arg1->data.var->type == __RNUM__)
                 {
                 }
-                /*
-                    mov TEMP_1, get_offset_with_width(temp->arg1)
-                    dec TEMP_1
-                    jnz l1
-                    mov rdi, false_str
-                    jmp l2
-                l1:
-                    mov rdi, true_str
-                l2:
-                    mov rax, 0
-                    call printf
-                */
                 else if (temp->arg1->data.var->type == __BOOL__)
                 {
                     // save the stack pointer in r13
@@ -1643,7 +1673,10 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
                     fprintf(fp, "sub rsp, 8\n");
                     fprintf(fp, "and rsp, -16\n");
                     // call printf
-                    fprintf(fp, "mov %s, %s\n", SMALL_TEMP_1, get_offset_with_width(temp->arg1)->name);
+                    if (temp->op == PRINT_ARR_ITER || temp->op == PRINT_ARR_ELEM)
+                        fprintf(fp, "mov %s, %s\n", SMALL_TEMP_1, temp->arg1->name);
+                    else
+                        fprintf(fp, "mov %s, %s\n", SMALL_TEMP_1, get_offset_with_width(temp->arg1)->name);
                     fprintf(fp, "sub %s, 1\n", SMALL_TEMP_1);
                     char *l1 = get_label();
                     char *l2 = get_label();
