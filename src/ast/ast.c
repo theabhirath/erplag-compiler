@@ -1837,8 +1837,6 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
     {
         fprintf(fp, "MINUS_AST\n\n");
         fflush(fp);
-        printf("Right: %d\n", node->right->nodeType);
-        fflush(stdout);
         print_ast_node(node->left, depth + 1, fp);
         print_ast_node(node->right, depth + 1, fp);
         break;

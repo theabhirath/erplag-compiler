@@ -73,6 +73,7 @@ typedef enum OPERATOR
 
 void print_op(OPERATOR op)
 {
+    return;
     switch (op)
     {
     case OP_ASSIGN:
@@ -229,7 +230,6 @@ int type_size[] = {__NUM_SIZE__, __RNUM_SIZE__, __BOOL_SIZE__, __BOOL_SIZE__};
 
 ST_ENTRY *get_temp_var(symbol_table *symtab, enum TYPE type, three_ac_list *list)
 {
-    printf("Creating temp var\n");
     static int temp_vars = 0;
     ST_ENTRY *temp = malloc(sizeof(ST_ENTRY));
     temp->entry_type = VAR_SYM;
@@ -242,7 +242,6 @@ ST_ENTRY *get_temp_var(symbol_table *symtab, enum TYPE type, three_ac_list *list
                                                                         : __BOOL_SIZE__;
     temp_vars++;
     addToSymbolTable(symtab, temp);
-    printf("Created temp var %s\n", temp->name);
 
     three_ac *node = malloc(sizeof(three_ac));
     node->label = NULL;
@@ -375,28 +374,24 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     {
     case ID:
     {
-        printf("Generating code for ID \n");
         temp->result = get_offset_with_width(checkAllSymbolTables(st, getName(node)));
-        printf("Lexeme %s \n", temp->result->name);
         break;
     }
     case NUM:
     {
-        printf("Generating code for NUM \n");
         temp->result = malloc(sizeof(ST_ENTRY));
         temp->result->entry_type = VAR_SYM;
         temp->result->data.var = malloc(sizeof(struct var_entry));
         temp->result->data.var->type = __NUM__;
         temp->result->name = getName(node);
-        printf("Lexeme %s \n", temp->result->name);
         break;
     }
     case RNUM:
     {
-        printf("Generating code for RNUM \n");
+        printf("RNUM not supported yet\n");
+        exit(1);
         temp->result = malloc(sizeof(ST_ENTRY));
         temp->result->name = getName(node);
-        printf("Lexeme %s \n", temp->result->name);
         break;
     }
     /*
@@ -407,17 +402,13 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     */
     case ARR_ELEM_AST:
     {
-        printf("Generating code for array element \n");
         ST_ENTRY *arr_entry = checkAllSymbolTables(st, getName(node->left));
         if (arr_entry->data.arr->arrayType == STATIC)
         {
-            printf("Generating code for static array element \n");
             int lindexVal = arr_entry->data.arr->left.staticIndex;
             int rindexVal = arr_entry->data.arr->right.staticIndex;
             int width = rindexVal - lindexVal + 1;
             int offset = arr_entry->data.arr->offset;
-
-            printf("lindexVal %d rindexVal %d width %d offset %d \n", lindexVal, rindexVal, width, offset);
 
             // Get the index
             ST_ENTRY *index = generate_opcode(node->right, st, list)->result;
@@ -494,7 +485,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             offset_3ac->arg2 = lindex;
             offset_3ac->result = get_offset_with_width(get_temp_var(st, __NUM__, list));
             add_to_three_ac_list(list, offset_3ac);
-            printf("offset_3ac->result %s \n", offset_3ac->result->name);
 
             three_ac *mul = new_3ac();
             mul->op = OP_MUL;
@@ -502,7 +492,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             mul->arg2 = size;
             mul->result = get_offset_with_width(get_temp_var(st, __NUM__, list));
             add_to_three_ac_list(list, mul);
-            printf("mul->result %s \n", mul->result->name);
 
             three_ac *add = new_3ac();
             add->op = OP_ADD;
@@ -514,7 +503,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             add->arg2 = arr_offset;
             add->result = mul->result;
             add_to_three_ac_list(list, add);
-            printf("add->result %s \n", add->result->name);
 
             // rbp - offset
             three_ac *rbp_minus = new_3ac();
@@ -523,25 +511,22 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             get_temp_var(st, __NUM__, list);
             rbp_minus->result = get_big_offset_with_width(get_temp_var(st, __NUM__, list)); // Keep space for 64 bit address
             add_to_three_ac_list(list, rbp_minus);
-            printf("rbp_minus->result %s \n", rbp_minus->result->name);
 
             temp->op = OP_LOAD;
             temp->arg1 = rbp_minus->result;
             temp->result = get_offset_with_width(get_temp_var(st, arr_entry->data.arr->eltype, list));
             add_to_three_ac_list(list, temp);
-            printf("arr_elem->result %s \n", temp->result->name);
 
             return temp;
         }
         else
         {
-            // TODO: Dynamic array
+            printf("Dynamic arrays not supported yet\n");
+            exit(1);
         }
     }
     case PROGRAM_AST:
     {
-        printf("Generating code for program \n");
-        fflush(stdout);
         struct programAuxInfo *programAux = (struct programAuxInfo *)node->aux_info;
         ast_node *moduleDeclaration = programAux->ModDec;
         ast_node *otherModules1 = programAux->OtherMod1;
@@ -564,7 +549,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         add_to_three_ac_list(list, temp);
         while (driver_list != NULL)
         {
-            printf("Statement \n");
             generate_opcode(driver_list->data, driver_st, list);
             driver_list = driver_list->next;
         }
@@ -572,14 +556,12 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         temp->op = OP_FUNC_SCOPE_END;
         add_to_three_ac_list(list, temp);
 
-        printf("Reached end of driver module \n");
         break;
     }
     case EQUALS_AST:
     {
         if (node->right->nodeType == USE_AST)
         {
-            printf("Generating code for use \n");
             ST_ENTRY *func_st_entry = checkAllSymbolTables(st, getName(node->right->left));
             symbol_table *func_st = func_st_entry->data.func->symTable;
             ST_LL *formal_input_list = func_st_entry->data.func->inputs;
@@ -632,7 +614,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             LinkedListASTNode *func_body = block_st_entry->data.block->body;
             while (func_body != NULL)
             {
-                printf("Func body statement \n");
                 generate_opcode(func_body->data, block_st, list);
                 func_body = func_body->next;
             }
@@ -657,24 +638,19 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             three_ac *pop_rbp = new_3ac();
             pop_rbp->op = OP_POP_RBP;
             add_to_three_ac_list(list, pop_rbp);
-            printf("Generated code for use \n");
             break;
         }
         if (node->left->nodeType == ID)
         {
-            printf("Generating code for assignment \n");
             temp->op = OP_ASSIGN;
             three_ac *temp1 = generate_opcode(node->right, st, list);
             temp->arg1 = temp1->result;
             temp->arg2 = NULL;
             temp->result = generate_opcode(node->left, st, list)->result;
             add_to_three_ac_list(list, temp);
-            printf("Generated code for assignment \n");
         }
         else if (node->left->nodeType == ARR_ELEM_AST)
         {
-
-            printf("Generating code for assignment to array element \n");
             temp->op = OP_STORE;
             three_ac *temp1 = generate_opcode(node->right, st, list);
             temp->arg1 = temp1->result;
@@ -682,22 +658,15 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             temp->result = generate_opcode(node->left, st, list)->arg1;
             add_to_three_ac_list(list, temp);
         }
-        else
-        {
-            printf("Haven't handled this assignment case yet\n");
-        }
         break;
     }
     case PLUS_AST:
     {
-        printf("Generating code for plus \n");
         if (node->type == __NUM__)
         {
             temp->op = OP_ADD;
             three_ac *temp1 = generate_opcode(node->left, st, list);
             three_ac *temp2 = generate_opcode(node->right, st, list);
-            printf("Args %s %s \n", temp1->result->name, temp2->result->name);
-            fflush(stdout);
             temp->arg1 = temp1->result;
             temp->arg2 = temp2->result;
             temp->result = get_offset_with_width(get_temp_var(st, temp1->result->data.var->type, list));
@@ -708,8 +677,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             temp->op = OP_FADD;
             three_ac *temp1 = generate_opcode(node->left, st, list);
             three_ac *temp2 = generate_opcode(node->right, st, list);
-            printf("Args %s %s \n", temp1->result->name, temp2->result->name);
-            fflush(stdout);
             temp->arg1 = temp1->result;
             temp->arg2 = temp2->result;
             temp->result = get_offset_with_width(get_temp_var(st, getType(temp1->result, st), list));
@@ -721,23 +688,17 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     {
         if (node->left != NULL)
         {
-            printf("Generating code for minus \n");
             temp->op = OP_SUB;
             three_ac *temp1 = generate_opcode(node->left, st, list);
             three_ac *temp2 = generate_opcode(node->right, st, list);
-            printf("Args %s %s \n", temp1->result->name, temp2->result->name);
             temp->arg1 = temp1->result;
             temp->arg2 = temp2->result;
-            printf("temp->arg1 %s type %d \n", temp->arg1->name, temp->arg1->data.var->type);
-            printf("temp->arg2 %s type %d \n", temp->arg2->name, temp->arg2->data.var->type);
 
             temp->result = get_offset_with_width(get_temp_var(st, temp->arg1->data.var->type, list));
-            printf("Result %s \n", temp->result->name);
             add_to_three_ac_list(list, temp);
         }
         else
         {
-            printf("Generating code for unary minus \n");
             temp->op = OP_NEGATE;
             three_ac *temp1 = generate_opcode(node->right, st, list);
             temp->arg1 = temp1->result;
@@ -812,17 +773,14 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     case LE_AST:
     case GE_AST:
     {
-        printf("Generating code for relational expression \n");
         three_ac *temp1 = generate_opcode(node->left, st, list);
         three_ac *temp2 = generate_opcode(node->right, st, list);
-        printf("Obtained two operands: %s and %s\n", temp1->result->name, temp2->result->name);
         three_ac *first = temp;
         first->op = OP_CMP;
         first->arg1 = temp1->result;
         first->arg2 = temp2->result;
         first->result = NULL;
         add_to_three_ac_list(list, first);
-        printf("Added cmp instruction\n");
 
         three_ac *second = new_3ac();
         switch (node->nodeType)
@@ -848,42 +806,33 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         }
         second->target_label = get_label();
         add_to_three_ac_list(list, second);
-        printf("Added a conditional jump instruction\n");
-        fflush(stdout);
 
         three_ac *third = new_3ac();
         third->op = OP_RESET;
         third->arg1 = get_offset_with_width(get_temp_var(st, __BOOL__, list));
-        printf("Created a temp variable %s\n", third->arg1->name);
         third->result = third->arg1;
         add_to_three_ac_list(list, third);
-        printf("Added a reset instruction");
-        fflush(stdout);
 
         three_ac *fourth = new_3ac();
         fourth->op = OP_JMP;
         fourth->target_label = get_label();
         add_to_three_ac_list(list, fourth);
-        printf("Added a jump instruction");
 
         three_ac *fifth = new_3ac();
         fifth->label = second->target_label;
         fifth->op = OP_LABEL;
         add_to_three_ac_list(list, fifth);
-        printf("Added a label instruction");
 
         three_ac *sixth = new_3ac();
         sixth->op = OP_SET;
         sixth->arg1 = third->arg1;
         sixth->result = third->arg1;
         add_to_three_ac_list(list, sixth);
-        printf("Added a set instruction");
 
         three_ac *seventh = new_3ac();
         seventh->label = fourth->target_label;
         seventh->op = OP_LABEL;
         add_to_three_ac_list(list, seventh);
-        printf("Added a label instruction");
 
         return third;
     }
@@ -905,42 +854,33 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     */
     case WHILE_AST:
     {
-        printf("In while\n");
         three_ac *first = temp;
         first->label = get_label();
-        printf("Label: %s\n", first->label);
         first->op = OP_LABEL;
         add_to_three_ac_list(list, first);
-        printf("Added label\n");
 
         three_ac *second = new_3ac();
         second->op = OP_CMP;
         if (node->left->nodeType == ID)
         {
-            printf("Name: %s\n", getName(node->left));
             second->arg1 = generate_opcode(node->left, st, list)->result;
         }
         else
         {
             second->arg1 = generate_opcode(node->left, st, list)->result;
-            printf("In else\n");
         }
         second->arg2 = const_false;
         add_to_three_ac_list(list, second);
 
-        printf("Added cmp\n");
         three_ac *third = new_3ac();
         third->op = OP_JZ;
         third->target_label = get_label();
         add_to_three_ac_list(list, third);
 
-        printf("Added jz\n");
         LinkedListASTNode *body = node->right;
-        printf("Body: %p\n", body);
         char *symName = malloc(sizeof(char) * 100);
         sprintf(symName, "%p", node);
         ST_ENTRY *body_ste = checkAllSymbolTables(st, symName);
-        printf("Body ste: %p\n", body_ste);
 
         // Scope start
         three_ac *scope_start = new_3ac();
@@ -962,7 +902,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         scope_end->op = OP_SCOPE_END;
         add_to_three_ac_list(list, scope_end);
 
-        printf("Added body\n");
         three_ac *fourth = new_3ac();
         fourth->op = OP_JMP;
         fourth->target_label = first->label;
@@ -1000,7 +939,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     */
     case FOR_AST:
     {
-        printf("Generating code for for loop\n");
         char *name = malloc(sizeof(char) * 10);
         sprintf(name, "%p", node);
         ST_ENTRY *st_entry = checkSymbolTable(st, name);
@@ -1052,25 +990,21 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         add_to_three_ac_list(list, first);
         if (start < end)
         {
-            printf("Start < end\n");
             three_ac *first = temp;
             first->label = get_label();
             first->op = OP_LABEL;
             add_to_three_ac_list(list, first);
-            printf("Added label\n");
 
             three_ac *second = new_3ac();
             second->op = OP_CMP;
             second->arg1 = get_offset_with_width(loop_var_ste);
             second->arg2 = get_offset_with_width(end_ste);
             add_to_three_ac_list(list, second);
-            printf("Added cmp\n");
 
             three_ac *third = new_3ac();
             third->op = OP_JG;
             third->target_label = get_label();
             add_to_three_ac_list(list, third);
-            printf("Added jg\n");
 
             LinkedListASTNode *body = st_entry->data.block->body;
             while (body != NULL)
@@ -1078,7 +1012,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
                 generate_opcode(body->data, new_st, list);
                 body = body->next;
             }
-            printf("Added body\n");
 
             three_ac *fourth = new_3ac();
             fourth->op = OP_INC;
@@ -1086,19 +1019,16 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             fourth->arg2 = NULL;
             fourth->result = second->arg1;
             add_to_three_ac_list(list, fourth);
-            printf("Added inc\n");
 
             three_ac *fifth = new_3ac();
             fifth->op = OP_JMP;
             fifth->target_label = first->label;
             add_to_three_ac_list(list, fifth);
-            printf("Added jmp\n");
 
             three_ac *sixth = new_3ac();
             sixth->label = third->target_label;
             sixth->op = OP_LABEL;
             add_to_three_ac_list(list, sixth);
-            printf("Added label\n");
         }
 
         else
@@ -1125,7 +1055,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
                 generate_opcode(body->data, new_st, list);
                 body = body->next;
             }
-            printf("Added body\n");
 
             three_ac *fourth = new_3ac();
             fourth->op = OP_DEC;
@@ -1177,8 +1106,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     {
         parse_tree_node *switch_var = node->left;
         ST_ENTRY *switch_var_ste = checkAllSymbolTables(st, switch_var->leafNodeInfo.lexeme);
-        printf("switch var: %s\n", switch_var->leafNodeInfo.lexeme);
-        fflush(stdout);
         LinkedListASTNode *case_list = node->right;
 
         char *end_label = get_label();
@@ -1220,13 +1147,11 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
                 three_ac *scope_end = new_3ac();
                 scope_end->op = OP_SCOPE_END;
                 add_to_three_ac_list(list, scope_end);
-                printf("Added default body\n");
 
                 temp->op = OP_JMP;
                 temp->target_label = end_label;
                 add_to_three_ac_list(list, temp);
                 case_list = case_list->next;
-                printf("Completed default case\n");
                 break;
             }
 
@@ -1235,14 +1160,12 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             second->arg1 = get_offset_with_width(switch_var_ste);
             second->arg2 = generate_opcode(case_val, st, list)->result;
             add_to_three_ac_list(list, second);
-            printf("Added compare for case at 851\n");
 
             three_ac *third = new_3ac();
             third->op = OP_JNZ;
             next_label = get_label();
             third->target_label = next_label;
             add_to_three_ac_list(list, third);
-            printf("Added jnz\n");
 
             LinkedListASTNode *body = st_entry->data.block->body;
             // scope start
@@ -1258,7 +1181,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             {
                 generate_opcode(body->data, case_st, list);
                 body = body->next;
-                printf("Statement in case body generated\n");
             }
             // scope end
             three_ac *scope_end = new_3ac();
@@ -1269,13 +1191,11 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
             fourth->op = OP_JMP;
             fourth->target_label = end_label;
             add_to_three_ac_list(list, fourth);
-            printf("Added jmp\n");
 
             three_ac *fifth = new_3ac();
             fifth->label = next_label;
             fifth->op = OP_LABEL;
             add_to_three_ac_list(list, fifth);
-            printf("Added label\n");
 
             case_list = case_list->next;
         }
@@ -1283,13 +1203,11 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
         sixth->label = end_label;
         sixth->op = OP_LABEL;
         add_to_three_ac_list(list, sixth);
-        printf("Added end label\n");
 
         break;
     }
     case GET_VALUE_AST:
     {
-        printf("Generating code for get_value\n");
 
         ST_ENTRY *ste = checkAllSymbolTables(st, getName(node->right));
         if (ste->entry_type == VAR_SYM)
@@ -1335,7 +1253,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     }
     case PRINT_AST:
     {
-        printf("Generating code for print\n");
         switch (node->right->nodeType)
         {
         case ID:
@@ -1360,20 +1277,18 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
                 int lindex = ste->data.arr->left.staticIndex;
                 int rindex = ste->data.arr->right.staticIndex;
                 int offset = ste->data.arr->offset;
-                printf("Offset of arr: %d\n", offset);
                 int size_of_data = ste->data.arr->eltype == __NUM__ ? __NUM_SIZE__ : __BOOL_SIZE__;
                 // Keep space for 4 words
+                get_temp_var(st, __NUM__, list);
+                get_temp_var(st, __NUM__, list);
+                get_temp_var(st, __NUM__, list);
                 ST_ENTRY *big = get_big_offset_with_width(get_temp_var(st, __NUM__, list));
-                get_temp_var(st, __NUM__, list);
-                get_temp_var(st, __NUM__, list);
-                get_temp_var(st, __NUM__, list);
                 for (int i = lindex; i <= rindex; i++, offset += size_of_data)
                 {
                     ST_ENTRY *st_for_offset = get_offset_with_width(ste);
                     sprintf(st_for_offset->name, "%s[rbp -%d]", ste->data.arr->eltype == __NUM__ ? "word" : ste->data.arr->eltype == __BOOL__ ? "byte"
                                                                                                                                               : "dword",
                             offset);
-                    printf("Name of st_for_offset: %s\n", st_for_offset->name);
 
                     // Print value
                     three_ac *print = new_3ac();
@@ -1403,7 +1318,6 @@ three_ac *generate_opcode(ast_node *node, symbol_table *st, three_ac_list *list)
     }
 
     default:
-        printf("Error: Unknown AST node type %d\n", node->nodeType);
         break;
     }
     return temp;
@@ -1463,36 +1377,31 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             fprintf(fp, "mov %s, %s\n", temp->result->name, SMALL_TEMP_1);
             break;
         case OP_ASSIGN:
-            if (temp->arg1->data.var->type == __NUM__)
+            if (temp->result->entry_type == VAR_SYM)
             {
-                fprintf(fp, "mov %s, %s\n", TEMP_1, temp->arg1->name);
-                fprintf(fp, "mov %s, %s\n", temp->result->name, TEMP_1);
+                if (temp->arg1->data.var->type == __NUM__)
+                {
+                    fprintf(fp, "mov %s, %s\n", TEMP_1, temp->arg1->name);
+                    fprintf(fp, "mov %s, %s\n", temp->result->name, TEMP_1);
+                }
+                else if (temp->arg1->data.var->type == __BOOL__)
+                {
+                    fprintf(fp, "mov %s, %s\n", SMALL_TEMP_1, temp->arg1->name);
+                    fprintf(fp, "mov %s, %s\n", temp->result->name, SMALL_TEMP_1);
+                }
+                else if (temp->arg1->data.var->type == __RNUM__)
+                {
+                    fprintf(fp, "mov %s, %s\n", BIG_TEMP_1, temp->arg1->name);
+                    fprintf(fp, "mov %s, %s\n", temp->result->name, BIG_TEMP_1);
+                }
             }
-            else if (temp->arg1->data.var->type == __BOOL__)
+            else
             {
-                fprintf(fp, "mov %s, %s\n", SMALL_TEMP_1, temp->arg1->name);
-                fprintf(fp, "mov %s, %s\n", temp->result->name, SMALL_TEMP_1);
-            }
-            else if (temp->arg1->data.var->type == __RNUM__)
-            {
-                fprintf(fp, "mov %s, %s\n", BIG_TEMP_1, temp->arg1->name);
-                fprintf(fp, "mov %s, %s\n", temp->result->name, BIG_TEMP_1);
+                printf("Array assignment not supported yet\n");
+                exit(1);
             }
             break;
         case OP_CMP:
-            printf("In CMP\n");
-            fflush(stdout);
-            if (temp->arg1 == NULL || temp->arg2 == NULL)
-            {
-                printf("arg1: %p\n", temp->arg1);
-                fflush(stdout);
-                printf("arg2: %p\n", temp->arg2);
-                fflush(stdout);
-            }
-            printf("arg1: %s\n", temp->arg1->name);
-            fflush(stdout);
-            printf("arg2: %s\n", temp->arg2->name);
-            fflush(stdout);
             fprintf(fp, "mov %s, %s\n", temp->arg1->data.var->type == __NUM__ ? TEMP_1 : SMALL_TEMP_1, temp->arg1->name);
             fprintf(fp, "mov %s, %s\n", temp->arg2->data.var->type == __NUM__ ? TEMP_2 : SMALL_TEMP_2, temp->arg2->name);
             fprintf(fp, "cmp %s, %s\n", temp->arg1->data.var->type == __NUM__ ? TEMP_1 : SMALL_TEMP_1, temp->arg2->data.var->type == __NUM__ ? TEMP_2 : SMALL_TEMP_2);
@@ -1541,7 +1450,6 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
         case OP_LOAD:
         {
             enum TYPE type = temp->result->data.var->type;
-            printf("type: %d\n", type);
             if (type == __NUM__)
             {
                 fprintf(fp, "mov %s, %s\n", BIG_TEMP_1, temp->arg1->name);
@@ -1597,17 +1505,6 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             fprintf(fp, "push rbp\n");
             break;
         case OP_TEMP_DECL:
-            // Decrement the stack pointer by the size of the variable
-            // Size depends on the type of the variable
-            // if (temp->result->entry_type == VAR_SYM)
-            //     fprintf(fp, "sub rsp, %d\n", temp->result->data.var->type == __NUM__ ? __NUM_SIZE__ : temp->result->data.var->type == __BOOL__ ? __BOOL_SIZE__ : __RNUM_SIZE__);
-            // else if (temp->result->entry_type == ARR_SYM)
-            // {
-            //     if (temp->result->data.arr->arrayType == STATIC)
-            //     {
-            //         fprintf(fp, "sub rsp, %d\n", temp->result->data.arr->eltype == __NUM__ ? __NUM_SIZE__ * (temp->result->data.arr->right.staticIndex - temp->result->data.arr->left.staticIndex + 1) : temp->result->data.arr->eltype == __BOOL__ ? __BOOL_SIZE__ * (temp->result->data.arr->right.staticIndex - temp->result->data.arr->left.staticIndex + 1) : __RNUM_SIZE__ * (temp->result->data.arr->right.staticIndex - temp->result->data.arr->left.staticIndex + 1));
-            //     }
-            // }
             break;
         case OP_FUNC_FRAME_ALLOC:
         {
@@ -1630,7 +1527,6 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
         case OP_NOP:
             fprintf(fp, "nop\n");
             break;
-        // TODO: Scan and Print
         case PROMPT_NUM:
         {
             // save rsp in r13
@@ -1719,7 +1615,6 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
         {
             if (temp->arg1->entry_type == VAR_SYM)
             {
-                printf("Entered print var for %s\n", temp->arg1->name);
                 if (temp->arg1->data.var->type == __NUM__)
                 {
                     // save rsp in r13
@@ -1828,7 +1723,6 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
             break;
         }
         default:
-            printf("Unknown opcode %d\n", temp->op);
             break;
         }
         fprintf(fp, "\n");
@@ -1836,7 +1730,6 @@ void print_three_ac_list(three_ac_list *list, FILE *fp)
         fflush(stdout);
         temp = temp->next;
     }
-    printf("Reached end of list\n");
     fflush(stdout);
 }
 
@@ -1892,7 +1785,6 @@ void generate_code(ast *AST, char *filename)
     three_ac_list *list3Ad = malloc(sizeof(three_ac_list));
     init_three_ac_list(list3Ad);
     generate_opcode(AST->root, &symbolTable, list3Ad);
-    printf("3AC generated successfully.\n");
     fflush(stdout);
     FILE *fp1 = fopen(filename, "w");
     print_init(fp1);

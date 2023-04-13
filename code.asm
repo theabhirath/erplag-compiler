@@ -30,7 +30,7 @@ main:
 
 mov rbp, rsp
 
-sub rsp, 8
+sub rsp, 49
 
 mov r13, rsp
 sub rsp, 8
@@ -53,7 +53,11 @@ mov rsp, r13
 mov r13, rsp
 sub rsp, 8
 and rsp, -16
-mov rdi, prompt_num
+mov rdi, prompt_arr
+mov rsi, 6
+mov rdx, int_str
+mov rcx, -3
+mov r8, 2
 mov rax, 0
 call printf
 mov rsp, r13
@@ -63,46 +67,9 @@ sub rsp, 8
 and rsp, -16
 mov rdi, scan_num
 mov rsi, rbp
-sub rsi, 4
+sub rsi, 12
 mov rax, 0
 call scanf
-mov rsp, r13
-
-mov al, byte[cnst_false]
-mov byte[rbp-8], al
-
-mov r13, rsp
-sub rsp, 8
-and rsp, -16
-mov rdi, print_num
-movsx rsi, word[rbp-2]
-mov rax, 0
-call printf
-mov rsp, r13
-
-push rbp
-
-mov ax, word[rbp-2]
-mov word[rsp-2], ax
-
-mov ax, word[rbp-4]
-mov word[rsp-4], ax
-
-mov al, byte[rbp-8]
-mov byte[rsp-5], al
-
-mov rbp, rsp
-
-sub rsp, 8
-
-sub rsp, 29
-
-mov r13, rsp
-sub rsp, 8
-and rsp, -16
-mov rdi, prompt_num
-mov rax, 0
-call printf
 mov rsp, r13
 
 mov r13, rsp
@@ -118,9 +85,11 @@ mov rsp, r13
 mov r13, rsp
 sub rsp, 8
 and rsp, -16
-mov rdi, prompt_num
+mov rdi, scan_num
+mov rsi, rbp
+sub rsi, 16
 mov rax, 0
-call printf
+call scanf
 mov rsp, r13
 
 mov r13, rsp
@@ -128,98 +97,30 @@ sub rsp, 8
 and rsp, -16
 mov rdi, scan_num
 mov rsi, rbp
-sub rsi, 12
+sub rsi, 18
 mov rax, 0
 call scanf
 mov rsp, r13
 
+mov r13, rsp
+sub rsp, 8
+and rsp, -16
+mov rdi, scan_num
+mov rsi, rbp
+sub rsi, 20
+mov rax, 0
+call scanf
+mov rsp, r13
 
-mov ax, word[rbp-2]
-mov bx, word[rbp-4]
-mul bx
-mov word[rbp-17], ax
-
-
-mov ax, word[rbp-14]
-mov bx, 2
-mul bx
-mov word[rbp-19], ax
-
-
-mov ax, word[rbp-17]
-mov bx, word[rbp-19]
-add ax, bx
-mov word[rbp-21], ax
-
-
-mov ax, word[rbp-21]
-mov bx, 3
-sub ax, bx
-mov word[rbp-23], ax
-
-mov ax, word[rbp-23]
-mov word[rbp-10], ax
-
-mov ax, word[rbp-2]
-mov bx, word[rbp-4]
-cmp ax, bx
-
-jle label0
-
-
-mov byte[rbp-24], 0
-
-jmp label1
-
-label0:
-
-mov byte[rbp-24], 1
-
-label1:
-
-
-mov al, byte[rbp-5]
-mov bl, byte[rbp-24]
-and al, bl
-mov byte[rbp-25], al
-
-mov al, byte[rbp-25]
-mov byte[rbp-15], al
-
-
-mov ax, word[rbp-10]
-mov bx, word[rbp-12]
-add ax, bx
-mov word[rbp-27], ax
-
-mov ax, word[rbp-27]
-mov word[rbp-7], ax
-
-mov ax, word[rbp-10]
-mov bx, word[rbp-12]
-cmp ax, bx
-
-jle label2
-
-
-mov byte[rbp-28], 0
-
-jmp label3
-
-label2:
-
-mov byte[rbp-28], 1
-
-label3:
-
-
-mov al, byte[rbp-15]
-mov bl, byte[rbp-28]
-or al, bl
-mov byte[rbp-29], al
-
-mov al, byte[rbp-29]
-mov byte[rbp-8], al
+mov r13, rsp
+sub rsp, 8
+and rsp, -16
+mov rdi, scan_num
+mov rsi, rbp
+sub rsi, 22
+mov rax, 0
+call scanf
+mov rsp, r13
 
 mov r13, rsp
 sub rsp, 8
@@ -233,8 +134,20 @@ mov rsp, r13
 mov r13, rsp
 sub rsp, 8
 and rsp, -16
-mov rdi, print_num
-movsx rsi, word[rbp-4]
+mov rdi, print_out
+mov rax, 0
+call printf
+mov rsp, r13
+
+
+
+
+
+mov r13, rsp
+sub rsp, 8
+and rsp, -16
+mov rdi, print_single_num
+movsx rsi, word[rbp -12]
 mov rax, 0
 call printf
 mov rsp, r13
@@ -242,15 +155,8 @@ mov rsp, r13
 mov r13, rsp
 sub rsp, 8
 and rsp, -16
-mov rdi, print_bool
-mov al, byte[rbp-5]
-sub al, 1
-jz label4
-mov rsi, false_str
-jmp label5
-label4:
-mov rsi, true_str
-label5:
+mov rdi, print_single_num
+movsx rsi, word[rbp -14]
 mov rax, 0
 call printf
 mov rsp, r13
@@ -258,8 +164,8 @@ mov rsp, r13
 mov r13, rsp
 sub rsp, 8
 and rsp, -16
-mov rdi, print_num
-movsx rsi, word[rbp-14]
+mov rdi, print_single_num
+movsx rsi, word[rbp -16]
 mov rax, 0
 call printf
 mov rsp, r13
@@ -267,8 +173,8 @@ mov rsp, r13
 mov r13, rsp
 sub rsp, 8
 and rsp, -16
-mov rdi, print_num
-movsx rsi, word[rbp-10]
+mov rdi, print_single_num
+movsx rsi, word[rbp -18]
 mov rax, 0
 call printf
 mov rsp, r13
@@ -276,8 +182,8 @@ mov rsp, r13
 mov r13, rsp
 sub rsp, 8
 and rsp, -16
-mov rdi, print_num
-movsx rsi, word[rbp-12]
+mov rdi, print_single_num
+movsx rsi, word[rbp -20]
 mov rax, 0
 call printf
 mov rsp, r13
@@ -285,8 +191,8 @@ mov rsp, r13
 mov r13, rsp
 sub rsp, 8
 and rsp, -16
-mov rdi, print_num
-movsx rsi, word[rbp-7]
+mov rdi, print_single_num
+movsx rsi, word[rbp -22]
 mov rax, 0
 call printf
 mov rsp, r13
@@ -294,30 +200,66 @@ mov rsp, r13
 mov r13, rsp
 sub rsp, 8
 and rsp, -16
-mov rdi, print_bool
-mov al, byte[rbp-8]
-sub al, 1
-jz label6
-mov rsi, false_str
-jmp label7
-label6:
-mov rsi, true_str
-label7:
+mov rdi, print_newline
 mov rax, 0
 call printf
 mov rsp, r13
 
-mov rsp, rbp
-pop rbp
-push rbp
 
-mov ax, word[rsp-7]
+mov ax, 2
+mov bx, 3
+mul bx
+mov word[rbp-34], ax
+
+
+mov ax, word[rbp-34]
+neg ax
+mov word[rbp-36], ax
+
+mov ax, word[rbp-36]
+mov word[rbp-2], ax
+
+
+mov ax, 2
+mov bx, 3
+mul bx
+mov word[rbp-38], ax
+
+mov ax, word[rbp-38]
+mov word[rbp-4], ax
+
+
+mov ax, 3
+neg ax
+mov word[rbp-40], ax
+
+
+mov ax, 2
+mov bx, word[rbp-40]
+mul bx
+mov word[rbp-42], ax
+
+mov ax, word[rbp-42]
 mov word[rbp-6], ax
 
-mov al, byte[rsp-8]
-mov byte[rbp-7], al
 
-pop rbp
+mov ax, 3
+neg ax
+mov word[rbp-44], ax
+
+
+mov ax, 2
+mov bx, word[rbp-44]
+mul bx
+mov word[rbp-46], ax
+
+
+mov ax, word[rbp-46]
+neg ax
+mov word[rbp-48], ax
+
+mov ax, word[rbp-48]
+mov word[rbp-8], ax
 
 mov r13, rsp
 sub rsp, 8
@@ -349,18 +291,64 @@ mov rsp, r13
 mov r13, rsp
 sub rsp, 8
 and rsp, -16
-mov rdi, print_bool
-mov al, byte[rbp-7]
-sub al, 1
-jz label8
-mov rsi, false_str
-jmp label9
-label8:
-mov rsi, true_str
-label9:
+mov rdi, print_num
+movsx rsi, word[rbp-8]
 mov rax, 0
 call printf
 mov rsp, r13
+
+label0:
+
+mov ax, word[rbp-2]
+mov bx, 0
+cmp ax, bx
+
+jg label1
+
+
+mov byte[rbp-49], 0
+
+jmp label2
+
+label1:
+
+mov byte[rbp-49], 1
+
+label2:
+
+mov al, byte[rbp-49]
+mov bl, byte[cnst_false]
+cmp al, bl
+
+jz label3
+
+nop
+
+nop
+
+
+mov ax, word[rbp-2]
+mov bx, 1
+sub ax, bx
+mov word[rbp-26], ax
+
+mov ax, word[rbp-26]
+mov word[rbp-2], ax
+
+mov r13, rsp
+sub rsp, 8
+and rsp, -16
+mov rdi, print_num
+movsx rsi, word[rbp-2]
+mov rax, 0
+call printf
+mov rsp, r13
+
+nop
+
+jmp label0
+
+label3:
 
 mov rsp, rbp
 pop rbp
