@@ -1,9 +1,11 @@
 #include <stdio.h>
-#include "../ast/ast.h"
-#include "../lexer/lexer.h"
-#include "../parser/parser.h"
-#include "../ast/symbol_table.h"
-#include "../codegen/codegen.h"
+#include <stdlib.h>
+#include "src/ast/ast.h"
+#include "src/lexer/lexer.h"
+#include "src/parser/parser.h"
+#include "src/ast/symbol_table.h"
+#include "src/codegen/codegen.h"
+#include <time.h>
 
 void printTimeTaken(char *testCaseFile, char *parseTreeFile)
 {
@@ -25,19 +27,16 @@ void printTimeTaken(char *testCaseFile, char *parseTreeFile)
 int main(int argc, char *argv[])
 {
     int option=12;
+    ast *AST = NULL;
+    if (argc != 3)
+    {
+        printf("Usage: ./driver <inputFile> <codeFile>\n");
+        exit(1);
+    }
+    printf("%s\n", argv[1]);
     while(option!=0)
     {
-        printf("0: Exit \n\
-                1: Lexer \n\
-                2: Parser \n\
-                3: AST \n\
-                4: Memory \n\
-                5. Symbol Table \n\
-                6. Activation Record \n\
-                7. Static and Dynamic Arrays \n\
-                8. Error reporting and Total Compilation Time \n\
-                9. Code Generation \n\n\
-                Enter your choice: ");
+        printf("0: Exit \n1: Lexer \n2: Parser \n3: AST \n4: Memory \n5. Symbol Table \n6. Activation Record \n7. Static and Dynamic Arrays \n8. Error reporting and Total Compilation Time \n9. Code Generation \n\nEnter your choice: ");
         scanf("%d", &option);
         switch (option)
         {
@@ -52,18 +51,18 @@ int main(int argc, char *argv[])
             break;
         case 3:
             parseInputSourceCode(argv[1], "parseTree.txt");
-            ast *AST = create_AST(&parseTree);
-            print_AST(AST);
+            AST = create_ast(&parseTree);
+            print_ast(AST);
             break;
         case 4:
             //TODO: memory
             break;
         case 5:
             parseInputSourceCode(argv[1], "parseTree.txt");
-            ast *AST = create_AST(&parseTree);
-            print_AST(AST);
+            AST = create_ast(&parseTree);
+            print_ast(AST);
             populateSymbolTables(AST);
-            printSymbolTables(symbolTable, 0);
+            printSymbolTable(&symbolTable, 0);
             break;
         case 6:
             //TODO: activation record
@@ -76,8 +75,8 @@ int main(int argc, char *argv[])
             break;
         case 9:
             parseInputSourceCode(argv[1], "parseTree.txt");
-            ast *AST = create_AST(&parseTree);
-            print_AST(AST);
+            AST = create_ast(&parseTree);
+            print_ast(AST);
             populateSymbolTables(AST);
             generate_code(AST, argv[2]);
             break;
