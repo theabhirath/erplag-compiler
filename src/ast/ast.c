@@ -611,7 +611,6 @@ ast_node *process_subtree(parse_tree_node *ptn)
         ptn->syn_addr = createASTNode(EQUALS_AST);
         process_subtree(ElementIndexWithExpression);
         process_subtree(Expression);
-
         ast_node *temp = createASTNode(ARR_ELEM_AST);
         printf("inherted addr: %p\n", ptn->inh_addr);
         parse_tree_node *temp1 = ptn->inh_addr;
@@ -1638,16 +1637,29 @@ ast *create_ast(parse_tree *pt)
     printf("%s\n", a->root->nodeType == PROGRAM_AST ? "PROGRAM_AST" : "NOT PROGRAM_AST");
     return a;
 }
+
 char *getName(ast_node *node)
 {
     parse_tree_node *ptn = node;
     return ptn->leafNodeInfo.lexeme;
 }
 
-int getLineNumber(parse_tree_node *node)
+int getNumVal(ast_node *node)
 {
-    return node->leafNodeInfo.lineNumber;
+    parse_tree_node *ptn = node;
+    return ptn->leafNodeInfo.val.intValue;
 }
+
+int getLineNumber(ast_node *node)
+{
+    if (node->nodeType == ARR_ELEM_AST)
+    {
+        return getLineNumber(node->left);
+    }
+    parse_tree_node *ptn = node;
+    return ptn->leafNodeInfo.lineNumber;
+}
+
 void print_ll(LinkedListASTNode *head, int depth, FILE *fp)
 {
     LinkedListASTNode *temp = head;
@@ -2069,20 +2081,20 @@ void print_ast(ast *a)
     fclose(fp);
 }
 
-// int main()
-// {
-//     bufferSize = 1024;
-//     parseInputSourceCode("tests/stage2/t8.txt", "src/parser/parseTree.txt");
-//     printf("parse tree created successfully.\n");
-//     fflush(stdout);
-//     ast *AST = create_ast(&parseTree);
-//     printf("AST created successfully.\n");
-//     print_ast(AST);
-//     printf("AST printed successfully.\n");
-//     fflush(stdout);
-//     // populate symbol tables
-//     populateSymbolTables(AST);
-//     printf("Nah. No way.\n");
-//     fflush(stdout);
-//     return 0;
-// }
+int main()
+{
+    bufferSize = 1024;
+    parseInputSourceCode("tests/stage2/t7.txt", "src/parser/parseTree.txt");
+    printf("parse tree created successfully.\n");
+    fflush(stdout);
+    ast *AST = create_ast(&parseTree);
+    printf("AST created successfully.\n");
+    print_ast(AST);
+    printf("AST printed successfully.\n");  
+    fflush(stdout);
+    // populate symbol tables
+    populateSymbolTables(AST);
+    printf("Nah. No way.\n");
+    fflush(stdout);
+    return 0;
+}

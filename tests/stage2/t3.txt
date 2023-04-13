@@ -42,7 +42,7 @@ end
 
 <<module compute>>
 takes input[a:integer, b:integer, s: real, c:integer];
-returns [res_1:boolean, res_2_a:integer, res_2__b:real];
+returns [res_1:boolean, res_2_a:integer, res_2_b:real];
 start
 	declare new:boolean;
 	declare abc_1, pqr_2: integer;

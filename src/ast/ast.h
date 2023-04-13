@@ -10,7 +10,8 @@ enum TYPE{
     __NUM__,
     __RNUM__,
     __BOOL__,
-    __ERROR__
+    __TYPE_ERROR__,
+    __NOT_DEFINED_ERROR__
 };
 
 enum AST_NODE_TYPE{
@@ -98,6 +99,8 @@ void print_ast_node(ast_node *node, int depth, FILE *fp);
 void print_ast(ast *a);
 ast *create_ast(parse_tree *pt);
 char *getName(ast_node *node);
+int getNumVal(ast_node *node);
+int getLineNumber(ast_node *node);
 ast_node *createASTNode(enum AST_NODE_TYPE nodeType);
 
 #endif

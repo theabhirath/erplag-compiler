@@ -7,6 +7,7 @@ start
 	[result]:=use module square with parameters v_1_2_3; 
         ** Modify rule for <actual_para_list>**
 	print(result);
+    while(resu)
 end
 
 <<module square>>

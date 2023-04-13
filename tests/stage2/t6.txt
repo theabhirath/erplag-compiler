@@ -116,7 +116,7 @@ start
 	C[18]:= a[18]+ b[18];
 	A[5]:= B[6]- 10;
 	m:= A[5]< C[18] + A[11];			      **ERROR: element of array A is out of bound** 
-	n:= 20*8-5;	
+	n:= 20*8-5;
 end
 
 

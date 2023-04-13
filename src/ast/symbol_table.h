@@ -27,6 +27,14 @@ enum ARRAY_TYPE
     INDEX_ERROR
 };
 
+enum ARRAY_ERROR_TYPES
+{
+    ARRAY_NO_ERROR,
+    ARRAY_ELTYPE_ERROR,
+    ARRAY_INDEX_ERROR,
+    ARRAY_STATIC_ASSIGN_ERROR,
+};
+
 union value{
     int numValue;
     float rnumValue;
@@ -38,6 +46,8 @@ struct var_entry
     enum TYPE type;
     int offset;
     union value val;
+    int isConstant;
+    int lastModifiedLineNumber;
 };
 
 struct dynamicIndex
@@ -58,6 +68,7 @@ struct arr_entry
     enum ARRAY_TYPE arrayType;
     union indexType left;
     union indexType right;
+    int lastModifiedLineNumber;
 };
 
 typedef struct ST_LL{
