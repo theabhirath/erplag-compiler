@@ -323,9 +323,9 @@ ST_ENTRY *get_offset_with_width(ST_ENTRY *entry)
     temp->data.var = malloc(sizeof(struct var_entry));
     temp->data.var->type = entry->data.var->type;
     if (entry->entry_type == VAR_SYM)
-        sprintf(temp->name, "%s[rbp-%d]", entry->data.var->type == __NUM__ ? "word" : "byte", entry->data.var->offset);
+        sprintf(temp->name, "%s[rbp-%d]", entry->data.var->type == __NUM__ ? "word" : "byte", entry->data.var->offset + type_size[entry->data.var->type]);
     else if (entry->entry_type == ARR_SYM)
-        sprintf(temp->name, "%s[rbp-%d]", entry->data.arr->eltype == __NUM__ ? "word" : "byte", entry->data.arr->offset);
+        sprintf(temp->name, "%s[rbp-%d]", entry->data.arr->eltype == __NUM__ ? "word" : "byte", entry->data.arr->offset + type_size[entry->data.arr->eltype]);
     return temp;
 }
 
@@ -335,18 +335,18 @@ ST_ENTRY *get_big_offset_with_width(ST_ENTRY *entry)
     temp->entry_type = VAR_SYM;
     temp->name = malloc(sizeof(char) * 64);
     if (entry->entry_type == VAR_SYM)
-        sprintf(temp->name, "qword[rbp-%d]", entry->data.var->offset);
+        sprintf(temp->name, "qword[rbp-%d]", entry->data.var->offset + type_size[entry->data.var->type]);
     else if (entry->entry_type == ARR_SYM)
-        sprintf(temp->name, "qword[rbp-%d]", entry->data.arr->offset);
+        sprintf(temp->name, "qword[rbp-%d]", entry->data.arr->offset + type_size[entry->data.arr->eltype]);
     return temp;
 }
 
 int get_offset(ST_ENTRY *entry)
 {
     if (entry->entry_type == VAR_SYM)
-        return entry->data.var->offset;
+        return entry->data.var->offset + type_size[entry->data.var->type]; 
     else if (entry->entry_type == ARR_SYM)
-        return entry->data.arr->offset;
+        return entry->data.arr->offset + type_size[entry->data.arr->eltype];
     else
         return 0;
 }
