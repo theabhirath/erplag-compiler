@@ -148,6 +148,11 @@ int Table[NUM_NONTERMINALS][NUM_TOKENS];
 // parse tree
 parse_tree parseTree;
 
+// Number of parse tree nodes
+int numParseTreeNodes = 1;
+
+int syntacticErrors = 0;
+
 void createParseTree(parse_tree parseTree, parse_tree_node *rootNode)
 {
     parseTree.root = rootNode;
@@ -156,10 +161,10 @@ void createParseTree(parse_tree parseTree, parse_tree_node *rootNode)
 void createParseTreeNode(TNT tnt, parse_tree_node *node)
 {
     node->tnt = tnt;
-
     node->addr = NULL;
     node->syn_addr = NULL;
     node->inh_addr = NULL;
+    numParseTreeNodes++;
 }
 
 char *trim(char *str)
@@ -592,6 +597,7 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
             {
                 // Print error
                 printf("Line: %d. Error: Expected %s, but got %s instead\n", L.lineNumber, terminals[X.tnt.tok], L.lexeme);
+                syntacticErrors++;
                 token_set *syncSet = createTokenSet();
                 // Add SQBC to syncSet using addToken function
                 // addToken(syncSet, SEMICOL);
@@ -701,6 +707,7 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
                 if (firstNode == NULL) // Epsilon rule
                 {
                     parse_tree_node *newPTNode = (parse_tree_node *)malloc(sizeof(parse_tree_node));
+                    numParseTreeNodes++;
                     newPTNode->tnt.tok = EPSILON;
                     newPTNode->child = NULL;
                     newPTNode->parent = keepTrackNode;
@@ -791,6 +798,7 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
             else
             {
                 printf("Line: %d. Rule error\n", L.lineNumber);
+                syntacticErrors++;
                 // Keep getting tokens till we find something in the syncSet
                 token_set *syncSet = createTokenSet();
                 // Add SQBC to syncSet using addToken function
@@ -877,20 +885,10 @@ void parseInputSourceCode(char *testcaseFile, char *parseTreeFile)
     }
     if (L.tokenID != PROGRAMEND)
     {
-        // printf("Parsing unsuccessful\n");
+        printf("Parsing unsuccessful\n");
+        syntacticErrors++;
         // Space for error recovery, stack empty but input not finished
-        FILE *fp1 = fopen("parseTree.txt", "w");
-        printParseTree(fp1);
-        fclose(fp1);
     }
-    else
-    {
-        printf("Parsing completed\n");
-        FILE *fp1 = fopen(parseTreeFile, "w");
-        printParseTree(fp1);
-        fclose(fp1);
-    }
-    fclose(fp);
     free(hashTable);
     destroyList(rules);
     free(S);
@@ -1022,6 +1020,7 @@ grammar createRuleList(char *grammarFile, hash_table_element *hashTable)
         {
             printf("Error in grammar at line %d\n", i + 1);
             printf("Expected nonterminal, found %s\n", tnt);
+            syntacticErrors++;
         }
         // printf("It is a nonterminal\n");
         lhs_nt = createNode(hashTable[hash(tnt)].tnt, __NONTERMINAL__); // Potential memleak
@@ -1195,6 +1194,7 @@ void prematureEndOfInputError()
     // End of source code achieved but stack not empty
     printf("Expected more code\n");
     FILE *fp1 = fopen("parseTree.txt", "w");
+    syntacticErrors++;
     printParseTree(fp1);
     fclose(fp1);
 }

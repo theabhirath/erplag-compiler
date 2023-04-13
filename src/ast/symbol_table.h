@@ -124,5 +124,7 @@ ST_ENTRY *checkSymbolTable(symbol_table *symTab, char *name);
 ST_ENTRY *checkAllSymbolTables(symbol_table *symTab, char *name);
 enum TYPE getType(ast_node *node, symbol_table *st);
 void printSymbolTable(symbol_table *symTab, int level);
+void printActivationRecord();
+void destroySymbolTables(symbol_table *symTab);
 
 #endif

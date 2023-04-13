@@ -6,6 +6,9 @@
 #include "../lexer/lexerdef.h"
 #include "../parser/parserdef.h"
 
+extern int numASTNodes;
+extern int sizeOfAST;
+
 enum TYPE{
     __NUM__,
     __RNUM__,

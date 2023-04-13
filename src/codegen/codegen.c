@@ -1790,29 +1790,30 @@ void generate_code(ast *AST, char *filename)
     print_init(fp1);
     print_three_ac_list(list3Ad, fp1);
     print_fine(fp1);
+    printf("Code generated successfully.\n");
 }
-int main(int argc, char *argv[])
-{
-    if (argc != 2)
-    {
-        printf("Usage: ./code.out <filename>\n");
-        return 0;
-    }
-    bufferSize = 1024;
-    parseInputSourceCode(argv[1], "pt.out");
-    printf("parse tree created successfully.\n");
-    fflush(stdout);
-    ast *AST = create_ast(&parseTree);
-    printf("AST created successfully.\n");
-    print_ast(AST);
-    printf("AST printed successfully.\n");
-    fflush(stdout);
-    // populate symbol tables
-    populateSymbolTables(AST);
-    printf("Nah. No way.\n");
-    fflush(stdout);
-    printSymbolTable(&symbolTable, 0);
+// int main(int argc, char *argv[])
+// {
+    // if (argc != 2)
+    // {
+        // printf("Usage: ./code.out <filename>\n");
+        // return 0;
+    // }
+    // bufferSize = 1024;
+    // parseInputSourceCode(argv[1], "pt.out");
+    // printf("parse tree created successfully.\n");
+    // fflush(stdout);
+    // ast *AST = create_ast(&parseTree);
+    // printf("AST created successfully.\n");
+    // print_ast(AST);
+    // printf("AST printed successfully.\n");
+    // fflush(stdout);
+    // // populate symbol tables
+    // populateSymbolTables(AST);
+    // printf("Nah. No way.\n");
+    // fflush(stdout);
+    // printSymbolTable(&symbolTable, 0);
 
-    generate_code(AST, "code.asm");
-    return 0;
-}
+    // generate_code(AST, "code.asm");
+    // return 0;
+// }

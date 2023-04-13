@@ -1263,8 +1263,8 @@ void printSymbolTable(symbol_table *symTab, int level)
 {
     if (level == 0)
     {
-        printf("Var\tscope\t\tscope\ttype of element\t\tis_array\tStatic/dynamic\tarray range\twidth\t\toffset\tnesting level\n");
-        printf("Name\t(mod name) (line numbers)\n");
+        printf("Var\tscope\t\t\t\tscope\ttype of element\t\tis_array\tStatic/dynamic\tarray range\twidth\t\toffset\tnesting level\n");
+        printf("Name\t(mod name)\t\t (line numbers)\n");
     }
     char *types[] = {"integer", "real", "boolean", "error"};
     int sizes[] = {__NUM_SIZE__, __RNUM_SIZE__, __BOOL_SIZE__, -1};
@@ -1279,7 +1279,7 @@ void printSymbolTable(symbol_table *symTab, int level)
             {
             case VAR_SYM:
                 printf("%s\t", entry->name);
-                printf("%s\t\t", getSymTabName(symTab));
+                printf("%s\t\t\t\t", getSymTabName(symTab));
                 printf("%d-%d\t", symTab->lineBegin, symTab->lineEnd);
                 printf("%s\t\t\t", types[entry->data.var->type]);
                 printf("%s\t\t", "no");
@@ -1292,7 +1292,7 @@ void printSymbolTable(symbol_table *symTab, int level)
                 break;
             case ARR_SYM:
                 printf("%s\t", entry->name);
-                printf("%s\t\t", getSymTabName(symTab));
+                printf("%s\t\t\t\t", getSymTabName(symTab));
                 printf("%d-%d\t", symTab->lineBegin, symTab->lineEnd);
                 printf("%s\t\t\t", types[entry->data.arr->eltype]);
                 printf("%s\t\t", "yes");
@@ -1322,5 +1322,126 @@ void printSymbolTable(symbol_table *symTab, int level)
             }
             list = list->next;
         }
+    }
+}
+
+void printArrs(symbol_table *symTab, int level)
+{
+    if (level == 0)
+    {
+        printf("Scope\t\t\tScope\tArr Name\t\t\tArr Type\tArr Range\tElement Type\n");
+    }
+    for (int i = 0; i < SYMBOL_TABLE_SIZE; i++)
+    {
+        ST_LL *list = symTab->data[i];
+        while (list != NULL)
+        {
+            ST_ENTRY *entry = list->data;
+            switch (entry->entry_type)
+            {
+            case ARR_SYM:
+                printf("%s\t\t\t", getSymTabName(symTab));
+                printf("%d-%d\t", symTab->lineBegin, symTab->lineEnd);
+                printf("%s\t\t\t", entry->name);
+                printf("%s\t\t", entry->data.arr->arrayType == STATIC ? "static array" : "dynamic array");
+                if (entry->data.arr->arrayType == STATIC)
+                {
+                    printf("[%d-%d]\t\t", entry->data.arr->left.staticIndex, entry->data.arr->right.staticIndex);
+                }
+                else
+                {
+                    printf("%s\t\t", "**");
+                }
+                printf("%s\t\t", entry->data.arr->eltype == INTEGER ? "integer" : entry->data.arr->eltype == REAL ? "real" : "boolean");
+                printf("\n");
+                break;
+            case FUNC_SYM:
+                printArrs(entry->data.func->symTable, level + 1);
+                break;
+            case BLOCK_SYM:
+                printArrs(entry->data.block->symTable, level + 1);
+                break;
+            default:
+                break;
+            }
+            list = list->next;
+        }
+    }
+}
+
+int getActivationRecordSize(symbol_table *symTab)
+{
+    int size = symTab->offset;
+    for (int i = 0; i < SYMBOL_TABLE_SIZE; i++)
+    {
+        ST_LL *list = symTab->data[i];
+        while (list != NULL)
+        {
+            ST_ENTRY *entry = list->data;
+            switch (entry->entry_type)
+            {
+            case FUNC_SYM:
+                size += getActivationRecordSize(entry->data.func->symTable);
+                break;
+            case BLOCK_SYM:
+                size += getActivationRecordSize(entry->data.block->symTable);
+                break;
+            default:
+                break;
+            }
+            list = list->next;
+        }
+    }
+    return size;
+}
+
+void printActivationRecord()
+{
+    for (int i = 0; i < SYMBOL_TABLE_SIZE; i++)
+    {
+        ST_LL *list = symbolTable.data[i];
+        while (list != NULL)
+        {
+            ST_ENTRY *entry = list->data;
+            switch (entry->entry_type)
+            {
+            case FUNC_SYM:
+                printf("%s %d\n", entry->name, getActivationRecordSize(entry->data.func->symTable));
+                break;
+            case BLOCK_SYM:
+                printf("%s %d\n", entry->name, getActivationRecordSize(entry->data.block->symTable));
+                break;
+            default:
+                break;
+            }
+            list = list->next;
+        }
+    }
+}
+
+void destroySymbolTables(symbol_table *symTab)
+{
+    for (int i = 0; i < SYMBOL_TABLE_SIZE; i++)
+    {
+        ST_LL *list = symTab->data[i];
+        while (list != NULL)
+        {
+            ST_ENTRY *entry = list->data;
+            switch (entry->entry_type)
+            {
+            case FUNC_SYM:
+                destroySymbolTables(entry->data.func->symTable);
+                free(entry->data.func->symTable);
+                break;
+            case BLOCK_SYM:
+                destroySymbolTables(entry->data.block->symTable);
+                free(entry->data.block->symTable);
+                break;
+            default:
+                break;
+            }
+            list = list->next;
+        }
+        symTab->data[i] = NULL;
     }
 }

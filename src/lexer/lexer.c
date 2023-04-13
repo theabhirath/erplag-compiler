@@ -21,6 +21,9 @@ int begin, finish;
 // line number
 int lineNumber = 1;
 
+// Lexical Errors
+int lexicalErrors = 0;
+
 // initialising twin buffers
 void initialiseTwinBuffers()
 {
@@ -305,6 +308,7 @@ tokenInfo getNextToken(FILE *fp)
             {
                 fprintf(stderr, "Error: Identifier length exceeds 20 characters at line %d\n", lineNumber);
                 free(lexeme);
+                lexicalErrors++;
                 resetPointers();
                 state = 0;
                 break;
@@ -368,6 +372,7 @@ tokenInfo getNextToken(FILE *fp)
         case 6:
             fprintf(stderr, "Error: Expected a digit or another . after . at line %d\n", lineNumber);
             resetPointers();
+            lexicalErrors++;
             state = 0;
             break;
 
@@ -537,6 +542,7 @@ tokenInfo getNextToken(FILE *fp)
         case 30:
             fprintf(stderr, "Line: %d. Error: Lone equal is an invalid symbol. Did you mean to write ':=' or '=='?\n", lineNumber);
             state = 0;
+            lexicalErrors++;
             break;
 
         // equal to
@@ -550,6 +556,7 @@ tokenInfo getNextToken(FILE *fp)
             fprintf(stderr, "Line: %d. Error: Invalid character '%c'.\n", lineNumber, c);
             finish++;
             state = 0;
+            lexicalErrors++;
             break;
 
         // multiplication, comment
@@ -638,6 +645,7 @@ tokenInfo getNextToken(FILE *fp)
             fprintf(stderr, "Line: %d. Error: Lone dot is an invalid symbol. Did you mean to write '..'?\n", lineNumber);
             resetPointers();
             state = 0;
+            lexicalErrors++;
             break;
 
         // rangeop
@@ -721,6 +729,7 @@ tokenInfo getNextToken(FILE *fp)
             fprintf(stderr, "Line: %d. Error: Lone exclamation mark is an invalid symbol. Did you mean to write '!='?\n", lineNumber);
             resetPointers();
             state = 0;
+            lexicalErrors++;
             break;
 
         // not equal to
@@ -815,6 +824,7 @@ tokenInfo getNextToken(FILE *fp)
             free(lexeme);
             resetPointers();
             state = 0;
+            lexicalErrors++;
             break;
         }
     }

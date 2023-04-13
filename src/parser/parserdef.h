@@ -130,5 +130,7 @@ typedef struct linked_list* grammar;
 
 extern int Table[NUM_NONTERMINALS][NUM_TOKENS];
 extern parse_tree parseTree;
+extern int numParseTreeNodes;
 
+extern int syntacticErrors;
 #endif

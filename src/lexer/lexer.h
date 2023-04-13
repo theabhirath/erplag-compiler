@@ -15,4 +15,5 @@ void removeComments(char *test_file, char *clean_file);
 tokenInfo getNextToken(FILE *fp);
 void printTokenList(char *fileName);
 
+extern int lexicalErrors;
 #endif

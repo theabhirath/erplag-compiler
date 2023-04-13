@@ -7,9 +7,14 @@
 #include "ast.h"
 #include "symbol_table.h"
 
+int numASTNodes = 0;
+int sizeOfAST = 0;
+
 LinkedListASTNode *insertAtFront(LinkedListASTNode *head, ast_node *data)
 {
     LinkedListASTNode *newNode = (LinkedListASTNode *)malloc(sizeof(LinkedListASTNode));
+    numASTNodes++;
+    sizeOfAST += sizeof(LinkedListASTNode);
     newNode->data = data;
     newNode->next = head;
     return newNode;
@@ -18,6 +23,8 @@ LinkedListASTNode *insertAtFront(LinkedListASTNode *head, ast_node *data)
 LinkedListASTNode *createLinkedListASTNode(ast_node *data)
 {
     LinkedListASTNode *newNode = (LinkedListASTNode *)malloc(sizeof(LinkedListASTNode));
+    numASTNodes++;
+    sizeOfAST += sizeof(LinkedListASTNode);
     newNode->data = data;
     newNode->next = NULL;
     return newNode;
@@ -26,6 +33,8 @@ LinkedListASTNode *createLinkedListASTNode(ast_node *data)
 LinkedListASTNode *insertAtEnd(LinkedListASTNode *head, ast_node *data)
 {
     LinkedListASTNode *newNode = (LinkedListASTNode *)malloc(sizeof(LinkedListASTNode));
+    numASTNodes++;
+    sizeOfAST += sizeof(LinkedListASTNode);
     newNode->data = data;
     newNode->next = NULL;
     if (head == NULL)
@@ -44,6 +53,8 @@ LinkedListASTNode *insertAtEnd(LinkedListASTNode *head, ast_node *data)
 ast_node *createASTNode(enum AST_NODE_TYPE nodeType)
 {
     ast_node *node = (ast_node *)malloc(sizeof(ast_node));
+    numASTNodes++;
+    sizeOfAST += sizeof(ast_node);
     node->nodeType = nodeType;
     node->left = NULL;
     node->right = NULL;
@@ -55,6 +66,8 @@ ast_node *createASTNode(enum AST_NODE_TYPE nodeType)
 void *createProgram(LinkedListASTNode *ModDec, LinkedListASTNode *OtherMod1, ast_node *DriverMod, LinkedListASTNode *OtherMod2)
 {
     struct programAuxInfo *aux_info = (struct programAuxInfo *)malloc(sizeof(struct programAuxInfo));
+    numASTNodes++;
+    sizeOfAST += sizeof(struct programAuxInfo);
     aux_info->ModDec = ModDec;
     aux_info->OtherMod1 = OtherMod1;
     aux_info->DriverMod = DriverMod;
@@ -65,6 +78,8 @@ void *createProgram(LinkedListASTNode *ModDec, LinkedListASTNode *OtherMod1, ast
 void *createModule(parse_tree_node *Id, LinkedListASTNode *input_plist, LinkedListASTNode *ret, LinkedListASTNode *moduleDef)
 {
     struct moduleDefAuxInfo *aux_info = (struct moduleDefAuxInfo *)malloc(sizeof(struct moduleDefAuxInfo));
+    numASTNodes++;
+    sizeOfAST += sizeof(struct moduleDefAuxInfo);
     aux_info->Id = Id;
     aux_info->input_plist = input_plist;
     aux_info->ret = ret;
@@ -1611,6 +1626,8 @@ ast_node *process_subtree(parse_tree_node *ptn)
 ast *create_ast(parse_tree *pt)
 {
     ast *a = (ast *)malloc(sizeof(ast));
+    numASTNodes = 0;
+    sizeOfAST = sizeof(ast);
     a->root = process_subtree(pt->root);
     return a;
 }
@@ -2000,12 +2017,12 @@ void print_ast_node(ast_node *node, int depth, FILE *fp)
 
 void print_ast(ast *a)
 {
-    FILE *fp = fopen("ast.txt", "w");
+    FILE *fp = stdout;
     fprintf(fp, "AST\n\n");
     fflush(fp);
     ast_node *root0 = a->root;
     print_ast_node(root0, 0, fp);
-    fclose(fp);
+    // fclose(fp);
 }
 
 // int main()
