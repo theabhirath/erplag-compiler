@@ -588,7 +588,8 @@ void checkFormalParams(LinkedListASTNode *param_list, ST_LL *formal_param_list, 
             ST_ENTRY *arr_entry = checkAllSymbolTables(symTable, getName(param_list->data));
             if (arr_entry && matchArrayTypes(arr_entry->data.arr, formal_param_list->data->data.arr))
             {
-                printf("Error: Array type mismatch at line number %d.\n", getLineNumber(param_list->data));
+                printf("Error: Type of actual parameter %s at line number %d does not match the type of formal parameter %s.\n",
+                       getName(param_list->data), paramLineNumber, formal_param_list->data->name);
             }
         }
         else
@@ -599,11 +600,12 @@ void checkFormalParams(LinkedListASTNode *param_list, ST_LL *formal_param_list, 
             {
                 if (actual_param_type != formal_param_list->data->data.var->type)
                 {
-                    printf("Error: Variable type mismatch at line number %d.\n", getLineNumber(param_list->data));
+                    printf("Error: Type of actual parameter %s at line number %d does not match the type of formal parameter %s.\n",
+                           getName(param_list->data), paramLineNumber, formal_param_list->data->name);
                 }
             }
             ST_ENTRY *var_entry = checkAllSymbolTables(symTable, getName(param_list->data));
-            if (var_entry && inOut == 1)
+            if (var_entry && inOut == 1 && var_entry->entry_type == VAR_SYM)
             {
                 var_entry->data.var->lastModifiedLineNumber = paramLineNumber;
                 if (var_entry->data.var->isConstant)
@@ -728,6 +730,11 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
                     {
                         printf("Error: Variable %s at line number %d is not a function and seems to have been used as one.\n",
                                Id->leafNodeInfo.lexeme, Id->leafNodeInfo.lineNumber);
+                    }
+                    else
+                    {
+                        // update lastCalledLineNumber
+                        equals_st_entry->data.func->lastCalledLineNumber = getLineNumber(Id);
                     }
                 }
                 else
@@ -1058,6 +1065,11 @@ void populateBlockSymbolTables(LinkedListASTNode *stmts, symbol_table *blockSymT
                     printf("Error: Variable %s at line number %d is not a function and seems to have been used as one.\n",
                            getName(Id), getLineNumber(Id));
                 }
+                else
+                {
+                    // update the last called line number
+                    use_st_entry->data.func->lastCalledLineNumber = getLineNumber(Id);
+                }
             }
             else
             {
@@ -1101,22 +1113,20 @@ void populateOtherModuleSignatures(LinkedListASTNode *node)
         LinkedListASTNode *ret = mdai->ret;
         LinkedListASTNode *moduleDef = mdai->moduleDef;
         ST_ENTRY *symTabEntryForModule;
+        int forwardDeclaration = 0;
         // module already exists in the symbol table
         if ((symTabEntryForModule = checkSymbolTable(&symbolTable, Id->leafNodeInfo.lexeme)) != NULL)
         {
+            forwardDeclaration = 1;
             // ensure type of symbol table entry is a function
             if (symTabEntryForModule->entry_type != FUNC_SYM)
             {
-                printf("Error: Name %s at line number %d does not seem to be a function or might be clashing with a variable of the same name. Please check the code and try again.\n",
-                       getName(Id), getLineNumber(Id));
                 node = node->next;
                 continue;
             }
             // module already has a definition
             else if (symTabEntryForModule->data.func != NULL)
             {
-                printf("Error: Function %s at line number %d cannot be overloaded. Please check the code and try again.\n",
-                       getName(Id), getLineNumber(Id));
                 node = node->next;
                 continue;
             }
@@ -1149,20 +1159,7 @@ void populateOtherModuleSignatures(LinkedListASTNode *node)
         symTabEntryForModule->data.func->outputs = addParamListToFuncSymTable(funcSymTable, ret);
         symTabEntryForModule->data.func->body = moduleDef;
         symTabEntryForModule->data.func->symTable = funcSymTable;
-        // function body is a block
-        ST_ENTRY *blockSymTableEntry = malloc(sizeof(ST_ENTRY));
-        char *blockname = malloc(sizeof(char) * 64);
-        sprintf(blockname, "%s_block", symTabEntryForModule->name);
-        blockSymTableEntry->name = blockname;
-        blockSymTableEntry->entry_type = BLOCK_SYM;
-        blockSymTableEntry->data.block = (struct block_entry *)malloc(sizeof(struct block_entry));
-        blockSymTableEntry->data.block->body = moduleDef;
-        // create a new symbol table for the block
-        symbol_table *blockSymTable = createSymbolTable(funcSymTable, blockSymTableEntry->name);
-        blockSymTableEntry->data.block->symTable = blockSymTable;
-        blockSymTable->lineBegin = funcSymTable->lineBegin;
-        blockSymTable->lineEnd = funcSymTable->lineEnd;
-        addToSymbolTable(funcSymTable, blockSymTableEntry);
+        symTabEntryForModule->data.func->lastCalledLineNumber = -1 * forwardDeclaration;
         node = node->next;
     }
 }
@@ -1179,11 +1176,50 @@ void populateOtherModuleBodies(LinkedListASTNode *node)
         LinkedListASTNode *ret = mdai->ret;
         LinkedListASTNode *moduleDef = mdai->moduleDef;
         ST_ENTRY *symTabEntryForModule = checkSymbolTable(&symbolTable, getName(Id));
-        // module already exists in the symbol table; extract block symbol table
+        // ensure type of symbol table entry is a function
+        if (symTabEntryForModule->entry_type != FUNC_SYM)
+        {
+            printf("Error: Name %s at line number %d does not seem to be a function or might be clashing with a variable of the same name. Please check the code and try again.\n",
+                   getName(Id), getLineNumber(Id));
+            node = node->next;
+            continue;
+        }
+        // module already has a definition
+        else
+        {
+            // module already exists in the symbol table; extract block symbol table
+            char *blockname = malloc(sizeof(char) * 64);
+            sprintf(blockname, "%s_block", symTabEntryForModule->name);
+            ST_ENTRY *blockSymTableEntry = checkSymbolTable(symTabEntryForModule->data.func->symTable, blockname);
+            if (blockSymTableEntry != NULL)
+            {
+                printf("Error: Function %s at line number %d cannot be overloaded. Please check the code and try again.\n",
+                       getName(Id), getLineNumber(Id));
+                node = node->next;
+                continue;
+            }
+        }
+        if (symTabEntryForModule->data.func->lastCalledLineNumber == -1)
+        {
+            // Module was forward declared but not used before definition
+            printf("Error: Function %s defined at line number %d was forward declared but not used before definition. Please check the code and try again.\n",
+                   getName(Id), getLineNumber(Id));
+        }
+        symbol_table *funcSymTable = symTabEntryForModule->data.func->symTable;
+        // function body is a block
+        ST_ENTRY *blockSymTableEntry = malloc(sizeof(ST_ENTRY));
         char *blockname = malloc(sizeof(char) * 64);
         sprintf(blockname, "%s_block", symTabEntryForModule->name);
-        ST_ENTRY *blockSymTableEntry = checkSymbolTable(symTabEntryForModule->data.func->symTable, blockname);
-        symbol_table *blockSymTable = blockSymTableEntry->data.block->symTable;
+        blockSymTableEntry->name = blockname;
+        blockSymTableEntry->entry_type = BLOCK_SYM;
+        blockSymTableEntry->data.block = (struct block_entry *)malloc(sizeof(struct block_entry));
+        blockSymTableEntry->data.block->body = moduleDef;
+        // create a new symbol table for the block
+        symbol_table *blockSymTable = createSymbolTable(funcSymTable, blockSymTableEntry->name);
+        blockSymTableEntry->data.block->symTable = blockSymTable;
+        blockSymTable->lineBegin = funcSymTable->lineBegin;
+        blockSymTable->lineEnd = funcSymTable->lineEnd;
+        addToSymbolTable(funcSymTable, blockSymTableEntry);
         // populate the symbol table with the block statements
         populateBlockSymbolTables(blockSymTableEntry->data.block->body, blockSymTable);
         // Check if all outputs are assigned values
@@ -1352,7 +1388,8 @@ void printArrs(symbol_table *symTab, int level)
                 {
                     printf("%s\t\t", "**");
                 }
-                printf("%s\t\t", entry->data.arr->eltype == INTEGER ? "integer" : entry->data.arr->eltype == REAL ? "real" : "boolean");
+                printf("%s\t\t", entry->data.arr->eltype == INTEGER ? "integer" : entry->data.arr->eltype == REAL ? "real"
+                                                                                                                  : "boolean");
                 printf("\n");
                 break;
             case FUNC_SYM:

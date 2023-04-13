@@ -83,6 +83,7 @@ struct func_entry
     struct ST_LL *outputs;
     LinkedListASTNode *body;
     struct symbol_table *symTable;
+    int lastCalledLineNumber;
 };
 
 struct block_entry
