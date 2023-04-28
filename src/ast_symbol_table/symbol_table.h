@@ -120,10 +120,12 @@ typedef struct symbol_table
 
 extern symbol_table symbolTable;
 
+void addToSymbolTable(symbol_table *symTab, ST_ENTRY *entry);
 void populateSymbolTables(ast *ASTree);
 ST_ENTRY *checkSymbolTable(symbol_table *symTab, char *name);
 ST_ENTRY *checkAllSymbolTables(symbol_table *symTab, char *name);
 enum TYPE getType(ast_node *node, symbol_table *st);
+void printArrs(symbol_table *symTab, int level);
 void printSymbolTable(symbol_table *symTab, int level);
 void printActivationRecord();
 void destroySymbolTables(symbol_table *symTab);

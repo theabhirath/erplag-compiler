@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "../ast/ast.h"
 #include "../ast/symbol_table.h"
 

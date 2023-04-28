@@ -1635,6 +1635,10 @@ ast *create_ast(parse_tree *pt)
 char *getName(ast_node *node)
 {
     parse_tree_node *ptn = node;
+    if (node->nodeType == ARR_ELEM_AST)
+    {
+        return getName(node->left);
+    }
     return ptn->leafNodeInfo.lexeme;
 }
 
