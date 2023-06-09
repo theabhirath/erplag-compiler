@@ -6,7 +6,7 @@ This is a compiler for the toy language ERPLAG. It is capable of converting code
 
 1. Run ````make driver```` to prepare the executable
 2. Run ````./driver <Input File> <Assembly Code File>````. A menu will appear offering different levels of execution
-3. To run the assembly file, run ````make runasm <Assembly Code File>````
+3. To run the assembly file, run ````make runasm asm=<Assembly Code File>````
 
 ## Limitations
 
