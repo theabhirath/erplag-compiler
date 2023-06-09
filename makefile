@@ -11,8 +11,8 @@ driver: driver.c src/codegen/codegen.c src/ast/symbol_table.c src/ast/ast.c src/
 	gcc -w -o driver driver.c src/codegen/codegen.c src/ast/symbol_table.c src/ast/ast.c src/lexer/lexer.c src/lexer/reserved_words.c src/parser/parser.c src/parser/set.c src/parser/stack.c src/parser/linked_list.c
 
 
-runasm: code.asm
-	nasm -f elf64 code.asm
+runasm: 
+	nasm -f elf64 $(asm) -o code.o
 	gcc -no-pie -o code code.o
 	./code
 
