@@ -18,7 +18,6 @@ The structure of the project as visualised by `tree` is given below:
 │   ├── lexer
 │   ├── parser
 │   └── stage1_driver.c
-├── test.c
 └── tests
     ├── codegen
     ├── stage1
